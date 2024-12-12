@@ -1,5 +1,7 @@
 const { getInput, isOnGrid, getHashKey } = require("../utils");
 
+console.time('time');
+
 const grid = getInput("day12.txt").split("\n");
 const seen = new Set();
 const regions = [];
@@ -24,6 +26,8 @@ for (let region of regions) {
   price += region.area * regionSides;
 }
 console.log(`Part 2: ${price}`);
+
+console.timeEnd('time');
 
 function processRegion(row, col) {
   const region = { perimeter: 0, area: 0, edges: {} };
@@ -66,8 +70,7 @@ function processRegion(row, col) {
             break;
         }
         const from = cell.dir === "u" || cell.dir === "d" ? curr[1] : curr[0];
-        const to =
-          cell.dir === "u" || cell.dir === "d" ? curr[1] + 1 : curr[0] + 1;
+        const to = from + 1;
         region.edges[getHashKey(cell.dir, idx, from, to)] = {
           dir: cell.dir,
           idx,
