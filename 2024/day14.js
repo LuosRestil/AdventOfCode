@@ -31,7 +31,7 @@ fs.mkdirSync("imgs");
 
 robots = getRobots();
 for (let i = 0; i < 10000; i++) {
-  if (getSafetyFactor(robots) < safetyFactor / 2) printRobots(robots, i);
+  if (getSafetyFactor(robots) < safetyFactor / 4) printRobots(robots, i);
   for (let robot of robots) {
     move(robot);
   }
