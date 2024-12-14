@@ -37,6 +37,8 @@ for (let i = 0; i < 10000; i++) {
   }
 }
 
+console.timeEnd('time');
+
 function getRobots() {
   return getInput(FILEPATH)
     .split("\n")

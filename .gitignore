@@ -1,3 +1,4 @@
 **/inputs
 **/node_modules
 .DS_Store
+**/imgs

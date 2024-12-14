@@ -25,4 +25,22 @@ function getAllPermutations(list) {
   return perms;
 }
 
-module.exports = { getInput, getAllPermutations };
+function getHashKey(...args) {
+  return args.join(':');
+}
+
+function getNextIdx(arr, idx) {
+  idx++;
+  if (idx === arr.length)
+    idx = 0;
+  return idx;
+}
+
+function getPrevIdx(arr, idx) {
+  idx--;
+  if (idx < 0)
+    idx = arr.length - 1;
+  return idx;
+}
+
+module.exports = { getInput, getAllPermutations, getHashKey, getNextIdx, getPrevIdx };
