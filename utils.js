@@ -1,5 +1,5 @@
-import fs from 'fs';
-import path from 'path';
+import fs from "fs";
+import path from "path";
 
 function getInput(filename) {
   const baseDir = path.dirname(process.argv[1]);
@@ -46,15 +46,40 @@ function getPrevIdx(arr, idx) {
 function find2D(grid, char) {
   for (let i = 0; i < grid.length; i++) {
     for (let j = 0; j < grid[0].length; j++) {
-      if (grid[i][j] === char)
-        return [i, j];
+      if (grid[i][j] === char) return [i, j];
     }
   }
   return null;
 }
 
 function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function pointsAreEqual(a, b) {
+  return a[0] === b[0] && a[1] === b[1];
+}
+
+function getNeighbors(grid, pos) {
+  return [
+    grid[pos[0] - 1][pos[1]],
+    grid[pos[0] + 1][pos[1]],
+    grid[pos[0]][pos[1] - 1],
+    grid[pos[0]][pos[1] + 1],
+  ];
+}
+
+function isInGrid(grid, pos) {
+  return (
+    pos[0] >= 0 &&
+    pos[0] < grid.length &&
+    pos[1] >= 0 &&
+    pos[1] < grid[0].length
+  );
+}
+
+function gridGetPos(grid, pos) {
+  return grid[pos[0]][pos[1]];
 }
 
 export default {
@@ -64,5 +89,9 @@ export default {
   getNextIdx,
   getPrevIdx,
   find2D,
-  sleep
+  sleep,
+  pointsAreEqual,
+  getNeighbors,
+  isInGrid,
+  gridGetPos
 };
