@@ -77,8 +77,7 @@ botPos = utils.find2D(grid, BOT);
 
 viz.start();
 for (let move of moves) {
-  viz.printGrid(grid, 1);
-  viz.writeChar('next move: ' + move, 0, 0);
+  viz.printGrid(grid);
   if (move === "<" || move === ">") {
     const dir = dirMap[move];
 
