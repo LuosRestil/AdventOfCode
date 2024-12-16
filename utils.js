@@ -1,8 +1,8 @@
-const fs = require("fs");
-const path = require("path");
+import fs from 'fs';
+import path from 'path';
 
 function getInput(filename) {
-  const baseDir = path.dirname(require.main.filename);
+  const baseDir = path.dirname(process.argv[1]);
   return fs.readFileSync(path.join(baseDir, "inputs", filename), {
     encoding: "utf-8",
   });
@@ -53,11 +53,16 @@ function find2D(grid, char) {
   return null;
 }
 
-module.exports = {
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+export default {
   getInput,
   getAllPermutations,
   getHashKey,
   getNextIdx,
   getPrevIdx,
-  find2D
+  find2D,
+  sleep
 };

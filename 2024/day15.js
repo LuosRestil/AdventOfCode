@@ -1,17 +1,25 @@
-const { getInput, find2D } = require("../utils");
+// const { getInput, find2D } = require("../utils");
+// const viz = require('../terminalViz');
+import utils from '../utils.js';
+import viz from '../terminalViz.js';
+
+process.on('SIGINT', () => {
+  viz.showCursor();
+  process.exit();
+})
 
 console.time('time');
 
 const [BOX, WALL, BOT, EMPTY] = ["O", "#", "@", "."];
 
-const input = getInput("day15.txt").split("\n\n");
+const input = utils.getInput("day15sample.txt").split("\n\n");
 const moves = input[1].replaceAll("\n", "");
 
 let grid = input[0]
   .split("\n")
   .map((row) => row.split(""));
 
-let botPos = find2D(grid, BOT);
+let botPos = utils.find2D(grid, BOT);
 
 const dirMap = {
   "^": [-1, 0],
@@ -67,9 +75,11 @@ grid = input[0]
   )
   .map(row => row.split(''));
 
-botPos = find2D(grid, BOT);
+botPos = utils.find2D(grid, BOT);
 
+viz.start();
 for (let move of moves) {
+  viz.printGrid(grid);
   if (move === "<" || move === ">") {
     const dir = dirMap[move];
 
@@ -104,7 +114,10 @@ for (let move of moves) {
       else botPos = [botPos[0] + 1, botPos[1]];
     }
   }
+  await utils.sleep(20);
 }
+viz.printGrid(grid);
+viz.end();
 
 total = 0;
 for (let i = 0; i < grid.length; i++) {
