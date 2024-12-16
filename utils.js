@@ -16,7 +16,9 @@ function getAllPermutations(list) {
   let perms = [];
   for (let i = 0; i < list.length; i++) {
     let curr = list[i];
-    let remaining = getAllPermutations(list.slice(0, i).concat(list.slice(i + 1, list.length)));
+    let remaining = getAllPermutations(
+      list.slice(0, i).concat(list.slice(i + 1, list.length))
+    );
     for (let perm of remaining) {
       perms.push([curr, ...perm]);
     }
@@ -26,21 +28,36 @@ function getAllPermutations(list) {
 }
 
 function getHashKey(...args) {
-  return args.join(':');
+  return args.join(":");
 }
 
 function getNextIdx(arr, idx) {
   idx++;
-  if (idx === arr.length)
-    idx = 0;
+  if (idx === arr.length) idx = 0;
   return idx;
 }
 
 function getPrevIdx(arr, idx) {
   idx--;
-  if (idx < 0)
-    idx = arr.length - 1;
+  if (idx < 0) idx = arr.length - 1;
   return idx;
 }
 
-module.exports = { getInput, getAllPermutations, getHashKey, getNextIdx, getPrevIdx };
+function find2D(grid, char) {
+  for (let i = 0; i < grid.length; i++) {
+    for (let j = 0; j < grid[0].length; j++) {
+      if (grid[i][j] === char)
+        return [i, j];
+    }
+  }
+  return null;
+}
+
+module.exports = {
+  getInput,
+  getAllPermutations,
+  getHashKey,
+  getNextIdx,
+  getPrevIdx,
+  find2D
+};
