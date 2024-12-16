@@ -1,10 +1,8 @@
-// const { getInput, find2D } = require("../utils");
-// const viz = require('../terminalViz');
 import utils from '../utils.js';
 import viz from '../terminalViz.js';
 
 process.on('SIGINT', () => {
-  viz.showCursor();
+  viz.end();
   process.exit();
 })
 
@@ -79,7 +77,8 @@ botPos = utils.find2D(grid, BOT);
 
 viz.start();
 for (let move of moves) {
-  viz.printGrid(grid);
+  viz.printGrid(grid, 1);
+  viz.writeChar('next move: ' + move, 0, 0);
   if (move === "<" || move === ">") {
     const dir = dirMap[move];
 
@@ -114,7 +113,8 @@ for (let move of moves) {
       else botPos = [botPos[0] + 1, botPos[1]];
     }
   }
-  await utils.sleep(20);
+  grid[botPos[0]][botPos[1]] = move;
+  await utils.sleep(500);
 }
 viz.printGrid(grid);
 viz.end();
@@ -137,7 +137,7 @@ function canMoveUpOrDown(pos, move) {
   const char = grid[pos[0]][pos[1]];
   if (char === WALL) return false;
   if (char === EMPTY) return true;
-  if (char === BOT) return canMoveUpOrDown([pos[0] + rowOffset, pos[1]], move);
+  if (['^v<>'.includes(char)]) return canMoveUpOrDown([pos[0] + rowOffset, pos[1]], move);
   if (char === "[" || char === "]") {
     const colOffset = char === "[" ? 1 : -1;
     return (
