@@ -114,7 +114,7 @@ for (let move of moves) {
     }
   }
   grid[botPos[0]][botPos[1]] = move;
-  await utils.sleep(500);
+  await utils.sleep(333);
 }
 viz.printGrid(grid);
 viz.end();
@@ -137,7 +137,7 @@ function canMoveUpOrDown(pos, move) {
   const char = grid[pos[0]][pos[1]];
   if (char === WALL) return false;
   if (char === EMPTY) return true;
-  if (['^v<>'.includes(char)]) return canMoveUpOrDown([pos[0] + rowOffset, pos[1]], move);
+  if ('^v<>'.includes(char)) return canMoveUpOrDown([pos[0] + rowOffset, pos[1]], move);
   if (char === "[" || char === "]") {
     const colOffset = char === "[" ? 1 : -1;
     return (
