@@ -82,6 +82,15 @@ function gridGetPos(grid, pos) {
   return grid[pos[0]][pos[1]];
 }
 
+function printGrid(grid) {
+  for (let i = 0; i < grid.length; i++) {
+    for (let j = 0; j < grid[0].length; j++) {
+      process.stdout.write(grid[i][j]);
+    }
+    process.stdout.write('\n');
+  }
+}
+
 export default {
   getInput,
   getAllPermutations,
@@ -93,5 +102,6 @@ export default {
   pointsAreEqual,
   getNeighbors,
   isInGrid,
-  gridGetPos
+  gridGetPos,
+  printGrid
 };

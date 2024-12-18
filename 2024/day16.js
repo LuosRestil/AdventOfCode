@@ -3,7 +3,6 @@ import viz from "../terminalViz.js";
 
 const doViz = process.argv[2] === "viz";
 
-// const dirs = ['n', 'e', 's', 'w'];
 const posOffsets = [
   [-1, 0],
   [0, 1],
@@ -14,93 +13,127 @@ const posOffsets = [
 const maze = utils
   .getInput("day16.txt")
   .split("\n")
-  .map((row, rowIdx) =>
-    row.split("").map((col, colIdx) => {
-      return {
-        val: col,
-        cost: Infinity,
-        dir: null,
-        from: null,
-        pos: [rowIdx, colIdx],
-      };
-    })
-  );
+  .map((row) => row.split(""));
 
 let startPos;
 let endPos;
 for (let i = 0; i < maze.length; i++) {
   for (let j = 0; j < maze[0].length; j++) {
-    const char = maze[i][j].val;
+    const char = maze[i][j];
     if (char === "S") startPos = [i, j];
     else if (char === "E") endPos = [i, j];
   }
 }
 
-const startCell = utils.gridGetPos(maze, startPos);
-startCell.cost = 0;
-startCell.dir = 1;
+const queue = [{ pos: startPos, dir: 1, cost: 0 }];
+const startHashKey = utils.getHashKey(...startPos);
+const seen = {[startHashKey]: [null, {cost: 0, from: []}]};
 
-const queue = [];
-queue.push(startPos);
 while (queue.length) {
-  const pos = queue.shift();
-  const cell = utils.gridGetPos(maze, pos);
-  if (cell.val === "E") {
+  const next = queue.shift();
+  const { pos, dir, cost } = next;
+  const seenFromHashKey = utils.getHashKey(pos[0], pos[1], dir);
+  if (utils.gridGetPos(maze, pos) === "E") {
     continue;
   }
   // look in dir
-  const forward = [
-    pos[0] + posOffsets[cell.dir][0],
-    pos[1] + posOffsets[cell.dir][1],
-  ];
-  const forwardCell = utils.gridGetPos(maze, forward);
-  if (forwardCell.val !== "#" && forwardCell.cost > cell.cost + 1) {
-    forwardCell.cost = cell.cost + 1;
-    forwardCell.dir = cell.dir;
-    forwardCell.from = cell; // just in case we want to visualize the path
-    queue.push(forward);
+  const forwardPos = [pos[0] + posOffsets[dir][0], pos[1] + posOffsets[dir][1]];
+  if (utils.gridGetPos(maze, forwardPos) !== "#") {
+    const forwardHashKey = utils.getHashKey(forwardPos[0], forwardPos[1]);
+    if (!seen[forwardHashKey]) {
+      seen[forwardHashKey] = [];
+    }
+    if (!seen[forwardHashKey][dir]) {
+      seen[forwardHashKey][dir] = { cost: Infinity, from: []}; 
+    }
+    const forwardCost = cost + 1;
+    const seenVal = seen[forwardHashKey][dir];
+    if (seenVal.cost > forwardCost) {
+      seenVal.cost = forwardCost;
+      seenVal.from = [seenFromHashKey];
+      queue.push({pos: forwardPos, dir, cost: forwardCost});
+    } else if (seenVal.cost === forwardCost) {
+      seenVal.from.push(seenFromHashKey);
+    }
   }
-  // look left
-  const leftDir = utils.getPrevIdx(posOffsets, cell.dir);
-  const left = [
+
+  // turn left
+  const leftDir = utils.getPrevIdx(posOffsets, dir);
+  const leftPos = [
     pos[0] + posOffsets[leftDir][0],
     pos[1] + posOffsets[leftDir][1],
   ];
-  const leftCell = utils.gridGetPos(maze, left);
-  if (leftCell.val !== "#" && leftCell.cost > cell.cost + 1001) {
-    leftCell.cost = cell.cost + 1001;
-    leftCell.dir = leftDir;
-    leftCell.from = cell; // just in case we want to visualize the path
-    queue.push(left);
+  if (utils.gridGetPos(maze, leftPos) !== '#') {
+    const leftHashKey = utils.getHashKey(pos[0], pos[1]);
+    if (!seen[leftHashKey]) {
+      seen[leftHashKey] = [];
+    }
+    if (!seen[leftHashKey][leftDir]) {
+      seen[leftHashKey][leftDir] = {cost: Infinity, from: []};
+    }
+    const leftCost = cost + 1000;
+    const seenVal = seen[leftHashKey][leftDir];
+    if (seenVal.cost > leftCost) {
+      seenVal.cost = leftCost;
+      seenVal.from = [seenFromHashKey];
+      queue.push({pos, dir: leftDir, cost: leftCost});
+    } else if (seenVal.cost === leftCost) {
+      seenVal.from.push(seenFromHashKey);
+    }
   }
-  // look right
-  const rightDir = utils.getNextIdx(posOffsets, cell.dir);
-  const right = [
+
+  // turn right
+  const rightDir = utils.getNextIdx(posOffsets, dir);
+  const rightPos = [
     pos[0] + posOffsets[rightDir][0],
     pos[1] + posOffsets[rightDir][1],
   ];
-  const rightCell = utils.gridGetPos(maze, right);
-  if (rightCell.val !== "#" && rightCell.cost > cell.cost + 1001) {
-    rightCell.cost = cell.cost + 1001;
-    rightCell.dir = rightDir;
-    rightCell.from = cell; // just in case we want to visualize the path
-    queue.push(right);
+  if (utils.gridGetPos(maze, rightPos) !== '#') {
+    const rightHashKey = utils.getHashKey(pos[0], pos[1]);
+    if (!seen[rightHashKey]) {
+      seen[rightHashKey] = [];
+    }
+    if (!seen[rightHashKey][rightDir]) {
+      seen[rightHashKey][rightDir] = {cost: Infinity, from: []};
+    }
+    const rightCost = cost + 1000;
+    const seenVal = seen[rightHashKey][rightDir];
+    if (seenVal.cost > rightCost) {
+      seenVal.cost = rightCost;
+      seenVal.from = [seenFromHashKey];
+      queue.push({pos, dir: rightDir, cost: rightCost});
+    } else if (seenVal.cost === rightCost) {
+      seenVal.from.push(seenFromHashKey);
+    }
   }
 }
 
-console.log(`Part 1: ${maze[endPos[0]][endPos[1]].cost}`);
+const endHashKey = utils.getHashKey(endPos[0], endPos[1]);
+let lowestCost = Infinity;
+let lowestCostDir = -1;
+for (let i = 0; i < seen[endHashKey].length; i++) {
+  if (seen[endHashKey][i] && seen[endHashKey][i].cost < lowestCost) {
+    lowestCostDir = i;
+    lowestCost = seen[endHashKey][i].cost;
+  }
+}
 
-function printMaze() {
-  const dirSymbols = ["^", ">", "v", "<"];
-  let curr = maze[endPos[0]][endPos[1]];
-  while (curr) {
-    curr.val = dirSymbols[curr.dir];
-    curr = curr.from;
-  }
-  for (let i = 0; i < maze.length; i++) {
-    for (let j = 0; j < maze.length; j++) {
-      process.stdout.write(maze[i][j].val);
+console.log(`Part 1: ${lowestCost}`);
+console.log(`Part 2: ${countPath(endHashKey, lowestCostDir)}`);
+
+function countPath(startKey, startDir) {
+  const found = new Set();
+  const queue = [{key: startKey, dir: startDir}];
+  while (queue.length) {
+    const {key, dir} = queue.pop();
+    found.add(key);
+    const entry = seen[key][dir];
+    for (let f of entry.from) {
+      const [fRow, fCol, fDirStr] = f.split(':');
+      const fDir = Number(fDirStr);
+      const fKey = utils.getHashKey(fRow, fCol);
+      queue.push({key: fKey, dir: fDir});
     }
-    process.stdout.write("\n");
   }
+  return found.size;
 }
