@@ -1,7 +1,6 @@
 import utils from "../utils.js";
-import viz from "../terminalViz.js";
 
-const doViz = process.argv[2] === "viz";
+console.time('time');
 
 const posOffsets = [
   [-1, 0],
@@ -121,6 +120,9 @@ for (let i = 0; i < seen[endHashKey].length; i++) {
 console.log(`Part 1: ${lowestCost}`);
 console.log(`Part 2: ${countPath(endHashKey, lowestCostDir)}`);
 
+console.timeEnd('time');
+
+
 function countPath(startKey, startDir) {
   const found = new Set();
   const queue = [{key: startKey, dir: startDir}];
@@ -128,8 +130,8 @@ function countPath(startKey, startDir) {
     const {key, dir} = queue.pop();
     found.add(key);
     const entry = seen[key][dir];
-    for (let f of entry.from) {
-      const [fRow, fCol, fDirStr] = f.split(':');
+    for (let from of entry.from) {
+      const [fRow, fCol, fDirStr] = from.split(':');
       const fDir = Number(fDirStr);
       const fKey = utils.getHashKey(fRow, fCol);
       queue.push({key: fKey, dir: fDir});
