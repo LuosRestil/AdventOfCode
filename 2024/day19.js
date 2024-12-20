@@ -1,28 +1,35 @@
 import utils from "../utils.js";
 
-const input = utils.getInput('day19sample.txt').split('\n\n');
+console.time('time');
+
+const input = utils.getInput('day19.txt').split('\n\n');
 
 const towels = input[0].split(', ');
 const designs = input[1].split('\n');
 
 let memo = new Map();
 
-let total = 0;
+let pt1Total = 0;
+let pt2Total = 0;
 for (let design of designs) {
-  if (isPossible(design)) total++;
+  const possibles = countPossibles(design);
+  if (possibles) pt1Total++;
+  pt2Total += possibles;
 }
-console.log(`Part 1: ${total}`);
+console.log(`Part 1: ${pt1Total}`);
+console.log(`Part 2: ${pt2Total}`);
 
+console.timeEnd('time');
 
-function isPossible(design) {
-  if (!design.length) return true;
+function countPossibles(design) {
+  if (!design.length) return 1;
   if (memo.has(design)) return memo.get(design);
+  let total = 0;
   for (let towel of towels) {
-    if (design.startsWith(towel) && isPossible(design.slice(towel.length))) {
-      memo.set(design, true);
-      return true;
+    if (design.startsWith(towel)) {
+      total += countPossibles(design.slice(towel.length));
     }
   }
-  memo.set(design, false);
-  return false;
+  memo.set(design, total);
+  return total;
 }
