@@ -26,7 +26,7 @@ function solveForBytes(numBytes) {
     let pos = queue.pop();
     let posHashKey = utils.getHashKey(...pos);
     let posCost = seen[posHashKey];
-    const neighbors = utils.getNeighbors(grid, pos);
+    const neighbors = utils.getNeighbors(pos);
     for (let neighbor of neighbors) {
       if (
         utils.isInGrid(grid, neighbor) &&

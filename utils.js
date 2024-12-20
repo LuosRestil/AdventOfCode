@@ -60,12 +60,12 @@ function pointsAreEqual(a, b) {
   return a[0] === b[0] && a[1] === b[1];
 }
 
-function getNeighbors(grid, pos) {
+function getNeighbors(pos, dist = 1) {
   return [
-    [pos[0] - 1, pos[1]],
-    [pos[0] + 1, pos[1]],
-    [pos[0], pos[1] - 1],
-    [pos[0], pos[1] + 1],
+    [pos[0] - dist, pos[1]],
+    [pos[0] + dist, pos[1]],
+    [pos[0], pos[1] - dist],
+    [pos[0], pos[1] + dist],
   ];
 }
 
@@ -82,6 +82,10 @@ function gridGetPos(grid, pos) {
   return grid[pos[0]][pos[1]];
 }
 
+function gridSetPos(grid, pos, val) {
+  grid[pos[0]][pos[1]] = val;
+}
+
 function printGrid(grid) {
   for (let i = 0; i < grid.length; i++) {
     for (let j = 0; j < grid[0].length; j++) {
@@ -89,6 +93,21 @@ function printGrid(grid) {
     }
     process.stdout.write("\n");
   }
+}
+
+function getManhattanDistance(a, b) {
+  return Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]);
+}
+
+function getAllNeighborsAtManhattanDistance(pos, dist) {
+  const neighbors = [];
+  for (let row = pos[0] - dist, offset = 0; row <= pos[0] + dist; row++, offset = dist - Math.abs(pos[0]-row)) {
+    for (let col = pos[1] - offset; col <= pos[1] + offset; col++) {
+      if (row === 0 && col === 0) continue;
+      neighbors.push([row, col]);
+    }
+  }
+  return neighbors;
 }
 
 export default {
@@ -103,5 +122,8 @@ export default {
   getNeighbors,
   isInGrid,
   gridGetPos,
+  gridSetPos,
   printGrid,
+  getManhattanDistance,
+  getAllNeighborsAtManhattanDistance
 };
