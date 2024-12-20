@@ -62,10 +62,10 @@ function pointsAreEqual(a, b) {
 
 function getNeighbors(grid, pos) {
   return [
-    grid[pos[0] - 1][pos[1]],
-    grid[pos[0] + 1][pos[1]],
-    grid[pos[0]][pos[1] - 1],
-    grid[pos[0]][pos[1] + 1],
+    [pos[0] - 1, pos[1]],
+    [pos[0] + 1, pos[1]],
+    [pos[0], pos[1] - 1],
+    [pos[0], pos[1] + 1],
   ];
 }
 
@@ -87,7 +87,7 @@ function printGrid(grid) {
     for (let j = 0; j < grid[0].length; j++) {
       process.stdout.write(grid[i][j]);
     }
-    process.stdout.write('\n');
+    process.stdout.write("\n");
   }
 }
 
@@ -103,5 +103,5 @@ export default {
   getNeighbors,
   isInGrid,
   gridGetPos,
-  printGrid
+  printGrid,
 };
