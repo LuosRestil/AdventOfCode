@@ -31,3 +31,39 @@ for (let key in connections) {
   }
 }
 console.log(`Part 1: ${seen.size}`);
+
+for (let key in connections) {
+  connections[key] = new Set(connections[key]);
+  connections[key].add(key);
+}
+
+const intersections = new Set();
+let keys = Object.keys(connections);
+for (let i = 0; i < keys.length; i++) {
+  const setA = connections[keys[i]];
+  for (let j = i + 1; j < keys.length; j++) {
+    const setB = connections[keys[j]];
+    const intersection = [...setA.intersection(setB)].toSorted().join(',');
+    intersections.add(intersection);
+  }
+}
+
+let intersectionsByLength = [...intersections].toSorted((a, b) => b.length - a.length);
+for (let intersection of intersectionsByLength) {
+  let keys = intersection.split(',');
+  if (allContainEachOther(keys)) {
+    console.log(`Part 2: ${intersection}`);
+    break;
+  }
+}
+
+function allContainEachOther(keys) {
+  for (let i = 0; i < keys.length - 1; i++) {
+    for (let j = i + 1; j < keys.length; j++) {
+      let keyA = keys[i];
+      let keyB = keys[j];
+      if (!connections[keyA].has(keyB) || !connections[keyB].has(keyA)) return false;
+    }
+  }
+  return true;
+}
