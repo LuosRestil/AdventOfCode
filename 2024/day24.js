@@ -1,6 +1,6 @@
 import utils from "../utils.js";
 
-const input = utils.getInput("day24.txt").split("\n\n");
+const input = utils.getInput("day24edit.txt").split("\n\n");
 const initVals = input[0]
   .split("\n")
   .map((line) => line.split(": "))
@@ -38,7 +38,34 @@ for (let gate of gates) {
 const zBin = zs.toReversed().join('');
 console.log(`Part 1: ${parseInt(zBin, 2)}`);
 
+const outs = gates.map(gate => gate.output);
+const pairs = [];
+for (let i = 0; i < outs.length - 1; i++) {
+  for (let j = i + 1; j < outs.length; j++) {
+    pairs.push([outs[i], outs[j]])
+  }
+}
 
+const xs = [];
+const ys = [];
+for (let [k,v] of Object.entries(wires)) {
+  if (k.startsWith('x')) {
+    const idx = Number(k.slice(1));
+    xs[idx] = v.val;
+  } else if (k.startsWith('y')) {
+    const idx = Number(k.slice(1));
+    ys[idx] = v.val;
+  }
+}
+const xBin = xs.toReversed().join('');
+const yBin = ys.toReversed().join('');
+const desired = (parseInt(xBin, 2) + parseInt(yBin, 2)).toString(2);
+const actual = zBin;
+console.log(`desired: ${desired}`);
+console.log(`actual:  ${actual}`);
+
+let swaps = ['gpr', 'z10', 'nks', 'z21', 'ghp', 'z33', 'krs', 'cpm'];
+console.log(`Part 2: ${swaps.toSorted().join(',')}`)
 
 function getVal(wireName) {
   const wire = wires[wireName];
