@@ -1,6 +1,6 @@
 import utils from "../utils.js";
 
-let codes = utils.getInput("day21sample.txt").split("\n");
+let codes = utils.getInput("day21.txt").split("\n");
 
 let numPad = `
 #####
@@ -10,43 +10,142 @@ let numPad = `
 ##0A#
 #####
 `;
-numPad = numPad.split('\n').slice(1, numPad.length - 1).map(row => row.split(''));
+numPad = numPad
+  .split("\n")
+  .slice(1, numPad.length - 1)
+  .map((row) => row.split(""));
 let dirPad = `
 #####
-# ^A#
+##^A#
 #<v>#
 #####
 `;
+dirPad = dirPad
+  .split("\n")
+  .slice(1, dirPad.length - 1)
+  .map((row) => row.split(""));
+
+let shortestPathsNumPad = getShortestPaths(numPad, "1234567890A".split(""));
+let shortestPathsDirPad = getShortestPaths(dirPad, "<>^vA".split(""));
+
+let total = 0;
+for (let code of codes) {
+  let firstRobotSeqs = robotPushSeq(code, shortestPathsNumPad);
+  let secondRobotSeqs = firstRobotSeqs
+    .map((seq) => robotPushSeq(seq, shortestPathsDirPad))
+    .flat();
+  let thirdRobotSeqs = secondRobotSeqs
+    .map((seq) => robotPushSeq(seq, shortestPathsDirPad))
+    .flat();
+  thirdRobotSeqs.sort((a, b) => a.length - b.length);
+  total += thirdRobotSeqs[0].length * parseInt(code);
+}
+console.log(`Part 1: ${total}`);
+
+function robotPushSeq(seq, pad) {
+  let paths = [""];
+  for (let i = 0; i < seq.length; i++) {
+    let nextPaths = [];
+    let hashKey = utils.getHashKey(i === 0 ? "A" : seq[i - 1], seq[i]);
+    let stepPaths = pad[utils.getHashKey(i === 0 ? "A" : seq[i - 1], seq[i])];
+    if (!stepPaths) {
+      console.log("well fuck");
+    }
+    stepPaths = stepPaths.map((path) => path + "A");
+    for (let path of paths) {
+      for (let sp of stepPaths) {
+        nextPaths.push(path + sp);
+      }
+    }
+    paths = nextPaths;
+  }
+  return paths;
+}
 
 function getShortestPaths(grid, chars) {
   let map = {};
   for (let a of chars) {
     for (let b of chars) {
-      if (a !== b) {
-        map[utils.getHashKey(a, b)] = getShortestPathsBetween(a, b, grid);
-      }
+      map[utils.getHashKey(a, b)] = getShortestPathsBetween(a, b, grid);
     }
   }
   return map;
 }
 
 function getShortestPathsBetween(a, b, grid) {
-  let aPos = utils.gridGetPos(grid, a);
-  let bPos = utils.gridGetPos(grid, b);
-  let seen = {[utils.getHashKey(aPos)]: {cost: 0, paths: []}};
-  let queue = [aPos];
+  let aPos = utils.find2D(grid, a);
+  let bPos = utils.find2D(grid, b);
+  const seen = { [a]: { paths: [""], cost: 0 } };
+  let queue = [{ ...seen[a], pos: aPos }];
   while (queue.length) {
-    let pos = queue.shift();
-    if (utils.pointsAreEqual(pos, bPos)) {
+    let curr = queue.shift();
+    if (utils.pointsAreEqual(curr.pos, bPos)) {
       continue;
     }
     // up
-    let up = [pos[0] - 1, pos[1]];
+    let up = [curr.pos[0] - 1, curr.pos[1]];
+    let upChar = grid[up[0]][up[1]];
+    if (upChar !== "#") {
+      if (!seen[upChar] || seen[upChar].cost > curr.cost + 1) {
+        seen[upChar] = {
+          paths: curr.paths.map((path) => path + "^"),
+          cost: curr.cost + 1,
+        };
+        queue.push({ ...seen[upChar], pos: up });
+      } else if (seen[upChar] && seen[upChar].cost === curr.cost + 1) {
+        for (let path of curr.paths) {
+          seen[upChar].paths.push(path + "^");
+        }
+      }
+    }
     // down
-    let down = [pos[0] + 1, pos[1]];
+    let down = [curr.pos[0] + 1, curr.pos[1]];
+    let downChar = grid[down[0]][down[1]];
+    if (downChar !== "#") {
+      if (!seen[downChar] || seen[downChar].cost > curr.cost + 1) {
+        seen[downChar] = {
+          paths: curr.paths.map((path) => path + "v"),
+          cost: curr.cost + 1,
+        };
+        queue.push({ ...seen[downChar], pos: down });
+      } else if (seen[downChar] && seen[downChar].cost === curr.cost + 1) {
+        for (let path of curr.paths) {
+          seen[downChar].paths.push(path + "v");
+        }
+      }
+    }
     // left
-    let left = [pos[0], pos[1] - 1];
+    let left = [curr.pos[0], curr.pos[1] - 1];
+    let leftChar = grid[left[0]][left[1]];
+    if (leftChar !== "#") {
+      if (!seen[leftChar] || seen[leftChar].cost > curr.cost + 1) {
+        seen[leftChar] = {
+          paths: curr.paths.map((path) => path + "<"),
+          cost: curr.cost + 1,
+        };
+        queue.push({ ...seen[leftChar], pos: left });
+      } else if (seen[leftChar] && seen[leftChar].cost === curr.cost + 1) {
+        for (let path of curr.paths) {
+          seen[leftChar].paths.push(path + "<");
+        }
+      }
+    }
     // right
-    let right = [pos[0], pos[1] + 1];
+    let right = [curr.pos[0], curr.pos[1] + 1];
+    let rightChar = grid[right[0]][right[1]];
+    if (rightChar !== "#") {
+      if (!seen[rightChar] || seen[rightChar].cost > curr.cost + 1) {
+        seen[rightChar] = {
+          paths: curr.paths.map((path) => path + ">"),
+          cost: curr.cost + 1,
+        };
+        queue.push({ ...seen[rightChar], pos: right });
+      } else if (seen[rightChar] && seen[rightChar].cost === curr.cost + 1) {
+        for (let path of curr.paths) {
+          seen[rightChar].paths.push(path + ">");
+        }
+      }
+    }
   }
+  return seen[b].paths;
 }
