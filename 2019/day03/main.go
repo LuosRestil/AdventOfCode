@@ -41,17 +41,19 @@ func main() {
 	for i, seg1 := range wire1Segments {
 		for j, seg2 := range wire2Segments {
 			intersects, pt := getIntersection(seg1, seg2)
-			if intersects {
-				manhattanDist := utils.ManhattanDist(point{X: 0, Y: 0}, pt)
-				if manhattanDist != 0 {
-					if manhattanDist < leastDist {
-						leastDist = manhattanDist
-					}
-					steps := getSteps(i, wire1Segments, j, wire2Segments, pt)
-					if steps < fewestSteps {
-						fewestSteps = steps
-					}
-				}
+			if !intersects {
+				continue
+			}
+			manhattanDist := utils.ManhattanDist(point{X: 0, Y: 0}, pt)
+			if manhattanDist == 0 {
+				continue
+			}
+			if manhattanDist < leastDist {
+				leastDist = manhattanDist
+			}
+			steps := getSteps(i, wire1Segments, j, wire2Segments, pt)
+			if steps < fewestSteps {
+				fewestSteps = steps
 			}
 		}
 	}
