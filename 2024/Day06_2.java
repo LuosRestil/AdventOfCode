@@ -2,7 +2,6 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,25 +32,25 @@ class Coord {
 
 class Guard {
     public int[] pos;
-    public String dir;
+    public char dir;
 
-    Guard(int[] pos, String dir) {
+    Guard(int[] pos, char dir) {
         this.pos = pos;
         this.dir = dir;
     }
 }
 
 public class Day06_2 {
-    public static final Map<String, int[]> nextPosMods = Map.of(
-            "^", new int[] { -1, 0 },
-            "v", new int[] { 1, 0 },
-            "<", new int[] { 0, -1 },
-            ">", new int[] { 0, 1 });
-    public static final Map<String, String> turns = Map.of(
-            "^", ">",
-            "v", "<",
-            "<", "^",
-            ">", "v");
+    public static final Map<Character, int[]> nextPosMods = Map.of(
+            '^', new int[] { -1, 0 },
+            'v', new int[] { 1, 0 },
+            '<', new int[] { 0, -1 },
+            '>', new int[] { 0, 1 });
+    public static final Map<Character, Character> turns = Map.of(
+            '^', '>',
+            'v', '<',
+            '<', '^',
+            '>', 'v');
     public static final String filepath = "inputs/day06.txt";
 
     public static void main(String[] args) throws IOException {
@@ -67,13 +66,13 @@ public class Day06_2 {
         System.out.println(String.format("Time: %dms", end - start));
     }
 
-    public static Map<Coord, List<String>> runPt1() throws IOException {
-        List<List<String>> grid = getGrid();
+    public static Map<Coord, List<Character>> runPt1() throws IOException {
+        List<List<Character>> grid = getGrid();
         return solve(grid);
     }
 
     public static void runPt2(List<Coord> trodden) throws IOException {
-        List<List<String>> grid = getGrid();
+        List<List<Character>> grid = getGrid();
         Guard guard = getGuard(grid);
         var count = 0;
         for (var coord : trodden) {
@@ -81,31 +80,35 @@ public class Day06_2 {
                 continue;
             }
 
-            grid.get(coord.row).set(coord.col, "#");
+            grid.get(coord.row).set(coord.col, '#');
             var completed = solve(grid);
             if (completed == null) {
                 count++;
             }
-            grid.get(coord.row).set(coord.col, ".");
+            grid.get(coord.row).set(coord.col, '.');
         }
         System.out.println(String.format("Part 2: %d", count));
     }
 
-    public static List<List<String>> getGrid() throws IOException {
-        List<List<String>> grid = new ArrayList<>();
+    public static List<List<Character>> getGrid() throws IOException {
+        List<List<Character>> grid = new ArrayList<>();
         BufferedReader br = new BufferedReader(new FileReader(filepath));
         String line;
         while ((line = br.readLine()) != null) {
-            grid.add(new ArrayList<>(Arrays.asList(line.split(""))));
+            List<Character> row = new ArrayList<>();
+            for (char c : line.toCharArray()) {
+                row.add(c);
+            }
+            grid.add(row);
         }
         br.close();
         return grid;
     }
 
-    public static Map<Coord, List<String>> solve(List<List<String>> grid) {
+    public static Map<Coord, List<Character>> solve(List<List<Character>> grid) {
         Guard guard = getGuard(grid);
-        Map<Coord, List<String>> path = new HashMap<>();
-        path.put(new Coord(guard.pos[0], guard.pos[1]), new ArrayList<>(List.of("^")));
+        Map<Coord, List<Character>> path = new HashMap<>();
+        path.put(new Coord(guard.pos[0], guard.pos[1]), new ArrayList<>(List.of('^')));
         while (isInGrid(grid, guard.pos)) {
             if (!tick(grid, guard, path)) {
                 return null;
@@ -114,23 +117,22 @@ public class Day06_2 {
         return path;
     }
 
-    public static Guard getGuard(List<List<String>> grid) {
+    public static Guard getGuard(List<List<Character>> grid) {
         for (int i = 0; i < grid.size(); i++) {
             for (int j = 0; j < grid.get(0).size(); j++) {
-                if (grid.get(i).get(j).equals("^")) {
-                    return new Guard(new int[] { i, j }, "^");
+                if (grid.get(i).get(j) == '^') {
+                    return new Guard(new int[] { i, j }, '^');
                 }
-
             }
         }
         return null;
     }
 
-    public static boolean isInGrid(List<List<String>> grid, int[] pos) {
+    public static boolean isInGrid(List<List<Character>> grid, int[] pos) {
         return pos[0] >= 0 && pos[0] < grid.size() && pos[1] >= 0 && pos[1] < grid.get(0).size();
     }
 
-    public static boolean tick (List<List<String>> grid, Guard guard, Map<Coord, List<String>> path) {
+    public static boolean tick(List<List<Character>> grid, Guard guard, Map<Coord, List<Character>> path) {
         move(grid, guard);
         var pathKey = new Coord(guard.pos[0], guard.pos[1]);
         var val = path.get(pathKey);
@@ -146,10 +148,10 @@ public class Day06_2 {
         return true;
     }
 
-    public static void move(List<List<String>> grid, Guard guard) {
+    public static void move(List<List<Character>> grid, Guard guard) {
         var nextPosMod = nextPosMods.get(guard.dir);
         var nextPos = new int[]{guard.pos[0] + nextPosMod[0], guard.pos[1] + nextPosMod[1]};
-        if (isInGrid(grid, nextPos) && grid.get(nextPos[0]).get(nextPos[1]).equals("#")) {
+        if (isInGrid(grid, nextPos) && grid.get(nextPos[0]).get(nextPos[1]) == '#') {
             guard.dir = turns.get(guard.dir);
         } else {
             guard.pos = nextPos;
