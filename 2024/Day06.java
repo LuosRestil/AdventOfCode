@@ -1,14 +1,46 @@
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.security.KeyException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
-class Day06 {
+class Coord {
+    public final int row, col;
+
+    Coord(int row, int col) {
+        this.row = row;
+        this.col = col;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (!(o instanceof Coord))
+            return false;
+        Coord coord = (Coord) o;
+        return row == coord.row && col == coord.col;
+    }
+
+    @Override
+    public int hashCode() {
+        return 31 * row + col;
+    }
+}
+
+class Guard {
+    public int[] pos;
+    public char dir;
+
+    Guard(int[] pos, char dir) {
+        this.pos = pos;
+        this.dir = dir;
+    }
+}
+
+public class Day06 {
     public static final Map<Character, int[]> nextPosMods = Map.of(
             '^', new int[] { -1, 0 },
             'v', new int[] { 1, 0 },
@@ -21,135 +53,108 @@ class Day06 {
             '>', 'v');
     public static final String filepath = "inputs/day06.txt";
 
-    public static void main(String[] args) throws IOException, KeyException {
+    public static void main(String[] args) throws IOException {
         final long start = System.currentTimeMillis();
 
-        List<List<Character>> p1Grid = runPt1();
-        System.out.println(String.format("Part 1: %d", countTrodden(p1Grid)));
+        var path = runPt1();
+        List<Coord> keys = new ArrayList<Coord>(path.keySet());
+        System.out.println(String.format("Part 1: %d", keys.size()));
 
-        List<int[]> trodden = new ArrayList<>();
-        for (int i = 0; i < p1Grid.size(); i++) {
-            for (int j = 0; j < p1Grid.get(0).size(); j++) {
-                trodden.add(new int[] { i, j });
-            }
-        }
-        runPt2(trodden);
+        runPt2(keys);
 
         final long end = System.currentTimeMillis();
         System.out.println(String.format("Time: %dms", end - start));
     }
 
-    public static List<List<Character>> runPt1() throws IOException, KeyException {
-        var grid = makeGrid();
-        solve(grid);
-        return grid;
+    public static Map<Coord, List<Character>> runPt1() throws IOException {
+        List<List<Character>> grid = getGrid();
+        return solve(grid);
     }
 
-    public static void runPt2(List<int[]> trodden) throws IOException, KeyException {
-        var grid = makeGrid();
-        var guardPos = getGuardPos(grid);
-        int count = 0;
-        for (var pos : trodden) {
-            if (pos[0] == guardPos[0] && pos[1] == guardPos[1])
+    public static void runPt2(List<Coord> trodden) throws IOException {
+        List<List<Character>> grid = getGrid();
+        Guard guard = getGuard(grid);
+        var count = 0;
+        for (var coord : trodden) {
+            if (coord.row == guard.pos[0] && coord.col == guard.pos[1]) {
                 continue;
-            var copy = deepCopy(grid);
-            copy.get(pos[0]).set(pos[1], '#');
-            boolean completed = solve(copy);
-            if (!completed) count++;
+            }
+
+            grid.get(coord.row).set(coord.col, '#');
+            var completed = solve(grid);
+            if (completed == null) {
+                count++;
+            }
+            grid.get(coord.row).set(coord.col, '.');
         }
         System.out.println(String.format("Part 2: %d", count));
     }
 
-    public static List<List<Character>> makeGrid() throws IOException {
+    public static List<List<Character>> getGrid() throws IOException {
         List<List<Character>> grid = new ArrayList<>();
         BufferedReader br = new BufferedReader(new FileReader(filepath));
         String line;
         while ((line = br.readLine()) != null) {
-            grid.add(line.chars()
-                    .mapToObj(e -> (char) e)
-                    .collect(Collectors.toList()));
+            List<Character> row = new ArrayList<>();
+            for (char c : line.toCharArray()) {
+                row.add(c);
+            }
+            grid.add(row);
         }
         br.close();
         return grid;
     }
 
-    public static boolean solve(List<List<Character>> grid) throws KeyException {
-        int[] guardPos = getGuardPos(grid);
-        Map<String, List<Character>> path = new HashMap<>();
-        while (isInGrid(grid, guardPos)) {
-            if (!tick(grid, guardPos, path))
-                return false;
-        }
-        return true;
-    }
-
-    public static boolean tick(List<List<Character>> grid, int[] pos, Map<String, List<Character>> path) {
-        char dir = grid.get(pos[0]).get(pos[1]);
-        move(grid, pos, dir);
-        String pathKey = String.format("%d:%d", pos[0], pos[1]);
-        if (path.containsKey(pathKey) &&
-                path.get(pathKey).contains(grid.get(pos[0]).get(pos[1])))
-            return false;
-
-        try {
-            if (!path.containsKey(pathKey))
-                path.put(pathKey, new ArrayList<>());
-            path.get(pathKey).add(grid.get(pos[0]).get(pos[1]));
-        } catch (Exception e) {
-        }
-
-        return true;
-    }
-
-    public static void move(List<List<Character>> grid, int[] pos, char dir) {
-        int[] nextPosMod = nextPosMods.get(dir);
-        int[] nextPos = new int[] { pos[0] + nextPosMod[0], pos[1] + nextPosMod[1] };
-        boolean hasTurned = false;
-        if (isInGrid(grid, nextPos)) {
-            if (grid.get(nextPos[0]).get(nextPos[1]) == '#') {
-                grid.get(pos[0]).set(pos[1], turns.get(dir));
-                hasTurned = true;
-            } else {
-                grid.get(nextPos[0]).set(nextPos[1], dir);
+    public static Map<Coord, List<Character>> solve(List<List<Character>> grid) {
+        Guard guard = getGuard(grid);
+        Map<Coord, List<Character>> path = new HashMap<>();
+        path.put(new Coord(guard.pos[0], guard.pos[1]), new ArrayList<>(List.of('^')));
+        while (isInGrid(grid, guard.pos)) {
+            if (!tick(grid, guard, path)) {
+                return null;
             }
         }
-
-        if (!hasTurned) {
-            pos[0] = nextPos[0];
-            pos[1] = nextPos[1];
-        }
+        return path;
     }
 
-    public static int[] getGuardPos(List<List<Character>> grid) throws KeyException {
+    public static Guard getGuard(List<List<Character>> grid) {
         for (int i = 0; i < grid.size(); i++) {
             for (int j = 0; j < grid.get(0).size(); j++) {
-                if (grid.get(i).get(j) == '^')
-                    return new int[] { i, j };
+                if (grid.get(i).get(j) == '^') {
+                    return new Guard(new int[] { i, j }, '^');
+                }
             }
         }
-        throw new KeyException("Unable to find guard");
+        return null;
     }
 
     public static boolean isInGrid(List<List<Character>> grid, int[] pos) {
         return pos[0] >= 0 && pos[0] < grid.size() && pos[1] >= 0 && pos[1] < grid.get(0).size();
     }
 
-    public static int countTrodden(List<List<Character>> grid) {
-        int count = 0;
-        for (var row : grid) {
-            for (var col : row) {
-                if (turns.containsKey(col))
-                    count++;
-            }
+    public static boolean tick(List<List<Character>> grid, Guard guard, Map<Coord, List<Character>> path) {
+        move(grid, guard);
+        var pathKey = new Coord(guard.pos[0], guard.pos[1]);
+        var val = path.get(pathKey);
+        if (val != null && val.contains(guard.dir)) {
+            return false;
         }
-        return count;
+        if (isInGrid(grid, guard.pos)) {
+            if (val == null) {
+                path.put(pathKey, new ArrayList<>());
+            }
+            path.get(pathKey).add(guard.dir);
+        }
+        return true;
     }
 
-    public static List<List<Character>> deepCopy(List<List<Character>> grid) {
-        List<List<Character>> dest = new ArrayList<>();
-        for (var row : grid) {
-            dest.add(new ArrayList<>(row));
+    public static void move(List<List<Character>> grid, Guard guard) {
+        var nextPosMod = nextPosMods.get(guard.dir);
+        var nextPos = new int[]{guard.pos[0] + nextPosMod[0], guard.pos[1] + nextPosMod[1]};
+        if (isInGrid(grid, nextPos) && grid.get(nextPos[0]).get(nextPos[1]) == '#') {
+            guard.dir = turns.get(guard.dir);
+        } else {
+            guard.pos = nextPos;
         }
-        return dest;
     }
 }
