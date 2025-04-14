@@ -108,7 +108,7 @@ func getGuard(grid [][]string) guard {
 }
 
 func isInGrid(grid [][]string, pos [2]int) bool {
-	return pos[0] >= 0 && pos[0] < len(grid) && pos[1] >= 0 && pos[1] < len(grid)
+	return pos[0] >= 0 && pos[0] < len(grid) && pos[1] >= 0 && pos[1] < len(grid[0])
 }
 
 func tick(grid [][]string, guard *guard, path map[[2]int][]string) bool {
