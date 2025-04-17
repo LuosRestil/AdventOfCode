@@ -14,7 +14,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	nums, err := utils.MapSlice(
+	nums, err := utils.Map(
 		strings.Split(string(bytes), ","),
 		func(val string) (int, error) { return strconv.Atoi(val) })
 	if err != nil {

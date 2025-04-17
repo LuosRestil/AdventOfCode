@@ -29,26 +29,41 @@ func GetNLines(file *os.File, nLines int) []string {
 	return lines
 }
 
-func MapSlice[T any, U any](src []T, converter func(T) (U, error)) ([]U, error) {
+func Map[T any, U any](src []T, converter func(T) (U, error)) ([]U, error) {
 	res := make([]U, 0, len(src))
 	for _, val := range src {
 		converted, err := converter(val)
 		if err != nil {
-			return nil, fmt.Errorf("MapSlice failed to convert value: %w", err)
+			return nil, fmt.Errorf("error in MapSlice converter: %w", err)
 		}
 		res = append(res, converted)
 	}
 	return res, nil
 }
 
-func FilterSlice[T any](src []T, filter func(T) bool) []T {
+func Filter[T any](src []T, filter func(T) (bool, error)) ([]T, error) {
 	var res []T
 	for _, val := range src {
-		if filter(val) {
+		pass, err := filter(val)
+		if err != nil {
+			return nil, fmt.Errorf("error in FilterSlice filter: %w", err)
+		}
+		if pass {
 			res = append(res, val)
 		}
 	}
-	return res
+	return res, nil
+}
+
+func Reduce[T any, U any](src []T, reducer func(*U, T) error, accumulator U) (U, error) {
+	for _, val := range src {
+		err := reducer(&accumulator, val)
+		if err != nil {
+			var zero U
+			return zero, fmt.Errorf("error in ReduceSlice reducer: %w", err)
+		}
+	}
+	return accumulator, nil
 }
 
 func IntcodeTransform(nums []int) {
@@ -78,5 +93,5 @@ func Abs(x int) int {
 }
 
 func ManhattanDist(p1 Point, p2 Point) int {
-	return Abs(p1.X - p2.X) + Abs(p1.Y - p2.Y)
+	return Abs(p1.X-p2.X) + Abs(p1.Y-p2.Y)
 }
