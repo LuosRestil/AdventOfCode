@@ -40,7 +40,7 @@ struct Guard {
     Guard(int16_t r, int16_t c, char d) : row(r), col(c), dir(d) {}
 };
 
-const std::string filepath = "inputs/day06.txt";
+const std::string filepath = "../inputs/day06.txt";
 
 // Direction constants and lookup tables - aligned for cache efficiency
 static constexpr int8_t DIR_UP = 0, DIR_DOWN = 1, DIR_LEFT = 2, DIR_RIGHT = 3;
