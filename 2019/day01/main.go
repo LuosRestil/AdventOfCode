@@ -1,7 +1,7 @@
 package main
 
 import (
-	utils "aoc2019/utils"
+	"aoc2019/utils"
 	"fmt"
 	"os"
 	"strconv"

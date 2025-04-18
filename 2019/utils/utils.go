@@ -66,25 +66,6 @@ func Reduce[T any, U any](src []T, reducer func(*U, T) error, accumulator U) (U,
 	return accumulator, nil
 }
 
-func IntcodeTransform(nums []int) {
-	pos := 0
-	for {
-		opcode := nums[pos]
-		if opcode == 99 {
-			break
-		}
-		in1 := nums[nums[pos+1]]
-		in2 := nums[nums[pos+2]]
-		dest := nums[pos+3]
-		if opcode == 1 {
-			nums[dest] = in1 + in2
-		} else if opcode == 2 {
-			nums[dest] = in1 * in2
-		}
-		pos += 4
-	}
-}
-
 func Abs(x int) int {
 	if x < 0 {
 		return -x
