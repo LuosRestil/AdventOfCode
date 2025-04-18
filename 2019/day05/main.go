@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	filepath := "day05/input/txt"
+	filepath := "day05/input.txt"
 	ic := intcode.GetIntcode(filepath)
 	res := intcode.RunWithInput(slices.Clone(ic[:]), 1)
 	fmt.Printf("Part 1: %v\n", res)
