@@ -7,6 +7,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type point = utils.Point
@@ -25,6 +26,8 @@ func (s *segment) vert() bool {
 }
 
 func main() {
+	start := time.Now()
+
 	bytes, err := os.ReadFile("day03/input.txt")
 	if err != nil {
 		panic(err)
@@ -60,6 +63,9 @@ func main() {
 
 	fmt.Printf("Part 1: %d\n", leastDist)
 	fmt.Printf("Part 2: %d\n", fewestSteps)
+
+	elapsed := time.Since(start)
+	fmt.Printf("elapsed: %s\n", elapsed)
 }
 
 func getSteps(idx1 int, segs1 []segment, idx2 int, segs2 []segment, pt point) int {

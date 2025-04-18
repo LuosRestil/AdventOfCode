@@ -4,9 +4,12 @@ import (
 	"aoc2019/intcode"
 	"fmt"
 	"slices"
+	"time"
 )
 
 func main() {
+	start := time.Now()
+
 	ic := intcode.GetIntcode("day02/input.txt")
 
 	cpy := slices.Clone(ic[:])
@@ -32,4 +35,7 @@ end:
 			}
 		}
 	}
+
+	elapsed := time.Since(start)
+	fmt.Printf("elapsed: %s\n", elapsed)
 }

@@ -5,9 +5,12 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func main() {
+	start := time.Now()
+
 	bytes, _ := os.ReadFile("day04/input.txt")
 	input := strings.Split(string(bytes), "-")
 	low, _ := strconv.Atoi(input[0])
@@ -43,4 +46,7 @@ func main() {
 	}
 	fmt.Printf("Part 1: %d\n", p1)
 	fmt.Printf("Part 2: %d\n", p2)
+	
+	elapsed := time.Since(start)
+	fmt.Printf("elapsed: %s\n", elapsed)
 }
