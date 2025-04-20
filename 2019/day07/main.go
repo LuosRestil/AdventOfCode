@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	defer utils.TrackTime(time.Now())
+	defer utils.TrackTime(time.Now())()
 
 	ic := intcode.GetIntcode("day07/input.txt")
 	phaseSettingPermutations := utils.GetAllPermutations([]int{0, 1, 2, 3, 4})
