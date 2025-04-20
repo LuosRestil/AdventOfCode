@@ -79,8 +79,8 @@ func RunWithInput(nums []int, input int) []int {
 			nums[dest] = input
 			ptr += instructionSizes[3]
 		case 4: // output
-			srcidx := nums[ptr+1]
-			output = append(output, nums[srcidx])
+			srcIdx := nums[ptr+1]
+			output = append(output, nums[srcIdx])
 			ptr += instructionSizes[4]
 		case 5: //  jump if true
 			in1 := nums[ptr+1]
@@ -96,7 +96,7 @@ func RunWithInput(nums []int, input int) []int {
 				break
 			}
 			ptr += instructionSizes[5]
-		case 6: //  jump if true
+		case 6: //  jump if false
 			in1 := nums[ptr+1]
 			if modes[0] == position {
 				in1 = nums[in1]
@@ -123,9 +123,10 @@ func RunWithInput(nums []int, input int) []int {
 			if in1 < in2 {
 				res = 1
 			}
-			nums[ptr+3] = res
+			writeIdx := nums[ptr+3]
+			nums[writeIdx] = res
 			ptr += instructionSizes[7]
-		case 8: // less than
+		case 8: // equal
 			in1 := nums[ptr+1]
 			if modes[0] == position {
 				in1 = nums[in1]
@@ -138,7 +139,8 @@ func RunWithInput(nums []int, input int) []int {
 			if in1 == in2 {
 				res = 1
 			}
-			nums[ptr+3] = res
+			writeIdx := nums[ptr+3]
+			nums[writeIdx] = res
 			ptr += instructionSizes[7]
 		default:
 			panic("unsupported opcode")
@@ -165,9 +167,9 @@ func parseInstruction(instruction int) instructionData {
 }
 
 func GetIntcode(filepath string) []int {
-	bytes, _ := os.ReadFile(filepath)	
+	bytes, _ := os.ReadFile(filepath)
 	input := strings.Split(string(bytes), ",")
-	instructions, _ := utils.Map(input, func (str string) (int, error) {
+	instructions, _ := utils.Map(input, func(str string) (int, error) {
 		num, err := strconv.Atoi(str)
 		if err != nil {
 			panic(err)

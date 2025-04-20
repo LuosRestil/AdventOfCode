@@ -76,3 +76,69 @@ func Abs(x int) int {
 func ManhattanDist(p1 Point, p2 Point) int {
 	return Abs(p1.X-p2.X) + Abs(p1.Y-p2.Y)
 }
+
+type Set[T comparable] struct {
+	members map[T]struct{}
+}
+
+func (s *Set[T]) Add(key T) {
+	s.members[key] = struct{}{}
+}
+
+func (s *Set[T]) Has(key T) bool {
+	_, ok := s.members[key]; return ok;
+}
+
+func (s *Set[T]) Remove(key T) {
+	delete(s.members, key)
+}
+
+func (s *Set[T]) Size(key T) int {
+	return len(s.members)
+}
+
+func (s *Set[T]) Union(s2 *Set[T]) *Set[T] {
+	res := NewSet[T]()
+	for key := range s.members {
+		res.Add(key)
+	}
+	for key := range s2.members {
+		res.Add(key)
+	}
+	return res
+}
+
+func (s *Set[T]) Intersection(s2 *Set[T]) *Set[T] {
+	res := NewSet[T]()
+	for key := range s.members {
+		if s2.Has(key) {
+			res.Add(key)
+		}
+	}
+	return res
+}
+
+// Returns the subset from s, that doesn't exist in s2 (param)
+func (s *Set[T]) Difference(s2 *Set[T]) *Set[T] {
+	res := NewSet[T]()
+	for key := range s.members {
+		if !s2.Has(key) {
+			res.Add(key)
+		}
+	}
+	return res
+}
+
+func (s *Set[T]) ToSlice() []T {
+	res := []T{}
+	for key := range s.members {
+		res = append(res, key)
+	}
+	return res
+}
+
+func NewSet[T comparable]() *Set[T] {
+	return &Set[T]{make(map[T]struct{})}
+}
+
+// TODO linked list, queue, stack

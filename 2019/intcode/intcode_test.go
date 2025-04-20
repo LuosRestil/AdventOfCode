@@ -9,7 +9,7 @@ func TestParseInstruction(t *testing.T) {
 	actual := parseInstruction(1002)
 	expected := instructionData{
 		opcode: 2,
-		modes: []int{0,1,0},
+		modes:  []int{0, 1, 0},
 	}
 	if !reflect.DeepEqual(actual, expected) {
 		t.Errorf("actual %v; expected %v", actual, expected)
@@ -20,14 +20,62 @@ func TestParseInstruction2(t *testing.T) {
 	actual := parseInstruction(1008)
 	expected := instructionData{
 		opcode: 8,
-		modes: []int{0,1,0},
+		modes:  []int{0, 1, 0},
 	}
 	if !reflect.DeepEqual(actual, expected) {
 		t.Errorf("actual %v; expected %v", actual, expected)
 	}
 }
 
-func TestIntcodeTransform(t *testing.T) {
+func TestRunWithInput_5_2_1(t *testing.T) {
+	ic := []int{3, 9, 8, 9, 10, 9, 4, 9, 99, -1, 8}
+	eq8 := RunWithInput(ic, 8)[0]
+	if eq8 != 1 {
+		t.Errorf("expected 1; actual; %d", eq8)
+	}
+	neq8 := RunWithInput(ic, 9)[0]
+	if neq8 != 0 {
+		t.Errorf("expected 0; actual %d", neq8)
+	}
+}
+
+func TestRunWithInput_5_2_2(t *testing.T) {
+	ic := []int{3, 3, 1108, -1, 8, 3, 4, 3, 99}
+	eq8 := RunWithInput(ic, 8)[0]
+	if eq8 != 1 {
+		t.Errorf("expected 1; actual; %d", eq8)
+	}
+	neq8 := RunWithInput(ic, 9)[0]
+	if neq8 != 0 {
+		t.Errorf("expected 0; actual %d", neq8)
+	}
+}
+
+func TestRunWithInput_5_2_3(t *testing.T) {
+	ic := []int{3, 9, 7, 9, 10, 9, 4, 9, 99, -1, 8}
+	lt8 := RunWithInput(ic, 7)[0]
+	if lt8 != 1 {
+		t.Errorf("expected 1; actual; %d", lt8)
+	}
+	nlt8 := RunWithInput(ic, 9)[0]
+	if nlt8 != 0 {
+		t.Errorf("expected 0; actual %d", nlt8)
+	}
+}
+
+func TestRunWithInput_5_2_4(t *testing.T) {
+	ic := []int{3, 3, 1107, -1, 8, 3, 4, 3, 99}
+	lt8 := RunWithInput(ic, 7)[0]
+	if lt8 != 1 {
+		t.Errorf("expected 1; actual; %d", lt8)
+	}
+	nlt8 := RunWithInput(ic, 9)[0]
+	if nlt8 != 0 {
+		t.Errorf("expected 0; actual %d", nlt8)
+	}
+}
+
+func TestRun_2(t *testing.T) {
 	tests := []struct {
 		input    []int
 		expected int
