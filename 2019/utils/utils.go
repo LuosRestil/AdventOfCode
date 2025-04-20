@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"time"
 )
 
 type Point struct {
@@ -139,6 +140,30 @@ func (s *Set[T]) ToSlice() []T {
 
 func NewSet[T comparable]() *Set[T] {
 	return &Set[T]{make(map[T]struct{})}
+}
+
+func GetAllPermutations[T any](list []T) [][]T {
+	if len(list) == 1 {
+		return [][]T{list}
+	}
+
+	perms := [][]T{}
+	for i := range list {
+		curr := list[i]
+		others := append([]T{}, list[0:i]...)
+		others = append(others, list[i+1:]...)
+		remaining := GetAllPermutations(others)		
+		for _, perm := range remaining {
+			perms = append(perms, append([]T{curr}, perm...))
+		}
+	}
+	return perms
+}
+
+func TrackTime(start time.Time) func() {
+	return func() {
+		fmt.Printf("elapsed: %s\n", time.Since(start))
+	}
 }
 
 // TODO linked list, queue, stack
