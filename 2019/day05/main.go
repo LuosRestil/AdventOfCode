@@ -2,13 +2,14 @@ package main
 
 import (
 	"aoc2019/intcode"
+	"aoc2019/utils"
 	"fmt"
 	"slices"
 	"time"
 )
 
 func main() {
-	start := time.Now()
+	defer utils.TrackTime(time.Now())()
 
 	filepath := "day05/input.txt"
 	ic := intcode.GetIntcode(filepath)
@@ -16,7 +17,4 @@ func main() {
 	fmt.Printf("Part 1: %v\n", res)
 	res = intcode.RunWithInputs(slices.Clone(ic[:]), []int{5})
 	fmt.Printf("Part 2: %v\n", res)
-
-	elapsed := time.Since(start)
-	fmt.Printf("elapsed: %s\n", elapsed)
 }

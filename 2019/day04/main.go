@@ -1,6 +1,7 @@
 package main
 
 import (
+	"aoc2019/utils"
 	"fmt"
 	"os"
 	"strconv"
@@ -9,7 +10,7 @@ import (
 )
 
 func main() {
-	start := time.Now()
+	defer utils.TrackTime(time.Now())()
 
 	bytes, _ := os.ReadFile("day04/input.txt")
 	input := strings.Split(string(bytes), "-")
@@ -46,7 +47,4 @@ func main() {
 	}
 	fmt.Printf("Part 1: %d\n", p1)
 	fmt.Printf("Part 2: %d\n", p2)
-	
-	elapsed := time.Since(start)
-	fmt.Printf("elapsed: %s\n", elapsed)
 }

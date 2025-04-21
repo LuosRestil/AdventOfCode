@@ -4,33 +4,67 @@ import (
 	"aoc2019/intcode"
 	"aoc2019/utils"
 	"fmt"
-	"time"
 	"slices"
+	"time"
 )
 
 func main() {
 	defer utils.TrackTime(time.Now())()
 
-	ic := intcode.GetIntcode("day07/sample.txt")
+	ic := intcode.GetIntcode("day07/input.txt")
 	phaseSettingPermutations := utils.GetAllPermutations([]int{0, 1, 2, 3, 4})
-	
+
 	max := 0
 	for _, phaseSettings := range phaseSettingPermutations {
-		res := run(ic, phaseSettings)
+		res := run1(ic, phaseSettings)
 		if res > max {
 			max = res
 		}
 	}
 	fmt.Printf("Part 1: %d\n", max)
+
+	// phaseSettingPermutations = utils.GetAllPermutations([]int{5, 6, 7, 8, 9})
+
+	// max = 0
+	// for _, phaseSettings := range phaseSettingPermutations {
+	// 	res := run2(ic, phaseSettings)
+	// 	if res > max {
+	// 		max = res
+	// 	}
+	// }
+	// fmt.Printf("Part 2: %d\n", max)
 }
 
-func run(ic []int, phaseSettings []int) int {
+func run1(ic []int, phaseSettings []int) int {
 	input := 0
 
-	for _, phaseSetting := range phaseSettings {
-		icCpy := slices.Clone(ic)
-		input = intcode.RunWithInputs(icCpy, []int{phaseSetting, input})[0]
+	ics := make([][]int, len(phaseSettings))
+	// channels := make([]chan int, len(phaseSettings))
+	for i, phaseSetting := range phaseSettings {
+		ics[i] = slices.Clone(ic)
+		input = intcode.RunWithInputs(ics[i], []int{phaseSetting, input})[0]
 	}
 
+	// retVal := <- channels[len(phaseSettings) - 1]
+	// for _, ch := range channels {
+	// 	close(ch)
+	// }
+
+	// return retVal
 	return input
 }
+
+// func run2(ic []int, phaseSettings []int) int {
+// 	channels := make([]chan int, len(phaseSettings))
+// 	ics := make([][]int, len(phaseSettings))
+// 	for i, phaseSetting := range phaseSettings {
+// 		ics[i] = slices.Clone(ic)
+// 		channels[i] = make(chan int)
+// 		channels[i]<-phaseSetting
+// 		if i == 0 {
+// 			channels[i]<-0
+// 		}
+// 		go RunWithInputsAndChannels()
+// 	}
+// 	return 0
+// }

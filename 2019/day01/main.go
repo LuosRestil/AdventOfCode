@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	start := time.Now()
+	defer utils.TrackTime(time.Now())()
 
 	file, err := os.Open("day01/input.txt")
 	if err != nil {
@@ -38,9 +38,6 @@ func main() {
 		total += getFuelReq2(mass)
 	}
 	fmt.Printf("Part 2: %d\n", total)
-
-	elapsed := time.Since(start)
-	fmt.Printf("elapsed: %s\n", elapsed)
 }
 
 func getFuelReq(mass int) int {

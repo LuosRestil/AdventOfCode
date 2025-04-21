@@ -78,7 +78,9 @@ func RunWithInputs(nums []int, inputs []int) []int {
 		case 3: // write from input
 			dest := nums[ptr+1]
 			nums[dest] = inputs[inputIdx]
-			inputIdx++
+			if inputIdx < len(inputs)-1 {
+				inputIdx++
+			}
 			ptr += instructionSizes[3]
 		case 4: // output
 			srcIdx := nums[ptr+1]
@@ -179,4 +181,117 @@ func GetIntcode(filepath string) []int {
 		return num, nil
 	})
 	return instructions
+}
+
+func RunWithChannel(nums []int, in <-chan int, out chan<- int) {
+	ptr := 0
+
+	for {
+		// read at instruction pointer
+		instruction := nums[ptr]
+		// extract opcode and modes
+		instructionData := parseInstruction(instruction)
+		opcode := instructionData.opcode
+		modes := instructionData.modes
+
+		if opcode == 99 {
+			break
+		}
+		switch opcode {
+		case 1: // add
+			in1 := nums[ptr+1]
+			in2 := nums[ptr+2]
+			dest := nums[ptr+3]
+			if modes[0] == position {
+				in1 = nums[in1]
+			}
+			if modes[1] == position {
+				in2 = nums[in2]
+			}
+			nums[dest] = in1 + in2
+			ptr += instructionSizes[1]
+		case 2: // multiply
+			in1 := nums[ptr+1]
+			in2 := nums[ptr+2]
+			if modes[0] == position {
+				in1 = nums[in1]
+			}
+			if modes[1] == position {
+				in2 = nums[in2]
+			}
+			dest := nums[ptr+3]
+			nums[dest] = in1 * in2
+			ptr += instructionSizes[2]
+		case 3: // write from input
+			dest := nums[ptr+1]
+			nums[dest] = <-in
+			ptr += instructionSizes[3]
+		case 4: // output
+			srcIdx := nums[ptr+1]
+			out <- nums[srcIdx]
+			ptr += instructionSizes[4]
+		case 5: //  jump if true
+			in1 := nums[ptr+1]
+			if modes[0] == position {
+				in1 = nums[in1]
+			}
+			if in1 != 0 {
+				in2 := nums[ptr+2]
+				if modes[1] == position {
+					in2 = nums[in2]
+				}
+				ptr = in2
+				break
+			}
+			ptr += instructionSizes[5]
+		case 6: //  jump if false
+			in1 := nums[ptr+1]
+			if modes[0] == position {
+				in1 = nums[in1]
+			}
+			if in1 == 0 {
+				in2 := nums[ptr+2]
+				if modes[1] == position {
+					in2 = nums[in2]
+				}
+				ptr = in2
+				break
+			}
+			ptr += instructionSizes[6]
+		case 7: // less than
+			in1 := nums[ptr+1]
+			if modes[0] == position {
+				in1 = nums[in1]
+			}
+			in2 := nums[ptr+2]
+			if modes[1] == position {
+				in2 = nums[in2]
+			}
+			res := 0
+			if in1 < in2 {
+				res = 1
+			}
+			writeIdx := nums[ptr+3]
+			nums[writeIdx] = res
+			ptr += instructionSizes[7]
+		case 8: // equal
+			in1 := nums[ptr+1]
+			if modes[0] == position {
+				in1 = nums[in1]
+			}
+			in2 := nums[ptr+2]
+			if modes[1] == position {
+				in2 = nums[in2]
+			}
+			res := 0
+			if in1 == in2 {
+				res = 1
+			}
+			writeIdx := nums[ptr+3]
+			nums[writeIdx] = res
+			ptr += instructionSizes[7]
+		default:
+			panic("unsupported opcode")
+		}
+	}
 }
