@@ -31,12 +31,13 @@ var instructionSizes map[int]int = map[int]int{
 }
 
 func Run(nums []int) {
-	RunWithInput(nums, 0)
+	RunWithInputs(nums, []int{0})
 }
 
-func RunWithInput(nums []int, input int) []int {
+func RunWithInputs(nums []int, inputs []int) []int {
 	output := []int{}
 	ptr := 0
+	inputIdx := 0
 
 	for {
 		// read at instruction pointer
@@ -76,7 +77,8 @@ func RunWithInput(nums []int, input int) []int {
 			ptr += instructionSizes[2]
 		case 3: // write from input
 			dest := nums[ptr+1]
-			nums[dest] = input
+			nums[dest] = inputs[inputIdx]
+			inputIdx++
 			ptr += instructionSizes[3]
 		case 4: // output
 			srcIdx := nums[ptr+1]

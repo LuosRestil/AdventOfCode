@@ -5,12 +5,13 @@ import (
 	"aoc2019/utils"
 	"fmt"
 	"time"
+	"slices"
 )
 
 func main() {
 	defer utils.TrackTime(time.Now())()
 
-	ic := intcode.GetIntcode("day07/input.txt")
+	ic := intcode.GetIntcode("day07/sample.txt")
 	phaseSettingPermutations := utils.GetAllPermutations([]int{0, 1, 2, 3, 4})
 	
 	max := 0
@@ -24,5 +25,12 @@ func main() {
 }
 
 func run(ic []int, phaseSettings []int) int {
-	return 0
+	input := 0
+
+	for _, phaseSetting := range phaseSettings {
+		icCpy := slices.Clone(ic)
+		input = intcode.RunWithInputs(icCpy, []int{phaseSetting, input})[0]
+	}
+
+	return input
 }

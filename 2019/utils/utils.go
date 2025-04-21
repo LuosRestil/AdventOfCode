@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"time"
+	"slices"
 )
 
 type Point struct {
@@ -150,8 +151,7 @@ func GetAllPermutations[T any](list []T) [][]T {
 	perms := [][]T{}
 	for i := range list {
 		curr := list[i]
-		others := append([]T{}, list[0:i]...)
-		others = append(others, list[i+1:]...)
+		others := slices.Concat(slices.Clone(list[0:i]), slices.Clone(list[i+1:]))
 		remaining := GetAllPermutations(others)		
 		for _, perm := range remaining {
 			perms = append(perms, append([]T{curr}, perm...))
