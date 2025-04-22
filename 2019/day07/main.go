@@ -13,6 +13,7 @@ func main() {
 	defer utils.TrackTime(time.Now())()
 	ic := intcode.GetIntcode("day07/input.txt")
 	run(ic, utils.GetAllPermutations([]int{0, 1, 2, 3, 4}), 1)
+	run(ic, utils.GetAllPermutations([]int{5, 6, 7, 8, 9}), 2)
 }
 
 func run(ic []int, phaseSettingPermutations [][]int, part int) {
@@ -23,7 +24,7 @@ func run(ic []int, phaseSettingPermutations [][]int, part int) {
 		wg.Add(1)
 		go func(ps []int) {
 			defer wg.Done()
-			res := processPermutation(ic, permutation)
+			res := processPermutation(ic, ps, part)
 			mu.Lock()
 			if res > max {
 				max = res
@@ -35,7 +36,7 @@ func run(ic []int, phaseSettingPermutations [][]int, part int) {
 	fmt.Printf("Part %d: %d\n", part, max)
 }
 
-func processPermutation(ic []int, phaseSettings []int) int {
+func processPermutation(ic []int, phaseSettings []int, part int) int {
 	var wg sync.WaitGroup
 
 	ics := make([][]int, len(phaseSettings))
@@ -43,17 +44,16 @@ func processPermutation(ic []int, phaseSettings []int) int {
 
 	for i := range phaseSettings {
 		ics[i] = slices.Clone(ic)
-		channels[i] = make(chan int)
+		channels[i] = make(chan int, 1)
 	}
+	channels[len(phaseSettings)] = make(chan int)
 
 	for i := range phaseSettings {
 		wg.Add(1)
-		if i == len(phaseSettings)-1 {
-			wg.Add(1)
-		}
 		go func(i int) {
 			defer wg.Done()
-			intcode.RunWithChannels(ics[i], channels[i], channels[(i+1)%len(phaseSettings)])
+			intcode.RunWithChannels(ics[i], channels[i], channels[i+1])
+			close(channels[i+1])
 		}(i)
 	}
 
@@ -62,14 +62,12 @@ func processPermutation(ic []int, phaseSettings []int) int {
 	}
 	channels[0] <- 0
 
-	go func() {
-		wg.Wait()
-		for _, ch := range channels {
-			close(ch)
-		}
-	}()
+	last := 0
+	for v := range channels[len(phaseSettings)] {
+		last = v
+		channels[0]<-v
+	}
 
-	retVal := <-channels[0]
-
-	return retVal
+	wg.Wait()
+	return last
 }
