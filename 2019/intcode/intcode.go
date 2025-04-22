@@ -183,7 +183,7 @@ func GetIntcode(filepath string) []int {
 	return instructions
 }
 
-func RunWithChannel(nums []int, in <-chan int, out chan<- int) {
+func RunWithChannels(nums []int, in <-chan int, out chan<- int, i int) {
 	ptr := 0
 
 	for {

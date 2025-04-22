@@ -5,6 +5,7 @@ import (
 	"aoc2019/utils"
 	"fmt"
 	"slices"
+	// "sync"
 	"time"
 )
 
@@ -25,6 +26,7 @@ func main() {
 
 	// phaseSettingPermutations = utils.GetAllPermutations([]int{5, 6, 7, 8, 9})
 
+	// wg := sync.WaitGroup()
 	// max = 0
 	// for _, phaseSettings := range phaseSettingPermutations {
 	// 	res := run2(ic, phaseSettings)
@@ -36,22 +38,30 @@ func main() {
 }
 
 func run1(ic []int, phaseSettings []int) int {
-	input := 0
-
 	ics := make([][]int, len(phaseSettings))
-	// channels := make([]chan int, len(phaseSettings))
-	for i, phaseSetting := range phaseSettings {
+	channels := make([]chan int, len(phaseSettings) + 1)
+
+	for i := range phaseSettings {
 		ics[i] = slices.Clone(ic)
-		input = intcode.RunWithInputs(ics[i], []int{phaseSetting, input})[0]
+		channels[i] = make(chan int)
+	}
+	channels[len(phaseSettings)] = make(chan int)
+
+	for i := range phaseSettings {
+		go intcode.RunWithChannels(ics[i], channels[i], channels[i + 1], i)
 	}
 
-	// retVal := <- channels[len(phaseSettings) - 1]
-	// for _, ch := range channels {
-	// 	close(ch)
-	// }
+	for i, phaseSetting := range phaseSettings {
+		channels[i] <- phaseSetting
+	}
+	channels[0] <- 0
 
-	// return retVal
-	return input
+	retVal := <-channels[len(phaseSettings)]
+	for _, ch := range channels {
+		close(ch)
+	}
+
+	return retVal
 }
 
 // func run2(ic []int, phaseSettings []int) int {
