@@ -5,41 +5,41 @@ import (
 	"aoc2019/utils"
 	"fmt"
 	"slices"
-	// "sync"
+	"sync"
 	"time"
 )
 
 func main() {
 	defer utils.TrackTime(time.Now())()
-
 	ic := intcode.GetIntcode("day07/input.txt")
-	phaseSettingPermutations := utils.GetAllPermutations([]int{0, 1, 2, 3, 4})
-
-	max := 0
-	for _, phaseSettings := range phaseSettingPermutations {
-		res := run1(ic, phaseSettings)
-		if res > max {
-			max = res
-		}
-	}
-	fmt.Printf("Part 1: %d\n", max)
-
-	// phaseSettingPermutations = utils.GetAllPermutations([]int{5, 6, 7, 8, 9})
-
-	// wg := sync.WaitGroup()
-	// max = 0
-	// for _, phaseSettings := range phaseSettingPermutations {
-	// 	res := run2(ic, phaseSettings)
-	// 	if res > max {
-	// 		max = res
-	// 	}
-	// }
-	// fmt.Printf("Part 2: %d\n", max)
+	run(ic, utils.GetAllPermutations([]int{0, 1, 2, 3, 4}), 1)
 }
 
-func run1(ic []int, phaseSettings []int) int {
+func run(ic []int, phaseSettingPermutations [][]int, part int) {
+	var max int
+	var mu sync.Mutex
+	var wg sync.WaitGroup
+	for _, permutation := range phaseSettingPermutations {
+		wg.Add(1)
+		go func(ps []int) {
+			defer wg.Done()
+			res := processPermutation(ic, permutation)
+			mu.Lock()
+			if res > max {
+				max = res
+			}
+			mu.Unlock()
+		}(permutation)
+	}
+	wg.Wait()
+	fmt.Printf("Part %d: %d\n", part, max)
+}
+
+func processPermutation(ic []int, phaseSettings []int) int {
+	var wg sync.WaitGroup
+
 	ics := make([][]int, len(phaseSettings))
-	channels := make([]chan int, len(phaseSettings) + 1)
+	channels := make([]chan int, len(phaseSettings)+1)
 
 	for i := range phaseSettings {
 		ics[i] = slices.Clone(ic)
@@ -48,7 +48,14 @@ func run1(ic []int, phaseSettings []int) int {
 	channels[len(phaseSettings)] = make(chan int)
 
 	for i := range phaseSettings {
-		go intcode.RunWithChannels(ics[i], channels[i], channels[i + 1], i)
+		wg.Add(1)
+		if i == len(phaseSettings) - 1 {
+			wg.Add(1)
+		}
+		go func(i int) {
+			defer wg.Done()
+			intcode.RunWithChannels(ics[i], channels[i], channels[i + 1])
+		}(i)
 	}
 
 	for i, phaseSetting := range phaseSettings {
@@ -56,25 +63,15 @@ func run1(ic []int, phaseSettings []int) int {
 	}
 	channels[0] <- 0
 
-	retVal := <-channels[len(phaseSettings)]
-	for _, ch := range channels {
-		close(ch)
-	}
+	go func() {
+		wg.Wait()
+		for _, ch := range channels {
+			close(ch)
+		}
+	}()
+
+	outChanIdx := len(channels) - 1
+	retVal := <-channels[outChanIdx]
 
 	return retVal
 }
-
-// func run2(ic []int, phaseSettings []int) int {
-// 	channels := make([]chan int, len(phaseSettings))
-// 	ics := make([][]int, len(phaseSettings))
-// 	for i, phaseSetting := range phaseSettings {
-// 		ics[i] = slices.Clone(ic)
-// 		channels[i] = make(chan int)
-// 		channels[i]<-phaseSetting
-// 		if i == 0 {
-// 			channels[i]<-0
-// 		}
-// 		go RunWithInputsAndChannels()
-// 	}
-// 	return 0
-// }
