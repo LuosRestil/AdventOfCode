@@ -45,16 +45,15 @@ func processPermutation(ic []int, phaseSettings []int) int {
 		ics[i] = slices.Clone(ic)
 		channels[i] = make(chan int)
 	}
-	channels[len(phaseSettings)] = make(chan int)
 
 	for i := range phaseSettings {
 		wg.Add(1)
-		if i == len(phaseSettings) - 1 {
+		if i == len(phaseSettings)-1 {
 			wg.Add(1)
 		}
 		go func(i int) {
 			defer wg.Done()
-			intcode.RunWithChannels(ics[i], channels[i], channels[i + 1])
+			intcode.RunWithChannels(ics[i], channels[i], channels[(i+1)%len(phaseSettings)])
 		}(i)
 	}
 
@@ -70,8 +69,7 @@ func processPermutation(ic []int, phaseSettings []int) int {
 		}
 	}()
 
-	outChanIdx := len(channels) - 1
-	retVal := <-channels[outChanIdx]
+	retVal := <-channels[0]
 
 	return retVal
 }
