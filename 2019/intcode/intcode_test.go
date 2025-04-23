@@ -28,48 +28,48 @@ func TestParseInstruction2(t *testing.T) {
 }
 
 func TestRunWithInput_5_2_1(t *testing.T) {
-	ic := []int{3, 9, 8, 9, 10, 9, 4, 9, 99, -1, 8}
-	eq8 := RunWithInputs(ic, []int{8})[0]
+	ic := []int64{3, 9, 8, 9, 10, 9, 4, 9, 99, -1, 8}
+	eq8 := RunWithInputs(ic, []int64{8})[0]
 	if eq8 != 1 {
 		t.Errorf("expected 1; actual; %d", eq8)
 	}
-	neq8 := RunWithInputs(ic, []int{9})[0]
+	neq8 := RunWithInputs(ic, []int64{9})[0]
 	if neq8 != 0 {
 		t.Errorf("expected 0; actual %d", neq8)
 	}
 }
 
 func TestRunWithInput_5_2_2(t *testing.T) {
-	ic := []int{3, 3, 1108, -1, 8, 3, 4, 3, 99}
-	eq8 := RunWithInputs(ic, []int{8})[0]
+	ic := []int64{3, 3, 1108, -1, 8, 3, 4, 3, 99}
+	eq8 := RunWithInputs(ic, []int64{8})[0]
 	if eq8 != 1 {
 		t.Errorf("expected 1; actual; %d", eq8)
 	}
-	neq8 := RunWithInputs(ic, []int{9})[0]
+	neq8 := RunWithInputs(ic, []int64{9})[0]
 	if neq8 != 0 {
 		t.Errorf("expected 0; actual %d", neq8)
 	}
 }
 
 func TestRunWithInput_5_2_3(t *testing.T) {
-	ic := []int{3, 9, 7, 9, 10, 9, 4, 9, 99, -1, 8}
-	lt8 := RunWithInputs(ic, []int{7})[0]
+	ic := []int64{3, 9, 7, 9, 10, 9, 4, 9, 99, -1, 8}
+	lt8 := RunWithInputs(ic, []int64{7})[0]
 	if lt8 != 1 {
 		t.Errorf("expected 1; actual; %d", lt8)
 	}
-	nlt8 := RunWithInputs(ic, []int{9})[0]
+	nlt8 := RunWithInputs(ic, []int64{9})[0]
 	if nlt8 != 0 {
 		t.Errorf("expected 0; actual %d", nlt8)
 	}
 }
 
 func TestRunWithInput_5_2_4(t *testing.T) {
-	ic := []int{3, 3, 1107, -1, 8, 3, 4, 3, 99}
-	lt8 := RunWithInputs(ic, []int{7})[0]
+	ic := []int64{3, 3, 1107, -1, 8, 3, 4, 3, 99}
+	lt8 := RunWithInputs(ic, []int64{7})[0]
 	if lt8 != 1 {
 		t.Errorf("expected 1; actual; %d", lt8)
 	}
-	nlt8 := RunWithInputs(ic, []int{9})[0]
+	nlt8 := RunWithInputs(ic, []int64{9})[0]
 	if nlt8 != 0 {
 		t.Errorf("expected 0; actual %d", nlt8)
 	}
@@ -77,14 +77,14 @@ func TestRunWithInput_5_2_4(t *testing.T) {
 
 func TestRun_2(t *testing.T) {
 	tests := []struct {
-		input    []int
-		expected int
+		input    []int64
+		expected int64
 	}{
-		{[]int{1, 9, 10, 3, 2, 3, 11, 0, 99, 30, 40, 50}, 3500},
-		{[]int{1, 0, 0, 0, 99}, 2},
-		{[]int{2, 3, 0, 3, 99}, 2},
-		{[]int{2, 4, 4, 5, 99, 0}, 2},
-		{[]int{1, 1, 1, 4, 99, 5, 6, 0, 99}, 30},
+		{[]int64{1, 9, 10, 3, 2, 3, 11, 0, 99, 30, 40, 50}, 3500},
+		{[]int64{1, 0, 0, 0, 99}, 2},
+		{[]int64{2, 3, 0, 3, 99}, 2},
+		{[]int64{2, 4, 4, 5, 99, 0}, 2},
+		{[]int64{1, 1, 1, 4, 99, 5, 6, 0, 99}, 30},
 	}
 
 	for _, test := range tests {

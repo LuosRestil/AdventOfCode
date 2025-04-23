@@ -21,13 +21,13 @@ func main() {
 
 	fmt.Printf("Part 1: %d\n", cpy[0])
 
-	target := 19690720
+	var target int64 = 19690720
 end:
 	for i := 0; i <= 99; i++ {
 		for j := 0; j <= 99; j++ {
 			cpy = slices.Clone(ic[:])
-			cpy[1] = i
-			cpy[2] = j
+			cpy[1] = int64(i)
+			cpy[2] = int64(j)
 			intcode.Run(cpy)
 			if cpy[0] == target {
 				ans := 100*i + j

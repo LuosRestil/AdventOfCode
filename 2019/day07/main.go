@@ -16,8 +16,8 @@ func main() {
 	run(ic, utils.GetAllPermutations([]int{5, 6, 7, 8, 9}), 2)
 }
 
-func run(ic []int, phaseSettingPermutations [][]int, part int) {
-	var max int
+func run(ic []int64, phaseSettingPermutations [][]int, part int) {
+	var max int64
 	var mu sync.Mutex
 	var wg sync.WaitGroup
 	for _, permutation := range phaseSettingPermutations {
@@ -36,17 +36,17 @@ func run(ic []int, phaseSettingPermutations [][]int, part int) {
 	fmt.Printf("Part %d: %d\n", part, max)
 }
 
-func processPermutation(ic []int, phaseSettings []int, part int) int {
+func processPermutation(ic []int64, phaseSettings []int, part int) int64 {
 	var wg sync.WaitGroup
 
-	ics := make([][]int, len(phaseSettings))
-	channels := make([]chan int, len(phaseSettings)+1)
+	ics := make([][]int64, len(phaseSettings))
+	channels := make([]chan int64, len(phaseSettings)+1)
 
 	for i := range phaseSettings {
 		ics[i] = slices.Clone(ic)
-		channels[i] = make(chan int, 1)
+		channels[i] = make(chan int64, 1)
 	}
-	channels[len(phaseSettings)] = make(chan int)
+	channels[len(phaseSettings)] = make(chan int64)
 
 	for i := range phaseSettings {
 		wg.Add(1)
@@ -58,11 +58,11 @@ func processPermutation(ic []int, phaseSettings []int, part int) int {
 	}
 
 	for i, phaseSetting := range phaseSettings {
-		channels[i] <- phaseSetting
+		channels[i] <- int64(phaseSetting)
 	}
 	channels[0] <- 0
 
-	last := 0
+	var last int64 = 0
 	for v := range channels[len(phaseSettings)] {
 		last = v
 		channels[0]<-v
