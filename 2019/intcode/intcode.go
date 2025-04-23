@@ -12,6 +12,7 @@ type intcodeMode = int
 const (
 	position intcodeMode = iota
 	immediate
+	relative
 )
 
 type instructionData struct {
@@ -28,20 +29,23 @@ var instructionSizes map[int]int = map[int]int{
 	6: 3,
 	7: 4,
 	8: 4,
+	9: 2,
 }
 
 func Run(nums []int) {
 	RunWithInputs(nums, []int{0})
 }
 
-func RunWithInputs(nums []int, inputs []int) []int {
+// TODO add support for int64 and addresses beyond length of nums
+func RunWithInputs(ic []int, inputs []int) []int {
 	output := []int{}
 	ptr := 0
 	inputIdx := 0
+	relativeBase := 0
 
 	for {
 		// read at instruction pointer
-		instruction := nums[ptr]
+		instruction := ic[ptr]
 		// extract opcode and modes
 		instructionData := parseInstruction(instruction)
 		opcode := instructionData.opcode
@@ -52,100 +56,133 @@ func RunWithInputs(nums []int, inputs []int) []int {
 		}
 		switch opcode {
 		case 1: // add
-			in1 := nums[ptr+1]
-			in2 := nums[ptr+2]
-			dest := nums[ptr+3]
+			in1 := ic[ptr+1]
+			in2 := ic[ptr+2]
+			dest := ic[ptr+3]
 			if modes[0] == position {
-				in1 = nums[in1]
+				in1 = ic[in1]
+			} else if modes[0] == relative {
+				in1 = ic[in1+relativeBase]
 			}
 			if modes[1] == position {
-				in2 = nums[in2]
+				in2 = ic[in2]
+			} else if modes[1] == relative {
+				in2 = ic[in2+relativeBase]
 			}
-			nums[dest] = in1 + in2
+			ic[dest] = in1 + in2
 			ptr += instructionSizes[1]
 		case 2: // multiply
-			in1 := nums[ptr+1]
-			in2 := nums[ptr+2]
+			in1 := ic[ptr+1]
+			in2 := ic[ptr+2]
 			if modes[0] == position {
-				in1 = nums[in1]
+				in1 = ic[in1]
+			} else if modes[0] == relative {
+				in1 = ic[in1+relativeBase]
 			}
 			if modes[1] == position {
-				in2 = nums[in2]
+				in2 = ic[in2]
+			} else if modes[1] == relative {
+				in2 = ic[in2+relativeBase]
 			}
-			dest := nums[ptr+3]
-			nums[dest] = in1 * in2
+			dest := ic[ptr+3]
+			ic[dest] = in1 * in2
 			ptr += instructionSizes[2]
 		case 3: // write from input
-			dest := nums[ptr+1]
-			nums[dest] = inputs[inputIdx]
+			dest := ic[ptr+1]
+			ic[dest] = inputs[inputIdx]
 			if inputIdx < len(inputs)-1 {
 				inputIdx++
 			}
 			ptr += instructionSizes[3]
 		case 4: // output
-			srcIdx := nums[ptr+1]
-			output = append(output, nums[srcIdx])
+			srcIdx := ic[ptr+1]
+			output = append(output, ic[srcIdx])
 			ptr += instructionSizes[4]
 		case 5: //  jump if true
-			in1 := nums[ptr+1]
+			in1 := ic[ptr+1]
 			if modes[0] == position {
-				in1 = nums[in1]
+				in1 = ic[in1]
+			} else if modes[0] == relative {
+				in1 = ic[in1+relativeBase]
 			}
 			if in1 != 0 {
-				in2 := nums[ptr+2]
+				in2 := ic[ptr+2]
 				if modes[1] == position {
-					in2 = nums[in2]
+					in2 = ic[in2]
+				} else if modes[1] == relative {
+					in2 = ic[in2+relativeBase]
 				}
 				ptr = in2
 				break
 			}
 			ptr += instructionSizes[5]
 		case 6: //  jump if false
-			in1 := nums[ptr+1]
+			in1 := ic[ptr+1]
 			if modes[0] == position {
-				in1 = nums[in1]
+				in1 = ic[in1]
+			} else if modes[0] == relative {
+				in1 = ic[in1+relativeBase]
 			}
 			if in1 == 0 {
-				in2 := nums[ptr+2]
+				in2 := ic[ptr+2]
 				if modes[1] == position {
-					in2 = nums[in2]
+					in2 = ic[in2]
+				} else if modes[1] == relative {
+					in2 = ic[in2+relativeBase]
 				}
 				ptr = in2
 				break
 			}
 			ptr += instructionSizes[6]
 		case 7: // less than
-			in1 := nums[ptr+1]
+			in1 := ic[ptr+1]
 			if modes[0] == position {
-				in1 = nums[in1]
+				in1 = ic[in1]
+			} else if modes[0] == relative {
+				in1 = ic[in1+relative]
 			}
-			in2 := nums[ptr+2]
+			in2 := ic[ptr+2]
 			if modes[1] == position {
-				in2 = nums[in2]
+				in2 = ic[in2]
+			} else if modes[1] == relative {
+				in2 = ic[in1+relative]
 			}
 			res := 0
 			if in1 < in2 {
 				res = 1
 			}
-			writeIdx := nums[ptr+3]
-			nums[writeIdx] = res
+			writeIdx := ic[ptr+3]
+			ic[writeIdx] = res
 			ptr += instructionSizes[7]
 		case 8: // equal
-			in1 := nums[ptr+1]
+			in1 := ic[ptr+1]
 			if modes[0] == position {
-				in1 = nums[in1]
+				in1 = ic[in1]
+			} else if modes[0] == relative {
+				in1 = ic[in1+relativeBase]
 			}
-			in2 := nums[ptr+2]
+			in2 := ic[ptr+2]
 			if modes[1] == position {
-				in2 = nums[in2]
+				in2 = ic[in2]
+			} else if modes[1] == relative {
+				in2 = ic[in2+relativeBase]
 			}
 			res := 0
 			if in1 == in2 {
 				res = 1
 			}
-			writeIdx := nums[ptr+3]
-			nums[writeIdx] = res
-			ptr += instructionSizes[7]
+			writeIdx := ic[ptr+3]
+			ic[writeIdx] = res
+			ptr += instructionSizes[8]
+		case 9: // adjust relative base
+			in := ic[ptr+1]
+			if modes[0] == position {
+				in = ic[in]
+			} else if modes[1] == relative {
+				in = ic[in+relativeBase]
+			}
+			relativeBase += in
+			ptr += instructionSizes[9]
 		default:
 			panic("unsupported opcode")
 		}
