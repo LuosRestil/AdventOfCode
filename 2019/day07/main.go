@@ -24,7 +24,7 @@ func run(ic []int64, phaseSettingPermutations [][]int, part int) {
 		wg.Add(1)
 		go func(ps []int) {
 			defer wg.Done()
-			res := processPermutation(ic, ps, part)
+			res := processPermutation(ic, ps)
 			mu.Lock()
 			if res > max {
 				max = res
@@ -36,7 +36,7 @@ func run(ic []int64, phaseSettingPermutations [][]int, part int) {
 	fmt.Printf("Part %d: %d\n", part, max)
 }
 
-func processPermutation(ic []int64, phaseSettings []int, part int) int64 {
+func processPermutation(ic []int64, phaseSettings []int) int64 {
 	var wg sync.WaitGroup
 
 	ics := make([][]int64, len(phaseSettings))
