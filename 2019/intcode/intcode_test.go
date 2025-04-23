@@ -27,13 +27,13 @@ func TestParseInstruction2(t *testing.T) {
 	}
 }
 
-func TestRunWithInput_5_2_1(t *testing.T) {
+func TestRunSimple_5_2_1(t *testing.T) {
 	ic := []int64{3, 9, 8, 9, 10, 9, 4, 9, 99, -1, 8}
-	eq8 := RunWithInputs(ic, []int64{8})[0]
+	eq8 := RunSimple(ic, []int64{8}, make(chan int64), make(chan int64))[0]
 	if eq8 != 1 {
 		t.Errorf("expected 1; actual; %d", eq8)
 	}
-	neq8 := RunWithInputs(ic, []int64{9})[0]
+	neq8 := RunSimple(ic, []int64{9}, make(chan int64), make(chan int64))[0]
 	if neq8 != 0 {
 		t.Errorf("expected 0; actual %d", neq8)
 	}
@@ -41,11 +41,11 @@ func TestRunWithInput_5_2_1(t *testing.T) {
 
 func TestRunWithInput_5_2_2(t *testing.T) {
 	ic := []int64{3, 3, 1108, -1, 8, 3, 4, 3, 99}
-	eq8 := RunWithInputs(ic, []int64{8})[0]
+	eq8 := RunSimple(ic, []int64{8}, make(chan int64), make(chan int64))[0]
 	if eq8 != 1 {
 		t.Errorf("expected 1; actual; %d", eq8)
 	}
-	neq8 := RunWithInputs(ic, []int64{9})[0]
+	neq8 := RunSimple(ic, []int64{9}, make(chan int64), make(chan int64))[0]
 	if neq8 != 0 {
 		t.Errorf("expected 0; actual %d", neq8)
 	}
@@ -53,11 +53,11 @@ func TestRunWithInput_5_2_2(t *testing.T) {
 
 func TestRunWithInput_5_2_3(t *testing.T) {
 	ic := []int64{3, 9, 7, 9, 10, 9, 4, 9, 99, -1, 8}
-	lt8 := RunWithInputs(ic, []int64{7})[0]
+	lt8 := RunSimple(ic, []int64{7}, make(chan int64), make(chan int64))[0]
 	if lt8 != 1 {
 		t.Errorf("expected 1; actual; %d", lt8)
 	}
-	nlt8 := RunWithInputs(ic, []int64{9})[0]
+	nlt8 := RunSimple(ic, []int64{9}, make(chan int64), make(chan int64))[0]
 	if nlt8 != 0 {
 		t.Errorf("expected 0; actual %d", nlt8)
 	}
@@ -65,17 +65,17 @@ func TestRunWithInput_5_2_3(t *testing.T) {
 
 func TestRunWithInput_5_2_4(t *testing.T) {
 	ic := []int64{3, 3, 1107, -1, 8, 3, 4, 3, 99}
-	lt8 := RunWithInputs(ic, []int64{7})[0]
+	lt8 := RunSimple(ic, []int64{7}, make(chan int64), make(chan int64))[0]
 	if lt8 != 1 {
 		t.Errorf("expected 1; actual; %d", lt8)
 	}
-	nlt8 := RunWithInputs(ic, []int64{9})[0]
+	nlt8 := RunSimple(ic, []int64{9}, make(chan int64), make(chan int64))[0]
 	if nlt8 != 0 {
 		t.Errorf("expected 0; actual %d", nlt8)
 	}
 }
 
-func TestRun_2(t *testing.T) {
+func TestRunSimple_2(t *testing.T) {
 	tests := []struct {
 		input    []int64
 		expected int64
@@ -88,7 +88,7 @@ func TestRun_2(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		Run(test.input)
+		RunSimple(test.input, []int64{}, make(chan int64), make(chan int64))
 		if test.input[0] != test.expected {
 			t.Errorf(
 				"actual %d; expected %d",

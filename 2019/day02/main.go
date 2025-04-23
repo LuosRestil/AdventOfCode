@@ -17,7 +17,7 @@ func main() {
 	cpy[1] = 12
 	cpy[2] = 2
 
-	intcode.Run(cpy)
+	intcode.RunSimple(cpy, []int64{}, make(chan int64), make(chan int64))
 
 	fmt.Printf("Part 1: %d\n", cpy[0])
 
@@ -28,7 +28,7 @@ end:
 			cpy = slices.Clone(ic[:])
 			cpy[1] = int64(i)
 			cpy[2] = int64(j)
-			intcode.Run(cpy)
+			intcode.RunSimple(cpy, []int64{}, make(chan int64), make(chan int64))
 			if cpy[0] == target {
 				ans := 100*i + j
 				fmt.Printf("Part 2: %d\n", ans)
