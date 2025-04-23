@@ -56,34 +56,14 @@ func RunWithInputs(ic []int, inputs []int) []int {
 		}
 		switch opcode {
 		case 1: // add
-			in1 := ic[ptr+1]
-			in2 := ic[ptr+2]
+			in1 := getInputValue(ic, ptr+1, modes[0], relativeBase)
+			in2 := getInputValue(ic, ptr+2, modes[1], relativeBase)
 			dest := ic[ptr+3]
-			if modes[0] == position {
-				in1 = ic[in1]
-			} else if modes[0] == relative {
-				in1 = ic[in1+relativeBase]
-			}
-			if modes[1] == position {
-				in2 = ic[in2]
-			} else if modes[1] == relative {
-				in2 = ic[in2+relativeBase]
-			}
 			ic[dest] = in1 + in2
 			ptr += instructionSizes[1]
 		case 2: // multiply
-			in1 := ic[ptr+1]
-			in2 := ic[ptr+2]
-			if modes[0] == position {
-				in1 = ic[in1]
-			} else if modes[0] == relative {
-				in1 = ic[in1+relativeBase]
-			}
-			if modes[1] == position {
-				in2 = ic[in2]
-			} else if modes[1] == relative {
-				in2 = ic[in2+relativeBase]
-			}
+			in1 := getInputValue(ic, ptr+1, modes[0], relativeBase)
+			in2 := getInputValue(ic, ptr+2, modes[1], relativeBase)
 			dest := ic[ptr+3]
 			ic[dest] = in1 * in2
 			ptr += instructionSizes[2]
@@ -99,54 +79,24 @@ func RunWithInputs(ic []int, inputs []int) []int {
 			output = append(output, ic[srcIdx])
 			ptr += instructionSizes[4]
 		case 5: //  jump if true
-			in1 := ic[ptr+1]
-			if modes[0] == position {
-				in1 = ic[in1]
-			} else if modes[0] == relative {
-				in1 = ic[in1+relativeBase]
-			}
+			in1 := getInputValue(ic, ptr+1, modes[0], relativeBase)
 			if in1 != 0 {
-				in2 := ic[ptr+2]
-				if modes[1] == position {
-					in2 = ic[in2]
-				} else if modes[1] == relative {
-					in2 = ic[in2+relativeBase]
-				}
+				in2 := getInputValue(ic, ptr+2, modes[1], relativeBase)
 				ptr = in2
 				break
 			}
 			ptr += instructionSizes[5]
 		case 6: //  jump if false
-			in1 := ic[ptr+1]
-			if modes[0] == position {
-				in1 = ic[in1]
-			} else if modes[0] == relative {
-				in1 = ic[in1+relativeBase]
-			}
+			in1 := getInputValue(ic, ptr+1, modes[0], relativeBase)
 			if in1 == 0 {
-				in2 := ic[ptr+2]
-				if modes[1] == position {
-					in2 = ic[in2]
-				} else if modes[1] == relative {
-					in2 = ic[in2+relativeBase]
-				}
+				in2 := getInputValue(ic, ptr+2, modes[1], relativeBase)
 				ptr = in2
 				break
 			}
 			ptr += instructionSizes[6]
 		case 7: // less than
-			in1 := ic[ptr+1]
-			if modes[0] == position {
-				in1 = ic[in1]
-			} else if modes[0] == relative {
-				in1 = ic[in1+relative]
-			}
-			in2 := ic[ptr+2]
-			if modes[1] == position {
-				in2 = ic[in2]
-			} else if modes[1] == relative {
-				in2 = ic[in1+relative]
-			}
+			in1 := getInputValue(ic, ptr+1, modes[0], relativeBase)
+			in2 := getInputValue(ic, ptr+2, modes[1], relativeBase)
 			res := 0
 			if in1 < in2 {
 				res = 1
@@ -155,18 +105,8 @@ func RunWithInputs(ic []int, inputs []int) []int {
 			ic[writeIdx] = res
 			ptr += instructionSizes[7]
 		case 8: // equal
-			in1 := ic[ptr+1]
-			if modes[0] == position {
-				in1 = ic[in1]
-			} else if modes[0] == relative {
-				in1 = ic[in1+relativeBase]
-			}
-			in2 := ic[ptr+2]
-			if modes[1] == position {
-				in2 = ic[in2]
-			} else if modes[1] == relative {
-				in2 = ic[in2+relativeBase]
-			}
+			in1 := getInputValue(ic, ptr+1, modes[0], relativeBase)
+			in2 := getInputValue(ic, ptr+2, modes[1], relativeBase)
 			res := 0
 			if in1 == in2 {
 				res = 1
@@ -175,12 +115,7 @@ func RunWithInputs(ic []int, inputs []int) []int {
 			ic[writeIdx] = res
 			ptr += instructionSizes[8]
 		case 9: // adjust relative base
-			in := ic[ptr+1]
-			if modes[0] == position {
-				in = ic[in]
-			} else if modes[1] == relative {
-				in = ic[in+relativeBase]
-			}
+			in := getInputValue(ic, ptr+1, modes[0], relativeBase)
 			relativeBase += in
 			ptr += instructionSizes[9]
 		default:
@@ -188,6 +123,16 @@ func RunWithInputs(ic []int, inputs []int) []int {
 		}
 	}
 	return output
+}
+
+func getInputValue(ic []int, idx int, mode intcodeMode, relativeBase int) int {
+	in := ic[idx]
+	if mode == position {
+		in = ic[in]
+	} else if mode == relative {
+		in = ic[in+relativeBase]
+	}
+	return in
 }
 
 func parseInstruction(instruction int) instructionData {
