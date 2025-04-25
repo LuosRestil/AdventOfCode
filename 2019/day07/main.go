@@ -4,7 +4,7 @@ import (
 	"aoc2019/intcode"
 	"aoc2019/utils"
 	"fmt"
-	"slices"
+	"maps"
 	"sync"
 	"time"
 )
@@ -16,7 +16,7 @@ func main() {
 	run(ic, utils.GetAllPermutations([]int{5, 6, 7, 8, 9}), 2)
 }
 
-func run(ic []int64, phaseSettingPermutations [][]int, part int) {
+func run(ic map[int64]int64, phaseSettingPermutations [][]int, part int) {
 	var max int64
 	var mu sync.Mutex
 	var wg sync.WaitGroup
@@ -36,14 +36,14 @@ func run(ic []int64, phaseSettingPermutations [][]int, part int) {
 	fmt.Printf("Part %d: %d\n", part, max)
 }
 
-func processPermutation(ic []int64, phaseSettings []int) int64 {
+func processPermutation(ic map[int64]int64, phaseSettings []int) int64 {
 	var wg sync.WaitGroup
 
-	ics := make([][]int64, len(phaseSettings))
+	ics := make([]map[int64]int64, len(phaseSettings))
 	channels := make([]chan int64, len(phaseSettings)+1)
 
 	for i := range phaseSettings {
-		ics[i] = slices.Clone(ic)
+		ics[i] = maps.Clone(ic)
 		channels[i] = make(chan int64, 1)
 	}
 	channels[len(phaseSettings)] = make(chan int64)
@@ -65,7 +65,7 @@ func processPermutation(ic []int64, phaseSettings []int) int64 {
 	var last int64 = 0
 	for v := range channels[len(phaseSettings)] {
 		last = v
-		channels[0]<-v
+		channels[0] <- v
 	}
 
 	wg.Wait()

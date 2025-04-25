@@ -4,7 +4,7 @@ import (
 	"aoc2019/intcode"
 	"aoc2019/utils"
 	"fmt"
-	"slices"
+	"maps"
 	"time"
 )
 
@@ -13,8 +13,8 @@ func main() {
 
 	filepath := "day05/input.txt"
 	ic := intcode.GetIntcode(filepath)
-	res := intcode.RunSimple(slices.Clone(ic[:]), []int64{1}, make(chan int64), make(chan int64))
+	res := intcode.RunSimple(maps.Clone(ic), []int64{1}, make(chan int64), make(chan int64))
 	fmt.Printf("Part 1: %v\n", res)
-	res = intcode.RunSimple(slices.Clone(ic[:]), []int64{5}, make(chan int64), make(chan int64))
+	res = intcode.RunSimple(maps.Clone(ic), []int64{5}, make(chan int64), make(chan int64))
 	fmt.Printf("Part 2: %v\n", res)
 }

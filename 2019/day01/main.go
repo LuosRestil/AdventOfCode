@@ -41,7 +41,7 @@ func main() {
 }
 
 func getFuelReq(mass int) int {
-	return mass / 3 - 2
+	return mass/3 - 2
 }
 
 func getFuelReq2(mass int) int {
