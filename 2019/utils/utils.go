@@ -166,4 +166,16 @@ func TrackTime(start time.Time) func() {
 	}
 }
 
+type IntConstraint interface {
+	int | int8 | int16 | int32 | int64
+}
+
+func SliceToMap[T IntConstraint, U any](s []U) map[T]U {
+	m := make(map[T]U)
+	for i, v := range s {
+		m[T(i)] = v
+	}
+	return m
+}
+
 // TODO linked list, queue, stack

@@ -19,7 +19,7 @@ type instructionData struct {
 	modes  []int
 }
 
-var instructionSizes map[int]int = map[int]int{
+var instructionSizes map[int64]int64 = map[int64]int64{
 	1: 4,
 	2: 4,
 	3: 2,
@@ -31,14 +31,22 @@ var instructionSizes map[int]int = map[int]int{
 	9: 2,
 }
 
-func getInputValue(ic map[int64]int64, idx int, mode intcodeMode, relativeBase int64) int64 {
-	in := ic[int64(idx)]
+func getInputValue(ic map[int64]int64, idx int64, mode intcodeMode, relativeBase int64) int64 {
+	in := ic[idx]
 	if mode == position {
 		in = ic[in]
 	} else if mode == relative {
 		in = ic[in+relativeBase]
 	}
 	return in
+}
+
+func getWriteIdx(ic map[int64]int64, idx int64, mode intcodeMode, relativeBase int64) int64 {
+	res := ic[idx]
+	if mode == relative {
+		res += relativeBase
+	}
+	return res
 }
 
 func parseInstruction(instruction int64) instructionData {
@@ -51,7 +59,7 @@ func parseInstruction(instruction int64) instructionData {
 		modes = append(modes, int(instruction%10))
 		instruction /= 10
 	}
-	toPad := instructionSizes[int(opcode)] - len(modes) - 1
+	toPad := instructionSizes[opcode] - int64(len(modes)) - 1
 	for range toPad {
 		modes = append(modes, 0)
 	}
@@ -88,7 +96,7 @@ func RunSimple(ic map[int64]int64, inputs []int64, inChan chan int64, outChan ch
 }
 
 func Run(ic map[int64]int64, in <-chan int64, out chan<- int64) {
-	ptr := 0
+	var ptr int64 = 0
 	var relativeBase int64 = 0
 
 	for {
@@ -106,28 +114,27 @@ func Run(ic map[int64]int64, in <-chan int64, out chan<- int64) {
 		case 1: // add
 			in1 := getInputValue(ic, ptr+1, modes[0], relativeBase)
 			in2 := getInputValue(ic, ptr+2, modes[1], relativeBase)
-			dest := ic[int64(ptr+3)]
+			dest := getWriteIdx(ic, ptr+3, modes[2], relativeBase)
 			ic[dest] = in1 + in2
 			ptr += instructionSizes[1]
 		case 2: // multiply
 			in1 := getInputValue(ic, ptr+1, modes[0], relativeBase)
 			in2 := getInputValue(ic, ptr+2, modes[1], relativeBase)
-			dest := ic[int64(ptr+3)]
+			dest := getWriteIdx(ic, ptr+3, modes[2], relativeBase)
 			ic[dest] = in1 * in2
 			ptr += instructionSizes[2]
 		case 3: // write from input
-			srcIdx := ic[int64(ptr+1)]
-			ic[srcIdx] = <-in
+			dest := getWriteIdx(ic, ptr+1, modes[0], relativeBase)
+			ic[dest] = <-in
 			ptr += instructionSizes[3]
 		case 4: // output
-			srcIdx := ic[int64(ptr+1)]
-			out <- ic[srcIdx]
+			out <- getInputValue(ic, ptr+1, modes[0], relativeBase)
 			ptr += instructionSizes[4]
 		case 5: //  jump if true
 			in1 := getInputValue(ic, ptr+1, modes[0], relativeBase)
 			if in1 != 0 {
 				in2 := getInputValue(ic, ptr+2, modes[1], relativeBase)
-				ptr = int(in2)
+				ptr = in2
 				break
 			}
 			ptr += instructionSizes[5]
@@ -135,7 +142,7 @@ func Run(ic map[int64]int64, in <-chan int64, out chan<- int64) {
 			in1 := getInputValue(ic, ptr+1, modes[0], relativeBase)
 			if in1 == 0 {
 				in2 := getInputValue(ic, ptr+2, modes[1], relativeBase)
-				ptr = int(in2)
+				ptr = in2
 				break
 			}
 			ptr += instructionSizes[6]
@@ -146,8 +153,8 @@ func Run(ic map[int64]int64, in <-chan int64, out chan<- int64) {
 			if in1 < in2 {
 				res = 1
 			}
-			writeIdx := ic[int64(ptr+3)]
-			ic[writeIdx] = int64(res)
+			dest := getWriteIdx(ic, ptr+3, modes[2], relativeBase)
+			ic[dest] = int64(res)
 			ptr += instructionSizes[7]
 		case 8: // equal
 			in1 := getInputValue(ic, ptr+1, modes[0], relativeBase)
@@ -156,8 +163,8 @@ func Run(ic map[int64]int64, in <-chan int64, out chan<- int64) {
 			if in1 == in2 {
 				res = 1
 			}
-			writeIdx := ic[int64(ptr+3)]
-			ic[writeIdx] = int64(res)
+			dest := getWriteIdx(ic, ptr+3, modes[2], relativeBase)
+			ic[dest] = int64(res)
 			ptr += instructionSizes[8]
 		case 9: // adjust relative base
 			in := getInputValue(ic, ptr+1, modes[0], relativeBase)
