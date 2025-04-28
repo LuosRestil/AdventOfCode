@@ -88,7 +88,7 @@ func main() {
 		asteroidList := asteroidsMap[angle]
 		if len(asteroidList) > 0 {
 			last = asteroidList[0]
-			asteroidList = asteroidList[1:]
+			asteroidsMap[angle] = asteroidList[1:]
 			zapCount++
 		}
 		i++
