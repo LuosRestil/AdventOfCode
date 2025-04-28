@@ -7,6 +7,7 @@ import (
 	"os"
 	"slices"
 	"strings"
+	"time"
 )
 
 type coord struct {
@@ -20,6 +21,8 @@ type asteroid struct {
 }
 
 func main() {
+	defer utils.TrackTime(time.Now())()
+
 	bytes, err := os.ReadFile("day10/input.txt")
 	if err != nil {
 		panic("failed to read file")
