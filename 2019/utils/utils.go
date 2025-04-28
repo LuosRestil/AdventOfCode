@@ -170,12 +170,29 @@ type IntConstraint interface {
 	int | int8 | int16 | int32 | int64
 }
 
+// Turns a slice into a map having keys equal to the slice's indices
 func SliceToMap[T IntConstraint, U any](s []U) map[T]U {
 	m := make(map[T]U)
 	for i, v := range s {
 		m[T(i)] = v
 	}
 	return m
+}
+
+func SliceToSet[T comparable](s []T) map[T]struct{} {
+	m := make(map[T]struct{})
+	for _, v := range s {
+		m[v] = struct{}{}
+	}
+	return m
+}
+
+func GetKeys[T comparable, U any](m map[T]U) []T {
+	res := make([]T, 0, len(m))
+	for k := range m {
+		res = append(res, k)
+	}
+	return res
 }
 
 // TODO linked list, queue, stack
