@@ -195,4 +195,15 @@ func GetKeys[T comparable, U any](m map[T]U) []T {
 	return res
 }
 
+func GCD(a int64, b int64) int64 {
+	for b > 0 {
+		a, b = b, a % b
+	}
+	return a
+}
+
+func LCM(a int64, b int64) int64 {
+	return (a * b) / GCD(a, b)
+}
+
 // TODO linked list, queue, stack
