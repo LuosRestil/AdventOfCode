@@ -52,7 +52,7 @@ func processPermutation(ic map[int64]int64, phaseSettings []int) int64 {
 		wg.Add(1)
 		go func(i int) {
 			defer wg.Done()
-			intcode.Run(ics[i], channels[i], channels[i+1])
+			intcode.Run(ics[i], channels[i], channels[i+1], false)
 			close(channels[i+1])
 		}(i)
 	}

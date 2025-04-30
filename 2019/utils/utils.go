@@ -206,4 +206,32 @@ func LCM(a int64, b int64) int64 {
 	return (a * b) / GCD(a, b)
 }
 
-// TODO linked list, queue, stack
+type Queue[T any] struct {
+	content []T
+}
+
+func NewQueue[T any]() Queue[T] {
+	return Queue[T]{
+		content: []T{},
+	}
+}
+
+func (q *Queue[T]) Add(val T) {
+	q.content = append(q.content, val)
+}
+
+func (q *Queue[T]) PopFront() T {
+	val := q.content[0]
+	q.content = q.content[1:]
+	return val
+}
+
+func (q *Queue[T]) PopEnd() T {
+	val := q.content[len(q.content) - 1]
+	q.content = q.content[:len(q.content)-1]
+	return val
+}
+
+func (q *Queue[T]) Size() int {
+	return len(q.content)
+}
