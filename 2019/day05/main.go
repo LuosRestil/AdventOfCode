@@ -13,8 +13,10 @@ func main() {
 
 	filepath := "day05/input.txt"
 	ic := intcode.GetIntcode(filepath)
-	res := intcode.RunSimple(maps.Clone(ic), []int64{1}, make(chan int64), make(chan int64))
-	fmt.Printf("Part 1: %v\n", res)
-	res = intcode.RunSimple(maps.Clone(ic), []int64{5}, make(chan int64), make(chan int64))
-	fmt.Printf("Part 2: %v\n", res)
+	computer := intcode.NewIntcodeComputer(maps.Clone(ic), &[]int64{1}, &[]int64{})
+	computer.Run()
+	fmt.Printf("Part 1: %v\n", *computer.Outputs)
+	computer = intcode.NewIntcodeComputer(maps.Clone(ic), &[]int64{5}, &[]int64{})
+	computer.Run()
+	fmt.Printf("Part 2: %v\n", *computer.Outputs)
 }

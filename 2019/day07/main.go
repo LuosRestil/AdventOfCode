@@ -5,7 +5,6 @@ import (
 	"aoc2019/utils"
 	"fmt"
 	"maps"
-	"sync"
 	"time"
 )
 
@@ -18,56 +17,37 @@ func main() {
 
 func run(ic map[int64]int64, phaseSettingPermutations [][]int, part int) {
 	var max int64
-	var mu sync.Mutex
-	var wg sync.WaitGroup
 	for _, permutation := range phaseSettingPermutations {
-		wg.Add(1)
-		go func(ps []int) {
-			defer wg.Done()
-			res := processPermutation(ic, ps)
-			mu.Lock()
-			if res > max {
-				max = res
-			}
-			mu.Unlock()
-		}(permutation)
+		res := processPermutation(ic, permutation)
+		if res > max {
+			max = res
+		}
 	}
-	wg.Wait()
 	fmt.Printf("Part %d: %d\n", part, max)
 }
 
 func processPermutation(ic map[int64]int64, phaseSettings []int) int64 {
-	var wg sync.WaitGroup
-
 	ics := make([]map[int64]int64, len(phaseSettings))
-	channels := make([]chan int64, len(phaseSettings)+1)
-
-	for i := range phaseSettings {
-		ics[i] = maps.Clone(ic)
-		channels[i] = make(chan int64, 1)
-	}
-	channels[len(phaseSettings)] = make(chan int64)
-
-	for i := range phaseSettings {
-		wg.Add(1)
-		go func(i int) {
-			defer wg.Done()
-			intcode.Run(ics[i], channels[i], channels[i+1], false)
-			close(channels[i+1])
-		}(i)
-	}
+	io := make([][]int64, len(phaseSettings))
+	computers := make([]intcode.IntcodeComputer, len(phaseSettings))
 
 	for i, phaseSetting := range phaseSettings {
-		channels[i] <- int64(phaseSetting)
+		ics[i] = maps.Clone(ic)
+		io[i] = []int64{int64(phaseSetting)}
 	}
-	channels[0] <- 0
+	for i := range phaseSettings {
+		computers[i] = intcode.NewIntcodeComputer(ics[i], &io[i], &io[(i+1)%len(phaseSettings)])
+	}
+	*computers[0].Inputs = append((*computers[0].Inputs), 0)
 
-	var last int64 = 0
-	for v := range channels[len(phaseSettings)] {
-		last = v
-		channels[0] <- v
+	lastComp := &computers[len(phaseSettings)-1]
+	for lastComp.StatusCode != intcode.StatusCodeDone {
+		for i := range computers {
+			c := &computers[i]
+			for c.Step() == intcode.StatusCodeOk {
+			}
+		}
 	}
 
-	wg.Wait()
-	return last
+	return (*lastComp.Outputs)[len(*lastComp.Outputs)-1]
 }
