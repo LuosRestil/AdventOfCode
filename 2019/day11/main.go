@@ -31,19 +31,16 @@ func main() {
 func run(ic map[int64]int64, input int64) map[point]int64 {
 	bot := robot{point{X: 0, Y: 0}, 'u'}
 	colors := make(map[point]int64)
-
-	in := make(chan int64, 1)
-	out := make(chan int64)
-	go func() {
-		defer close(out)
-		intcode.Run(maps.Clone(ic), in, out)
-	}()
-
-	in <- input
-
+	computer := intcode.NewIntcodeComputer(maps.Clone(ic), &[]int64{input}, &[]int64{})
 	outCount := 0
-	var nextIn int64
-	for val := range out {
+	lastOutLen := 0
+	for computer.Step() != intcode.StatusCodeDone {
+		outLen := len(*computer.Outputs)
+		if outLen == lastOutLen {
+			continue
+		}
+		lastOutLen = outLen
+		val := (*computer.Outputs)[outLen-1]
 		if outCount%2 == 0 { // paint, 0 black 1 white
 			colors[bot.pos] = val
 		} else { // turn, 0 left 1 right, move
@@ -53,8 +50,7 @@ func run(ic map[int64]int64, input int64) map[point]int64 {
 				turnRight(&bot)
 			}
 			move(&bot)
-			nextIn = colors[bot.pos]
-			in <- nextIn
+			*computer.Inputs = append(*computer.Inputs, colors[bot.pos])
 		}
 		outCount++
 	}
@@ -97,10 +93,10 @@ func move(bot *robot) {
 func draw(colors map[point]int64) {
 	normalizedColors := normalize(colors)
 	points := utils.GetKeys(normalizedColors)
-	xs, _ := utils.Map(points, func (p point) (int, error) {
+	xs, _ := utils.Map(points, func(p point) (int, error) {
 		return p.X, nil
 	})
-	ys, _ := utils.Map(points, func (p point) (int, error) {
+	ys, _ := utils.Map(points, func(p point) (int, error) {
 		return p.Y, nil
 	})
 	maxX := slices.Max(xs)
@@ -127,7 +123,7 @@ func normalize(colors map[point]int64) map[point]int64 {
 	for key := range colors {
 		if key.X < minX {
 			minX = key.X
-		}	
+		}
 		if key.Y < minY {
 			minY = key.Y
 		}
@@ -136,7 +132,7 @@ func normalize(colors map[point]int64) map[point]int64 {
 	padY := -minY
 	res := make(map[point]int64)
 	for k, v := range colors {
-		res[point{X: k.X+padX, Y: k.Y+padY}] = v
+		res[point{X: k.X + padX, Y: k.Y + padY}] = v
 	}
 	return res
 }
