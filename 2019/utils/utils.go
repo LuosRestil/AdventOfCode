@@ -235,12 +235,3 @@ func (q *Queue[T]) PopEnd() T {
 func (q *Queue[T]) Size() int {
 	return len(q.content)
 }
-
-func Every[T any](src []T, pred func(elem T) bool) bool {
-	for _, elem := range src {
-		if !pred(elem) {
-			return false
-		}
-	}
-	return true
-}
