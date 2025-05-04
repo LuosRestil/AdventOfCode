@@ -15,15 +15,15 @@ const (
 )
 
 type IntcodeComputer struct {
-	Mem            map[int64]int64
-	InstructionPtr int64
-	RelativeBase   int64
-	Inputs         *[]int64
-	Outputs        *[]int64
+	Mem            map[int]int
+	InstructionPtr int
+	RelativeBase   int
+	Inputs         *[]int
+	Outputs        *[]int
 	StatusCode     StatusCode
 }
 
-func NewIntcodeComputer(ic map[int64]int64, inputs, outputs *[]int64) IntcodeComputer {
+func NewIntcodeComputer(ic map[int]int, inputs, outputs *[]int) IntcodeComputer {
 	return IntcodeComputer{
 		Mem:            ic,
 		Inputs:         inputs,
@@ -93,7 +93,7 @@ func (c *IntcodeComputer) Step() StatusCode {
 			res = 1
 		}
 		dest := getWriteIdx(c.Mem, c.InstructionPtr+3, modes[2], c.RelativeBase)
-		c.Mem[dest] = int64(res)
+		c.Mem[dest] = int(res)
 		c.InstructionPtr += instructionSizes[7]
 	case 8: // equal
 		in1 := getInputValue(c.Mem, c.InstructionPtr+1, modes[0], c.RelativeBase)
@@ -103,7 +103,7 @@ func (c *IntcodeComputer) Step() StatusCode {
 			res = 1
 		}
 		dest := getWriteIdx(c.Mem, c.InstructionPtr+3, modes[2], c.RelativeBase)
-		c.Mem[dest] = int64(res)
+		c.Mem[dest] = int(res)
 		c.InstructionPtr += instructionSizes[8]
 	case 9: // adjust relative base
 		in := getInputValue(c.Mem, c.InstructionPtr+1, modes[0], c.RelativeBase)
@@ -136,7 +136,7 @@ type instructionData struct {
 	modes  []int
 }
 
-var instructionSizes map[int64]int64 = map[int64]int64{
+var instructionSizes map[int]int = map[int]int{
 	1: 4,
 	2: 4,
 	3: 2,
@@ -148,7 +148,7 @@ var instructionSizes map[int64]int64 = map[int64]int64{
 	9: 2,
 }
 
-func getInputValue(ic map[int64]int64, idx int64, mode intcodeMode, relativeBase int64) int64 {
+func getInputValue(ic map[int]int, idx int, mode intcodeMode, relativeBase int) int {
 	in := ic[idx]
 	if mode == position {
 		in = ic[in]
@@ -158,7 +158,7 @@ func getInputValue(ic map[int64]int64, idx int64, mode intcodeMode, relativeBase
 	return in
 }
 
-func getWriteIdx(ic map[int64]int64, idx int64, mode intcodeMode, relativeBase int64) int64 {
+func getWriteIdx(ic map[int]int, idx int, mode intcodeMode, relativeBase int) int {
 	res := ic[idx]
 	if mode == relative {
 		res += relativeBase
@@ -166,7 +166,7 @@ func getWriteIdx(ic map[int64]int64, idx int64, mode intcodeMode, relativeBase i
 	return res
 }
 
-func parseInstruction(instruction int64) instructionData {
+func parseInstruction(instruction int) instructionData {
 	// from the right, first two digits are the opcode
 	opcode := instruction % 100
 	// subsequent digits are the mode
@@ -176,23 +176,23 @@ func parseInstruction(instruction int64) instructionData {
 		modes = append(modes, int(instruction%10))
 		instruction /= 10
 	}
-	toPad := instructionSizes[opcode] - int64(len(modes)) - 1
+	toPad := instructionSizes[opcode] - int(len(modes)) - 1
 	for range toPad {
 		modes = append(modes, 0)
 	}
 	return instructionData{opcode: int(opcode), modes: modes}
 }
 
-func GetIntcode(filepath string) map[int64]int64 {
+func GetIntcode(filepath string) map[int]int {
 	bytes, _ := os.ReadFile(filepath)
 	input := strings.Split(string(bytes), ",")
-	instructions := make(map[int64]int64)
+	instructions := make(map[int]int)
 	for i, str := range input {
-		num, err := strconv.ParseInt(str, 0, 64)
+		num, err := strconv.Atoi(str)
 		if err != nil {
 			panic(err)
 		}
-		instructions[int64(i)] = num
+		instructions[int(i)] = num
 	}
 	return instructions
 }

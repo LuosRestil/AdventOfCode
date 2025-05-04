@@ -4,8 +4,8 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-	"time"
 	"slices"
+	"time"
 )
 
 type Point struct {
@@ -88,7 +88,8 @@ func (s *Set[T]) Add(key T) {
 }
 
 func (s *Set[T]) Has(key T) bool {
-	_, ok := s.members[key]; return ok;
+	_, ok := s.members[key]
+	return ok
 }
 
 func (s *Set[T]) Remove(key T) {
@@ -152,7 +153,7 @@ func GetAllPermutations[T any](list []T) [][]T {
 	for i := range list {
 		curr := list[i]
 		others := slices.Concat(slices.Clone(list[0:i]), slices.Clone(list[i+1:]))
-		remaining := GetAllPermutations(others)		
+		remaining := GetAllPermutations(others)
 		for _, perm := range remaining {
 			perms = append(perms, append([]T{curr}, perm...))
 		}
@@ -195,14 +196,14 @@ func GetKeys[T comparable, U any](m map[T]U) []T {
 	return res
 }
 
-func GCD(a int64, b int64) int64 {
+func GCD(a int, b int) int {
 	for b > 0 {
-		a, b = b, a % b
+		a, b = b, a%b
 	}
 	return a
 }
 
-func LCM(a int64, b int64) int64 {
+func LCM(a int, b int) int {
 	return (a * b) / GCD(a, b)
 }
 
@@ -227,7 +228,7 @@ func (q *Queue[T]) PopFront() T {
 }
 
 func (q *Queue[T]) PopEnd() T {
-	val := q.content[len(q.content) - 1]
+	val := q.content[len(q.content)-1]
 	q.content = q.content[:len(q.content)-1]
 	return val
 }

@@ -28,10 +28,10 @@ func main() {
 	draw(colors)
 }
 
-func run(ic map[int64]int64, input int64) map[point]int64 {
+func run(ic map[int]int, input int) map[point]int {
 	bot := robot{point{X: 0, Y: 0}, 'u'}
-	colors := make(map[point]int64)
-	computer := intcode.NewIntcodeComputer(maps.Clone(ic), &[]int64{input}, &[]int64{})
+	colors := make(map[point]int)
+	computer := intcode.NewIntcodeComputer(maps.Clone(ic), &[]int{input}, &[]int{})
 	outCount := 0
 	lastOutLen := 0
 	for computer.Step() != intcode.StatusCodeDone {
@@ -90,7 +90,7 @@ func move(bot *robot) {
 	}
 }
 
-func draw(colors map[point]int64) {
+func draw(colors map[point]int) {
 	normalizedColors := normalize(colors)
 	points := utils.GetKeys(normalizedColors)
 	xs, _ := utils.Map(points, func(p point) (int, error) {
@@ -117,7 +117,7 @@ func draw(colors map[point]int64) {
 	fmt.Print("\n")
 }
 
-func normalize(colors map[point]int64) map[point]int64 {
+func normalize(colors map[point]int) map[point]int {
 	minX := math.MaxInt
 	minY := math.MaxInt
 	for key := range colors {
@@ -130,7 +130,7 @@ func normalize(colors map[point]int64) map[point]int64 {
 	}
 	padX := -minX
 	padY := -minY
-	res := make(map[point]int64)
+	res := make(map[point]int)
 	for k, v := range colors {
 		res[point{X: k.X + padX, Y: k.Y + padY}] = v
 	}

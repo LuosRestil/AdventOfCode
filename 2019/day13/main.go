@@ -16,7 +16,7 @@ func main() {
 	defer utils.TrackTime(time.Now())()
 
 	ic := intcode.GetIntcode("day13/input.txt")
-	computer := intcode.NewIntcodeComputer(maps.Clone(ic), &[]int64{}, &[]int64{})
+	computer := intcode.NewIntcodeComputer(maps.Clone(ic), &[]int{}, &[]int{})
 	computer.Run()
 	blocks := 0
 	for i := 0; i < len(*computer.Outputs); i += 3 {
@@ -26,23 +26,23 @@ func main() {
 	}
 	fmt.Printf("Part 1: %d\n", blocks)
 
-	var _ map[int64]string = map[int64]string{
+	var _ map[int]string = map[int]string{
 		0: "⬛️",
 		1: "🟫",
 		2: "🟨",
 		3: "🟦",
 		4: "🏐",
 	}
-	board := make(map[coord]int64)
+	board := make(map[coord]int)
 
 	ic[0] = 2
-	in := []int64{}
-	out := []int64{}
+	in := []int{}
+	out := []int{}
 	computer = intcode.NewIntcodeComputer(maps.Clone(ic), &in, &out)
 
 	// alter input such that the bottom row is all paddles to auto-run
 	// otherwise use controls (pretty difficult)
-	var score int64 = 0
+	var score int = 0
 	for computer.Step() != intcode.StatusCodeDone {
 		if len(*computer.Outputs) == 3 {
 			x := (*computer.Outputs)[0]
@@ -67,14 +67,14 @@ func main() {
 			// } else if userIn == "d" {
 			// 	nextIn = 1
 			// }
-			// *computer.Inputs = append(*computer.Inputs, int64(nextIn))
+			// *computer.Inputs = append(*computer.Inputs, int(nextIn))
 			*computer.Inputs = append(*computer.Inputs, 0)
 		}
 	}
 	fmt.Printf("Part 2: %d\n", score)
 }
 
-// func printGame(board map[coord]int64, pieces map[int64]string) {
+// func printGame(board map[coord]int, pieces map[int]string) {
 // 	cls()
 // 	for y := 0; y <= 20; y++ {
 // 		for x := 0; x <= 37; x++ {

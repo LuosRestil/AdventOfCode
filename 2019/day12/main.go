@@ -58,7 +58,7 @@ func main() {
 		step(moons)
 		zLoopSize++
 	}
-	ans, _ := utils.Reduce([]int64{int64(xLoopSize), int64(yLoopSize), int64(zLoopSize)}, func (acc *int64, curr int64) error {
+	ans, _ := utils.Reduce([]int{int(xLoopSize), int(yLoopSize), int(zLoopSize)}, func(acc *int, curr int) error {
 		*acc = utils.LCM(*acc, curr)
 		return nil
 	}, 1)
@@ -160,28 +160,28 @@ func calculateEnergy(moons []moon) int {
 }
 
 func getXs(moons []moon) []int {
-	res := make([]int, len(moons) * 2)
+	res := make([]int, len(moons)*2)
 	for i, moon := range moons {
 		res[i] = moon.pos.x
-		res[i+1]=moon.vel.x
+		res[i+1] = moon.vel.x
 	}
 	return res
 }
 
 func getYs(moons []moon) []int {
-	res := make([]int, len(moons) * 2)
+	res := make([]int, len(moons)*2)
 	for i, moon := range moons {
 		res[i] = moon.pos.y
-		res[i+1]=moon.vel.y
+		res[i+1] = moon.vel.y
 	}
 	return res
 }
 
 func getZs(moons []moon) []int {
-	res := make([]int, len(moons) * 2)
+	res := make([]int, len(moons)*2)
 	for i, moon := range moons {
 		res[i] = moon.pos.z
-		res[i+1]=moon.vel.z
+		res[i+1] = moon.vel.z
 	}
 	return res
 }

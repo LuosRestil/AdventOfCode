@@ -17,18 +17,18 @@ func main() {
 	cpy[1] = 12
 	cpy[2] = 2
 
-	computer := intcode.NewIntcodeComputer(cpy, &[]int64{}, &[]int64{})
+	computer := intcode.NewIntcodeComputer(cpy, &[]int{}, &[]int{})
 	computer.Run()
 	fmt.Printf("Part 1: %d\n", computer.Mem[0])
 
-	var target int64 = 19690720
+	var target int = 19690720
 end:
 	for i := 0; i <= 99; i++ {
 		for j := 0; j <= 99; j++ {
 			cpy = maps.Clone(ic)
-			cpy[1] = int64(i)
-			cpy[2] = int64(j)
-			computer = intcode.NewIntcodeComputer(cpy, &[]int64{}, &[]int64{})
+			cpy[1] = int(i)
+			cpy[2] = int(j)
+			computer = intcode.NewIntcodeComputer(cpy, &[]int{}, &[]int{})
 			computer.Run()
 			if computer.Mem[0] == target {
 				ans := 100*i + j

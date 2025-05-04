@@ -15,8 +15,8 @@ func main() {
 	run(ic, utils.GetAllPermutations([]int{5, 6, 7, 8, 9}), 2)
 }
 
-func run(ic map[int64]int64, phaseSettingPermutations [][]int, part int) {
-	var max int64
+func run(ic map[int]int, phaseSettingPermutations [][]int, part int) {
+	var max int
 	for _, permutation := range phaseSettingPermutations {
 		res := processPermutation(ic, permutation)
 		if res > max {
@@ -26,14 +26,14 @@ func run(ic map[int64]int64, phaseSettingPermutations [][]int, part int) {
 	fmt.Printf("Part %d: %d\n", part, max)
 }
 
-func processPermutation(ic map[int64]int64, phaseSettings []int) int64 {
-	ics := make([]map[int64]int64, len(phaseSettings))
-	io := make([][]int64, len(phaseSettings))
+func processPermutation(ic map[int]int, phaseSettings []int) int {
+	ics := make([]map[int]int, len(phaseSettings))
+	io := make([][]int, len(phaseSettings))
 	computers := make([]intcode.IntcodeComputer, len(phaseSettings))
 
 	for i, phaseSetting := range phaseSettings {
 		ics[i] = maps.Clone(ic)
-		io[i] = []int64{int64(phaseSetting)}
+		io[i] = []int{int(phaseSetting)}
 	}
 	for i := range phaseSettings {
 		computers[i] = intcode.NewIntcodeComputer(ics[i], &io[i], &io[(i+1)%len(phaseSettings)])

@@ -51,7 +51,7 @@ func main() {
 		recipes[name] = recipe{quantity, ingredients}
 	}
 
-	var ore int64 = 0
+	var ore int = 0
 	inv := map[string]int{}
 	produce("FUEL", recipes, inv, &ore)
 	fmt.Printf("Part 1: %d\n", ore)
@@ -63,11 +63,11 @@ func main() {
 		fmt.Println(inv)
 		// if every element is 0 (except fuel and ore), print inv
 	}
-	
+
 	fmt.Printf("Part 2: %d\n", inv["FUEL"])
 }
 
-func produce(name string, recipes map[string]recipe, inv map[string]int, ore *int64) {
+func produce(name string, recipes map[string]recipe, inv map[string]int, ore *int) {
 	if name == "ORE" {
 		inv[name]++
 		*ore++
