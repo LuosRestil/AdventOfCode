@@ -46,7 +46,7 @@ func getFuelReq(mass int) int {
 
 func getFuelReq2(mass int) int {
 	var total int
-	var fuel = getFuelReq(mass)
+	fuel := getFuelReq(mass)
 	for fuel > 0 {
 		total += fuel
 		fuel = getFuelReq(fuel)

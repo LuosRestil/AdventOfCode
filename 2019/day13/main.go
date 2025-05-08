@@ -42,7 +42,7 @@ func main() {
 
 	// alter input such that the bottom row is all paddles to auto-run
 	// otherwise use controls (pretty difficult)
-	var score int = 0
+	score := 0
 	for computer.Step() != intcode.StatusCodeDone {
 		if len(*computer.Outputs) == 3 {
 			x := (*computer.Outputs)[0]

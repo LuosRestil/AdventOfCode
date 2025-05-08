@@ -21,7 +21,7 @@ func main() {
 	computer.Run()
 	fmt.Printf("Part 1: %d\n", computer.Mem[0])
 
-	var target int = 19690720
+	target := 19690720
 end:
 	for i := 0; i <= 99; i++ {
 		for j := 0; j <= 99; j++ {

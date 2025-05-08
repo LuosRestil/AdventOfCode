@@ -107,8 +107,8 @@ func getSegments(wire []string) []segment {
 func getIntersection(a segment, b segment) (bool, point) {
 	var vert segment
 	var horiz segment
-	var aVert = a.vert()
-	var bVert = b.vert()
+	aVert := a.vert()
+	bVert := b.vert()
 	if (aVert && bVert) || (!aVert && !bVert) {
 		return false, point{}
 	}

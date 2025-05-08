@@ -22,12 +22,18 @@ type recipe struct {
 func main() {
 	defer utils.TrackTime(time.Now())()
 
-	bytes, err := os.ReadFile("day14/sample.txt")
+	bytes, err := os.ReadFile("day14/input.txt")
 	if err != nil {
 		panic(err)
 	}
 	lines := strings.Split(string(bytes), "\n")
+	recipes := recipesFromLines(lines)
 
+	fmt.Printf("Part 1: %d\n", oreRequiredForFuel(1, recipes))
+	fmt.Printf("Part 2: %d\n", maxFuelForOre(1_000_000_000_000, recipes))
+}
+
+func recipesFromLines(lines []string) map[string]recipe {
 	recipes := make(map[string]recipe)
 	for _, line := range lines {
 		lr := strings.Split(line, " => ")
@@ -50,34 +56,48 @@ func main() {
 		name := quantityAndName[1]
 		recipes[name] = recipe{quantity, ingredients}
 	}
-
-	var ore int = 0
-	inv := map[string]int{}
-	produce("FUEL", recipes, inv, &ore)
-	fmt.Printf("Part 1: %d\n", ore)
-
-	ore = 0
-	inv = map[string]int{}
-	for ore < 1_000_000_000 {
-		produce("FUEL", recipes, inv, &ore)
-		fmt.Println(inv)
-		// if every element is 0 (except fuel and ore), print inv
-	}
-
-	fmt.Printf("Part 2: %d\n", inv["FUEL"])
+	return recipes
 }
 
-func produce(name string, recipes map[string]recipe, inv map[string]int, ore *int) {
-	if name == "ORE" {
-		inv[name]++
-		*ore++
-	}
-	recipe := recipes[name]
-	for _, ingredient := range recipe.ingredients {
-		for inv[ingredient.name] < ingredient.quantity {
-			produce(ingredient.name, recipes, inv, ore)
+func oreRequiredForFuel(fuelAmount int, recipes map[string]recipe) int {
+	inventory := map[string]int{}
+	produce("FUEL", fuelAmount, inventory, recipes)
+	return inventory["ORE"]
+}
+
+func produce(name string, amount int, inventory map[string]int, recipes map[string]recipe) {
+	batchSize := recipes[name].quantity
+	batches := (amount + batchSize - 1) / batchSize // amount / batchSize, rounded up
+	for _, ingredient := range recipes[name].ingredients {
+		ingredientAmount := batches * ingredient.quantity
+		if ingredient.name == "ORE" {
+			inventory[ingredient.name] += ingredientAmount
+			continue
 		}
-		inv[ingredient.name] -= ingredient.quantity
+		alreadyHas := inventory[ingredient.name]
+		if alreadyHas > 0 {
+			toUse := min(alreadyHas, ingredientAmount)
+			ingredientAmount -= toUse
+			inventory[ingredient.name] -= toUse
+		}
+		produce(ingredient.name, ingredientAmount, inventory, recipes)
 	}
-	inv[name] += recipe.quantity
+	inventory[name] += batchSize*batches - amount
+}
+
+func maxFuelForOre(target int, recipes map[string]recipe) int {
+	lowerBound := 1
+	upperBound := target
+	for lowerBound < upperBound {
+		middle := (upperBound+lowerBound)/2 + 1
+		ore := oreRequiredForFuel(middle, recipes)
+		if ore == target {
+			return middle
+		} else if ore > target {
+			upperBound = middle - 1
+		} else {
+			lowerBound = middle
+		}
+	}
+	return lowerBound
 }
