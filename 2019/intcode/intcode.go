@@ -123,6 +123,21 @@ func (c *IntcodeComputer) Run() {
 	}
 }
 
+func (c *IntcodeComputer) AddInput(input int) {
+	*c.Inputs = append(*c.Inputs, input)
+}
+
+func (c *IntcodeComputer) ClearOutputs() {
+	*c.Outputs = nil
+}
+
+func (c *IntcodeComputer) LastOutput() (int, bool) {
+	if len(*c.Outputs) == 0 {
+		return 0, false
+	}
+	return (*c.Outputs)[len(*c.Outputs)-1], true
+}
+
 type intcodeMode = int
 
 const (
