@@ -27,7 +27,7 @@ func main() {
 	defer restoreCursor()
 
 	curr := loc{}
-	grid := map[loc]string{curr: "."}
+	grid := map[loc]string{{}: "."}
 
 	for {
 		normalizedGrid, normalizedCurr := normalizeGrid(grid, curr)
@@ -61,7 +61,14 @@ func normalizeGrid(grid map[loc]string, curr loc) (map[loc]string, loc) {
 }
 
 func printGrid(grid map[loc]string, curr loc) {
-	// cls()
+	charmap := map[string]string {
+		" ": "⬛️",
+		".": "🟨",
+		"#": "🟫",
+		"!": "⚡️",
+		"@": "🤖",
+	}
+	cls()
 	// fmt.Printf("%v, %v\n\r", grid, curr)
 	keys := utils.GetKeys(grid)
 	rows, _ := utils.Map(keys, func(key loc) (int, error) {
@@ -72,21 +79,16 @@ func printGrid(grid map[loc]string, curr loc) {
 	})
 	maxRow := slices.Max(rows)
 	maxCol := slices.Max(cols)
-	// fmt.Printf("maxRow: %d, maxCol: %d\n\r", maxRow, maxCol)
 	for row := 0; row <= maxRow; row++ {
 		for col := 0; col <= maxCol; col++ {
-			char := "#"
+			char := " "
 			if val, ok := grid[loc{row, col}]; ok {
 				char = val
 			}
-			if row == curr.row && col == curr.col {
-				if char == "!" {
-					char = "$"
-				} else {
-					char = "@"
-				}
+			if row == curr.row && col == curr.col && char != "!" {
+				char = "@"
 			}
-			fmt.Print(char)
+			fmt.Print(charmap[char])
 		}
 		fmt.Print("\n\r")
 	}
@@ -125,23 +127,19 @@ func processInput(computer *intcode.IntcodeComputer, input string, grid map[loc]
 		"west":  3,
 		"east":  4,
 	}
-	computer.AddInput(inputToInstruction[input])
-	for computer.StatusCode != intcode.StatusCodeAwaitingInput {
-		computer.Step()
+	inputInstruction := inputToInstruction[input]
+	computer.AddInput(inputInstruction)
+	for computer.Step() != intcode.StatusCodeAwaitingInput {
 	}
-	fmt.Print("computer waiting for input\n\r")
-	fmt.Printf("output: %v\n\r", *computer.Outputs)
 	output, ok := computer.LastOutput()
 	if !ok {
 		panic("oh god oh fuck")
 	}
-	// computer.ClearOutputs()
+	computer.ClearOutputs()
 	updateGrid(grid, input, output, curr)
 }
 
 func updateGrid(grid map[loc]string, input string, statusCode int, curr *loc) {
-	// fmt.Print("before update\n\r")
-	// fmt.Printf("%v, %s, %d, %v\n\r", grid, input, statusCode, curr)
 	target := *curr
 	switch input {
 	case "north":
