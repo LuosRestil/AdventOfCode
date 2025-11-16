@@ -2,7 +2,7 @@ import sys
 from pathlib import Path
 
 classname = sys.argv[1]
-with open(f"days/{classname}.cs", "x") as newfile:
+with open(f"days/{classname.capitalize()}.cs", "x") as newfile:
     newfile.write(
         f"""\
 namespace _2016.days;
