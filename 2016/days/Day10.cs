@@ -39,8 +39,8 @@ public static class Day10
                     {
                         if (chips[0] == null || chips[1] == null) continue;
 
-                        int lowChip = (int)(chips[0] < chips[1] ? chips[0] : chips[1]);
-                        int highChip = (int)(lowChip == chips[0] ? chips[1] : chips[0]);
+                        int lowChip = (int)(chips[0]! < chips[1]! ? chips[0]! : chips[1]!);
+                        int highChip = (int)(lowChip! == chips[0]! ? chips[1]! : chips[0]!);
                         if (lowChip == lowChipTarget && highChip == highChipTarget)
                         {
                             Console.WriteLine($"Part 1: {botId}");
@@ -60,7 +60,7 @@ public static class Day10
                 }
             }
         }
-        Console.WriteLine($"Part 2: {output[0] * output[1] * output[2]}"); 
+        Console.WriteLine($"Part 2: {output[0] * output[1] * output[2]}");
     }
 
     private static void GiveChipToBot(string botId, int chipId, Dictionary<string, int?[]> bots)
