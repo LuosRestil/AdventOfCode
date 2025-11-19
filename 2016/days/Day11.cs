@@ -24,7 +24,7 @@ public static class Day11
             ['a',  null, 'b',  'B',  'c',  null, 'd',  'D',  'e',  'E', 'f', 'F', 'g', 'G'],
         ];
         Console.WriteLine($"Part 1: {GetSteps(board1)}");
-        // Console.WriteLine($"Part 2: {GetSteps(board2)}");
+        Console.WriteLine($"Part 2: {GetSteps(board2)}");
     }
 
     private static int GetSteps(char?[][] board)
@@ -138,23 +138,6 @@ public static class Day11
                     adjacentStates.Add(singleMoveState);
                     seen.Add(singleMoveStateStr);
                 }
-
-                // for (int j = i + 1; j < state.Board[0].Length; j++)
-                // {
-                //     if (state.Board[state.Floor][j] == null) continue;
-
-                //     char?[][] doubleMoveBoard = CopyBoard(singleMoveBoard);
-                //     doubleMoveBoard[state.Floor + 1][j] = doubleMoveBoard[state.Floor][j];
-                //     doubleMoveBoard[state.Floor][j] = null;
-
-                //     var doubleMoveState = new State(doubleMoveBoard, state.Moves + 1, state.Floor + 1);
-                //     var doubleMoveStateStr = Stringify(doubleMoveState);
-                //     if (!seen.Contains(doubleMoveStateStr) && IsValid(doubleMoveState.Board))
-                //     {
-                //         adjacentStates.Add(doubleMoveState);
-                //         seen.Add(doubleMoveStateStr);
-                //     }
-                // }
             }
         }
         return adjacentStates;
