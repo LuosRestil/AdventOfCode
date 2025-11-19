@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        padding: 0;
+        margin: 0;
+      }
+      body {
+        background-color: black;
+      }
+      button {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        font-size: 16px;
+        font-weight: bold;
+        padding: 10px;
+        border-radius: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="canvas"></canvas>
+    <button id="btn">Moves: 0</button>
+    <script>
+      let moves = 0;
+      let button = document.getElementById('btn');
+      button.addEventListener('click', () => {
+        button.innerText = `Moves: ${++moves}`;
+      });
+
+      let canvas = document.getElementById("canvas");
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      let ctx = canvas.getContext("2d");
+
+      let items = [
+        { x: 20, y: canvas.height * .8, text: "AG" },
+        { x: 325, y: canvas.height * .8, text: "BG" },
+        { x: 626, y: canvas.height * .8, text: "CG" },
+        { x: 967, y: canvas.height * .8, text: "DG" },
+        { x: 1248, y: canvas.height * .8, text: "EG" },
+        { x: 132, y: canvas.height * .55, text: "AM" },
+        { x: 441, y: canvas.height * .8, text: "BM" },
+        { x: 752, y: canvas.height * .55, text: "CM" },
+        { x: 1077, y: canvas.height * .8, text: "DM" },
+        { x: 1359, y: canvas.height * .8, text: "EM" },
+      ];
+      let selectedIdx = null;
+
+      let mouse = { x: 0, y: 0 };
+      document.addEventListener("mousemove", (evt) => {
+        if (selectedIdx != null) {
+          let changeX = evt.clientX - mouse.x;
+          let changeY = evt.clientY - mouse.y;
+          items[selectedIdx].x += changeX;
+          items[selectedIdx].y += changeY;
+        }
+        mouse.x = evt.clientX;
+        mouse.y = evt.clientY;
+      });
+      document.addEventListener("mousedown", (evt) => {
+        selectItem();
+      });
+      document.addEventListener("mouseup", (evt) => {
+        selectedIdx = null;
+        console.log(items);
+      });
+
+      function selectItem() {
+        for (let i = 0; i < items.length; i++) {
+          let item = items[i];
+          if (
+            isBetween(item.x, item.x + 100, mouse.x) &&
+            isBetween(item.y, item.y + 100, mouse.y)
+          ) {
+            selectedIdx = i;
+            return;
+          }
+        }
+      }
+
+      function isBetween(start, end, val) {
+        return val > start && val < end;
+      }
+
+      requestAnimationFrame(loop);
+
+      function loop() {
+        requestAnimationFrame(loop);
+
+        ctx.fillStyle = 'rgb(50, 50, 50)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.fillStyle = "white";
+        ctx.fillRect(0, canvas.height * 0.25, canvas.width, 3);
+        ctx.fillRect(0, canvas.height * 0.5, canvas.width, 3);
+        ctx.fillRect(0, canvas.height * 0.75, canvas.width, 3);
+
+        for (let item of items) {
+          ctx.fillStyle = "white";
+          ctx.fillRect(item.x, item.y, 100, 100);
+          ctx.fillStyle = "black";
+          ctx.font = "48px monospace";
+          ctx.fillText(item.text, item.x + 20, item.y + 60);
+        }
+      }
+    </script>
+  </body>
+</html>
