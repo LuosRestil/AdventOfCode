@@ -62,7 +62,6 @@ public static class Day11
                 {
                     return false;
                 }
-
             }
         }
         return true;
