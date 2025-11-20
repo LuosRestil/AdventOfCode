@@ -5,3 +5,4 @@
 **/*.class
 **/obj
 **/bin
+.vscode
