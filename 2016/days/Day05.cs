@@ -1,5 +1,6 @@
 using System.Text;
 using System.Security.Cryptography;
+using _2016.common;
 
 namespace _2016.days;
 public static class Day05
@@ -11,22 +12,15 @@ public static class Day05
         int idx = 0;
         int charIdx = 0;
         char[] password = new char[8];
-        StringBuilder hashBuilder = new();
 
         while (charIdx < 8)
         {
-            byte[] hashArray = MD5.HashData(Encoding.UTF8.GetBytes(doorId + idx.ToString()));
-            foreach (byte b in hashArray)
-            {
-                hashBuilder.Append(b.ToString("x2"));
-            }
-            string hash = hashBuilder.ToString();
+            string hash = MD5Utils.Hash(doorId + idx.ToString());
             if (hash.StartsWith(FIVE_ZEROES))
             {
                 password[charIdx] = hash[5];
                 charIdx++;
             }
-            hashBuilder.Clear();
             idx++;
         }
         Console.WriteLine($"Part 1: {string.Join(null, password)}");
@@ -36,12 +30,7 @@ public static class Day05
         HashSet<int> seen = [];
         while (seen.Count < 8)
         {
-            byte[] hashArray = MD5.HashData(Encoding.UTF8.GetBytes(doorId + idx.ToString()));
-            foreach (byte b in hashArray)
-            {
-                hashBuilder.Append(b.ToString("x2"));
-            }
-            string hash = hashBuilder.ToString();
+            string hash = MD5Utils.Hash(doorId + idx.ToString());
             if (hash.StartsWith(FIVE_ZEROES))
             {
                 int pos = hash[5] - 48;
@@ -51,7 +40,6 @@ public static class Day05
                     seen.Add(pos);
                 }
             }
-            hashBuilder.Clear();
             idx++;
         }
         Console.WriteLine($"Part 2: {string.Join(null, password)}");
