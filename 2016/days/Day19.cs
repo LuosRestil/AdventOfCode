@@ -4,7 +4,7 @@ public static class Day19
 {
     public static void Run()
     {
-        int numElves = 3014387;
+        int numElves = int.Parse(File.ReadAllText("inputs/day19.txt"));
         int ans1 = 1;
         int ans2 = 1;
         for (int i = 4; i < numElves; i++)
