@@ -1,20 +1,6 @@
 namespace _2016.days;
 
-public class Instruction
-{
-    public required string Opcode { get; set; }
-    public char? CharVal1 { get; set; }
-    public int? IntVal1 { get; set; }
-    public char? CharVal2 { get; set; }
-    public int? IntVal2 { get; set; }
-
-    public override string ToString()
-    {
-        return $"Opcode: {Opcode}, CharVal1: {CharVal1}, IntVal1: {IntVal1}, CharVal2: {CharVal2}, IntVal2: {IntVal2}";
-    }
-}
-
-public static class Day12
+public static class Day23
 {
     private static readonly Dictionary<string, string> tglMap = new(){
         {"jnz", "cpy"},
@@ -26,15 +12,17 @@ public static class Day12
 
     public static void Run()
     {
-        Instruction[] instructions = [.. File.ReadAllLines("inputs/day12.txt").Select(ParseLine)];
-        Console.WriteLine($"Part 1: {RunInstructions(instructions, 0)}");
-        Console.WriteLine($"Part 2: {RunInstructions(instructions, 1)}");
+        Instruction[] instructions = [.. File.ReadAllLines("inputs/day23.txt").Select(ParseLine)];
+        Console.WriteLine($"Part 1: {RunInstructions(instructions, 7)}");
+        instructions = [.. File.ReadAllLines("inputs/day23.txt").Select(ParseLine)];
+        Console.WriteLine($"Part 2: {RunInstructions(instructions, 12)}");
+        // runs too long, we need to optimize jnz loops...
     }
 
-    private static int RunInstructions(Instruction[] instructions, int registerCStartVal)
+    private static int RunInstructions(Instruction[] instructions, int registerAStartVal)
     {
         int ptr = 0;
-        Dictionary<char, int> registers = new() { { 'a', 0 }, { 'b', 0 }, { 'c', registerCStartVal }, { 'd', 0 } };
+        Dictionary<char, int> registers = new() { { 'a', registerAStartVal }, { 'b', 0 }, { 'c', 0 }, { 'd', 0 } };
         while (ptr < instructions.Length)
         {
             Instruction instruction = instructions[ptr];
@@ -42,18 +30,21 @@ public static class Day12
 
             if (instruction.Opcode == "cpy")
             {
-                if (instruction.CharVal2 == null) continue;
-                registers[instruction.CharVal2!.Value] = instruction.IntVal1 != null ? instruction.IntVal1.Value : registers[instruction.CharVal1!.Value];
+                if (instruction.CharVal2 != null)
+                    registers[instruction.CharVal2!.Value] = instruction.IntVal1 != null ? instruction.IntVal1.Value : registers[instruction.CharVal1!.Value];
             }
             else if (instruction.Opcode == "inc")
             {
-                if (instruction.CharVal1 == null) continue;
-                registers[instruction.CharVal1!.Value]++;
+                if (instruction.CharVal1 != null)
+                {
+                    registers[instruction.CharVal1!.Value]++;
+
+                }
             }
             else if (instruction.Opcode == "dec")
             {
-                if (instruction.CharVal1 == null) continue;
-                registers[instruction.CharVal1!.Value]--;
+                if (instruction.CharVal1 != null)
+                    registers[instruction.CharVal1!.Value]--;
             }
             else if (instruction.Opcode == "jnz")
             {
@@ -75,8 +66,8 @@ public static class Day12
                 else if (instruction.CharVal1 != null)
                     dist = registers[instruction.CharVal1.Value];
                 int targetIdx = ptr + dist;
-                if (targetIdx < 0 || targetIdx > instructions.Length - 1) continue;
-                instructions[targetIdx].Opcode = tglMap[instructions[targetIdx].Opcode];
+                if (targetIdx >= 0 && targetIdx < instructions.Length)
+                    instructions[targetIdx].Opcode = tglMap[instructions[targetIdx].Opcode];
             }
             if (!jump) ptr++;
         }
