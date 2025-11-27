@@ -8,13 +8,6 @@ public class FsNode
     public int Size { get; set; }
     public int Used { get; set; }
     public int Avail { get; set; }
-    public float UsedPct { get; set; }
-    public required string Name { get; set; }
-
-    public FsNode Copy()
-    {
-        return new() { Size = Size, Used = Used, Avail = Avail, UsedPct = UsedPct, Name = Name };
-    }
 }
 
 public class FsState
@@ -29,13 +22,10 @@ public static partial class Day22
 {
     private static readonly int w = 37;
     private static readonly int h = 25;
-    private static string target = "";
 
     public static void Run()
     {
         FsNode[,] fs = new FsNode[h, w];
-
-        Vec2 empty = new(0, 0);
 
         foreach (var line in File.ReadLines("inputs/day22.txt"))
         {
@@ -48,18 +38,11 @@ public static partial class Day22
             int size = int.Parse(parts[1][..^1]);
             int used = int.Parse(parts[2][..^1]);
             int avail = int.Parse(parts[3][..^1]);
-            float usedPct = float.Parse("0." + parts[4][..^1]);
-            fs[y, x] = new FsNode { Size = size, Used = used, Avail = avail, UsedPct = usedPct, Name = parts[0] };
-
-            if (x == w - 1 && y == 0)
-                target = parts[0];
-            if (used == 0)
-                empty = new(x, y);
+            fs[y, x] = new FsNode { Size = size, Used = used, Avail = avail };
         }
 
-
         Console.WriteLine($"Part 1: {CountViablePairs(fs)}");
-        Console.WriteLine($"Part 2: {BFS(new FsState() { Fs = fs, Steps = 0, Empty = empty })}");
+        PrintFs(fs); // pt 2 trivially worked by hand
     }
 
     private static int CountViablePairs(FsNode[,] fs)
@@ -86,44 +69,16 @@ public static partial class Day22
         return viablePairs;
     }
 
-    private static int BFS(FsState startState)
+    private static void PrintFs(FsNode[,] fs)
     {
-        List<FsState> queue = [startState];
-        while (queue.Count > 0)
+        for (int i = 0; i < fs.GetLength(0); i++)
         {
-            FsState state = queue[0];
-            queue.RemoveAt(0);
-            if (state.Fs[0, 0].Name == target)
-                return state.Steps;
-            queue.AddRange(GetNeighborStates(state));
-        }
-        return 0;
-    }
-
-    private static List<FsState> GetNeighborStates(FsState state)
-    {
-        List<FsState> neighborStates = [];
-
-
-
-        return neighborStates;
-    }
-
-    private static FsNode[,] Copy(FsNode[,] array)
-    {
-        int width = array.GetLength(0);
-        int height = array.GetLength(1);
-        FsNode[,] copy = new FsNode[width, height];
-
-        for (int w = 0; w < width; w++)
-        {
-            for (int h = 0; h < height; h++)
+            for (int j = 0; j < fs.GetLength(1); j++)
             {
-                copy[w, h] = array[w, h].Copy();
+                Console.Write(fs[i,j].Used == 0 ? '_' : fs[i,j].Size > 500 ? '#' : '.');
             }
+            System.Console.WriteLine();
         }
-
-        return copy;
     }
 
     [GeneratedRegex(@"\s+")]
