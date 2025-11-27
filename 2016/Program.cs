@@ -25,7 +25,8 @@ long start = Stopwatch.GetTimestamp();
 // Day20.Run();
 // Day21.Run();
 // Day22.Run();
-Day23.Run();
+// Day23.Run();
+Day24.Run();
 
 TimeSpan elapsed = Stopwatch.GetElapsedTime(start);
 Console.WriteLine(elapsed.TotalMilliseconds + "ms");
