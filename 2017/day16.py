@@ -23,7 +23,6 @@ def main():
         if i == 0:
             print(f"Part 1: {''.join(programs)}")
     print(f"Part 2: {''.join(programs)}")
-        
 
 
 if __name__ == "__main__":
