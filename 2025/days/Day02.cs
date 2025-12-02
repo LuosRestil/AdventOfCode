@@ -15,7 +15,6 @@ public static class Day02
             string[] split = rng.Split('-');
             return new Day02Range(long.Parse(split[0]), long.Parse(split[1]));
         }).OrderBy(rng => rng.Start)];
-        CollapseRanges(ranges);
         long highestValue = ranges[^1].End;
 
         HashSet<long> invalidNums = [];
@@ -41,7 +40,7 @@ public static class Day02
 
             curr++;
         }
-        
+
         long total = 0;
         foreach (long invalidNum in invalidNums)
         {
@@ -54,8 +53,7 @@ public static class Day02
                 }
             }
         }
-
-        System.Console.WriteLine($"Part 1: {total}");
+        Console.WriteLine($"Part 1: {total}");
 
         total = 0;
         foreach (long invalidNum in moreInvalidNums)
@@ -69,28 +67,6 @@ public static class Day02
                 }
             }
         }
-
-        System.Console.WriteLine($"Part 2: {total}");
-    }
-
-    private static void CollapseRanges(List<Day02Range> ipRanges)
-    {
-        int i = 0;
-        while (i < ipRanges.Count - 1)
-        {
-            if (ipRanges[i + 1].Start <= ipRanges[i].End)
-            {
-                if (ipRanges[i + 1].End > ipRanges[i].End)
-                    ipRanges[i].End = ipRanges[i + 1].End;
-                if (
-                    ipRanges[i + 1].Start >= ipRanges[i].Start &&
-                    ipRanges[i + 1].End <= ipRanges[i].End)
-                {
-                    ipRanges.RemoveAt(i + 1);
-                    continue;
-                }
-            }
-            i++;
-        }
+        Console.WriteLine($"Part 2: {total}");
     }
 }
