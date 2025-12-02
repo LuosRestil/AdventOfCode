@@ -5,7 +5,7 @@ classname = sys.argv[1]
 with open(f"days/{classname.capitalize()}.cs", "x") as newfile:
     newfile.write(
         f"""\
-namespace _2016.days;
+namespace _2025.days;
 public static class {classname.capitalize()}
 {{
     public static void Run()
