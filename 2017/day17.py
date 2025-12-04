@@ -12,6 +12,14 @@ def main():
     _2017 = buff.index(2017)
     print(f"Part 1: {buff[_2017 + 1]}")
 
+    after_zero = None
+    for i in range(50_000_000):
+        pos = (pos + steps) % (i + 1)
+        if pos == 0:
+            after_zero = i + 1
+        pos += 1
+    print(f"Part 2: {after_zero}")
+
 
 if __name__ == "__main__":
     main()
