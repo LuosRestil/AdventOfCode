@@ -1,7 +1,3 @@
-from functools import reduce
-from pathlib import Path
-
-
 def main():
     state = 'a'
     idx = 0
