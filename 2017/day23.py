@@ -30,7 +30,6 @@ class Program:
         if self.i >= len(instructions): return True
         jumped = False
         instruction = instructions[self.i]
-        print(f"i: {self.i}, {instruction}")
         if instruction.opcode == 'snd':
             x = get_value(instruction.x, self.registers)
             self.emit(x)
@@ -69,7 +68,6 @@ class Program:
                 jumped = True
         if not jumped:
             self.i += 1
-        print(self.registers)
         return False
 
 
@@ -81,19 +79,24 @@ def main():
         if not isinstance(instruction.x, int):
             registers[instruction.x] = 0
             
-    # program = Program(0, registers.copy(), [])
-    # finished = False
-    # while not finished:
-    #     finished = program.tick(instructions)
-    # print(f"Part 1: {program.mul_times}")
-    
-    pt2_reg = registers.copy()
-    pt2_reg['a'] = 1
-    program = Program(0, pt2_reg, [])
+    program = Program(0, registers.copy(), [])
     finished = False
     while not finished:
         finished = program.tick(instructions)
-    print(f"Part 2: {program.mul_times}") 
+    print(f"Part 1: {program.mul_times}")
+    
+    b = 106700
+    c = 123700
+    h = 0
+    while b <= c:
+        for d in range(2, b):
+            needed_e = b / d
+            if needed_e % 1 == 0 and needed_e < b:
+                h += 1
+                break
+        b += 17
+    print(f"Part 2: {h}")
+
 
 
 def parse(instruction: str) -> Instruction:
