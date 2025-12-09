@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "2025": {
+      "commandName": "Project",
+      "workingDirectory": "$(ProjectDir)",
+      "dotnetRunMessages": true
+    }
+  }
+}
