@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        width: 100vw;
+        height: 100vh;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="canvas" />
+    <script type="module">
+      const canvas = document.getElementById("canvas");
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      const ctx = canvas.getContext("2d");
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      const HORIZ = 1;
+      const VERT = 2;
+
+      let scale = 100;
+      let input = await fetch("../inputs/day09sample.txt");
+      let text = await input.text();
+      let tiles = text
+        .split("\n")
+        .map((line) => line.split(",").map((num) => parseInt(num)));
+      let lines = [];
+      for (let i = 0; i < tiles.length - 1; i++)
+        lines.push([tiles[i], tiles[i + 1]]);
+      lines.push([tiles[0], tiles.at(-1)]);
+
+      let i = 0;
+      let j = i + 1;
+      function tick() {
+        ctx.fillStyle = "black";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        let a = tiles.at(i);
+        let b = tiles[j];
+
+        drawPolygon(tiles.map((tile) => tile.map((num) => num * scale)));
+        drawRect(a, b);
+
+        for (let tile of tiles.map((tile) => tile.map((num) => num * scale))) {
+          drawPoint([tile[0], tile[1]], 7, "dodgerblue");
+          ctx.fillStyle = "cyan";
+          ctx.fillText(`${tile[0]}, ${tile[1]}`, tile[0] + 20, tile[1] + 30);
+        }
+
+        drawPoint([a[0] * scale, a[1] * scale], 3, "red");
+        drawPoint([b[0] * scale, b[1] * scale], 3, "red");
+
+        ctx.fillStyle = "yellow";
+        ctx.font = "18px monospace";
+        ctx.fillText(a, 20, 20);
+        ctx.fillText(b, 20, 40);
+        ctx.fillText(isGreen(a, b, lines) ? "valid" : "NOT valid", 20, 60);
+
+        j++;
+        if (j === tiles.length) {
+          i++;
+          if (i === tiles.length - 1) i = 0;
+          j = i + 1;
+        }
+      }
+
+      tick();
+
+      document.addEventListener("click", tick);
+
+      // let max_size = 0;
+      // let max_green_size = 0;
+      // let max_green_a = null;
+      // let max_green_b = null;
+      // for (let i = 0; i < tiles.length - 1; i++) {
+      //   for (let j = i + 1; j < tiles.length; j++) {
+      //     let a = tiles.at(i);
+      //     let b = tiles[j];
+      //     let size = (Math.abs(a[0] - b[0]) + 1) * (Math.abs(a[1] - b[1]) + 1);
+      //     if (size > max_size) max_size = size;
+
+      //     console.log(`${a}, ${b}, is green: ${is_green(a, b, lines)}`);
+
+      //     if (is_green(a, b, lines) && size > max_green_size) {
+      //       max_green_size = size;
+      //       max_green_a = a;
+      //       max_green_b = b;
+      //     }
+      //   }
+      // }
+      // console.log(`Part 1: ${max_size}`);
+      // console.log(`Part 2: ${max_green_size}`);
+
+      // drawPolygon(tiles.map((tile) => tile.map((num) => num * scale)));
+      // drawRect(max_green_a, max_green_b);
+
+      function isGreen(a, b, lines) {
+        let minX = Math.min(a[0], b[0]);
+        let maxX = Math.max(a[0], b[0]);
+        let minY = Math.min(a[1], b[1]);
+        let maxY = Math.max(a[1], b[1]);
+
+        let topLeft = [minX, minY];
+        let bottomRight = [maxX, maxY];
+        let tlInt = { left: null, right: null, up: null, down: null };
+        let brInt = { left: null, right: null, up: null, down: null };
+
+        for (let line of lines) {
+          // VERTICALS
+          if (getLineType(line) == VERT) {
+            // top left
+            if (between(topLeft[1], line[0][1], line[1][1], true)) {
+              // intersection found
+              let intersection = [line[0][0], topLeft[1]];
+              let onLineEnd =
+                intersection[1] == line[0][1] || intersection[1] == line[1][1];
+              if (intersection[0] <= topLeft[0]) {
+                // left
+                tlInt.left = { intersection, inside: !onLineEnd };
+              }
+              if (intersection[0] > topLeft[0]) {
+                // right
+                console.log('right int:' + intersection);
+                if (tlInt.right === null) {
+                  tlInt.right = { intersection, inside: !onLineEnd };
+                } else {
+                  if (pointsEqual(intersection, topLeft)) continue;
+                  // short or long based on inside or outside
+                  if (onLineEnd) {
+                    if (
+                      !tlInt.right.inside &&
+                      tlInt.right.intersection[0] < intersection[0]
+                    )
+                      tlInt.right = { intersection, inside: !onLineEnd };
+                  } else {
+                    if (
+                      !tlInt.right.inside ||
+                      tlInt.right.intersection[0] > intersection[0]
+                    )
+                      tlInt.right = { intersection, inside: !onLineEnd };
+                  }
+                }
+              }
+            }
+
+            // bottom right
+            if (between(bottomRight[1], line[0][1], line[1][1], true)) {
+              // intersection found
+              let intersection = [line[0][0], bottomRight[1]];
+              let onLineEnd =
+                intersection[1] == line[0][1] || intersection[1] == line[1][1];
+              if (intersection[0] < bottomRight[0]) {
+                // left
+                if (brInt.left === null) {
+                  brInt.left = { intersection, inside: !onLineEnd };
+                } else {
+                  pointsEqual(intersection, bottomRight);
+                  // short or long based on inside or outside
+                  if (onLineEnd) {
+                    if (!brInt.left.inside && brInt.left[0] > intersection[0])
+                      brInt.left = { intersection, inside: !onLineEnd };
+                  } else {
+                    if (!brInt.right.inside || brInt.left[0] < intersection[0])
+                      brInt.left = { intersection, inside: !onLineEnd };
+                  }
+                }
+              }
+              if (intersection[0] >= bottomRight[0]) {
+                // right
+                brInt.right = { intersection, inside: !onLineEnd };
+              }
+            }
+
+            // HORIZONTALS
+          } else {
+            // top left
+            if (between(topLeft[0], line[0][0], line[1][0], true)) {
+              // intersection found
+              let intersection = [topLeft[0], line[0][1]];
+              let onLineEnd =
+                intersection[0] == line[0][0] || intersection[0] == line[1][0];
+              if (intersection[1] <= topLeft[1]) {
+                // up
+                tlInt.up = { intersection, inside: !onLineEnd };
+              }
+              if (intersection[1] > topLeft[1]) {
+                // down
+                if (tlInt.down === null) {
+                  tlInt.down = { intersection, inside: !onLineEnd };
+                } else {
+                  pointsEqual(intersection, topLeft);
+                  // short or long based on inside or outside
+                  if (onLineEnd) {
+                    if (!tlInt.down.inside && tlInt.down[1] < intersection[1])
+                      tlInt.down = { intersection, inside: !onLineEnd };
+                  } else {
+                    if (!tlInt.down.inside || tlInt.down[1] > intersection[1]) {
+                      tlInt.down = { intersection, inside: !onLineEnd };
+                    }
+                  }
+                }
+              }
+            }
+
+            // bottom right
+            if (between(bottomRight[0], line[0][0], line[1][0], true)) {
+              // intersection found
+              let intersection = [bottomRight[0], line[0][1]];
+              let onLineEnd =
+                intersection[0] == line[0][0] || intersection[0] == line[1][0];
+              if (intersection[1] <= bottomRight[1]) {
+                // up
+                if (brInt.up === null) {
+                  brInt.up = { intersection, inside: !onLineEnd };
+                } else {
+                  pointsEqual(intersection, bottomRight);
+                  // short or long based on inside or outside
+                  if (onLineEnd) {
+                    if (!brInt.up.inside && brInt.up[1] > intersection[1])
+                      brInt.up = { intersection, inside: !onLineEnd };
+                  } else {
+                    if (!brInt.up.inside || brInt.up[1] < intersection[1])
+                      brInt.up = { intersection, inside: !onLineEnd };
+                  }
+                }
+              }
+              if (intersection[1] >= bottomRight[1]) {
+                // down
+                brInt.down = { intersection, inside: !onLineEnd };
+              }
+            }
+          }
+        }
+
+        console.log("tl");
+        console.log(tlInt);
+        console.log("br");
+        console.log(brInt);
+
+        if (
+          Object.values(tlInt).some((val) => val === null) ||
+          Object.values(brInt).some((val) => val === null)
+        ) {
+          return false;
+        }
+
+        if (
+          tlInt.right.intersection[0] < maxX ||
+          tlInt.down.intersection[1] < maxY ||
+          brInt.left.intersection[0] > minX ||
+          brInt.up.intersection[1] > minY
+        )
+          return false;
+        return true;
+      }
+
+      function getLineType(line) {
+        if (line[0][1] == line[1][1]) return HORIZ;
+        return VERT;
+      }
+
+      function between(val, a, b) {
+        let start = Math.min(a, b);
+        let end = Math.max(a, b);
+        return val >= start && val <= end;
+      }
+
+      function pointsEqual(a, b) {
+        return a[0] === b[0] && a[1] === b[1];
+      }
+
+      function drawPolygon(tiles) {
+        ctx.beginPath();
+        ctx.moveTo(tiles[0][0], tiles[0][1]);
+        let limit = tiles.length;
+        for (let i = 1; i < limit; i++) ctx.lineTo(tiles[i][0], tiles[i][1]);
+        ctx.lineTo(tiles[0][0], tiles[0][1]);
+        ctx.strokeStyle = "red";
+        ctx.fillStyle = "green";
+        ctx.stroke();
+        ctx.fill();
+      }
+
+      function drawRect(a, b) {
+        let min_x = Math.min(a[0], b[0]) * scale;
+        let max_x = Math.max(a[0], b[0]) * scale;
+        let min_y = Math.min(a[1], b[1]) * scale;
+        let max_y = Math.max(a[1], b[1]) * scale;
+        ctx.beginPath();
+        ctx.moveTo(min_x, min_y);
+        ctx.lineTo(max_x, min_y);
+        ctx.lineTo(max_x, max_y);
+        ctx.lineTo(min_x, max_y);
+        ctx.lineTo(min_x, min_y);
+        ctx.fillStyle = "rgb(255, 0, 0, 0.3)";
+        ctx.fill();
+
+        drawPoint([max_x, min_y], 10, "white");
+        drawPoint([max_x, max_y], 10, "white");
+        drawPoint([min_x, max_y], 10, "white");
+        drawPoint([min_x, min_y], 10, "white");
+
+        ctx.fillStyle = "white";
+        ctx.font = "12px monospace";
+        ctx.fillText(`${max_x}, ${min_y}`, max_x - 60, min_y - 20);
+        ctx.fillText(`${max_x}, ${max_y}`, max_x - 60, max_y - 20);
+        ctx.fillText(`${min_x}, ${max_y}`, min_x - 60, max_y - 20);
+        ctx.fillText(`${min_x}, ${min_y}`, min_x - 60, min_y - 20);
+      }
+
+      function drawPoint(point, size, color) {
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.arc(point[0], point[1], size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    </script>
+  </body>
+</html>

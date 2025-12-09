@@ -22,7 +22,7 @@ public static partial class Day06
 {
     public static void Run()
     {
-        string[] lines = File.ReadAllLines("inputs/day06.txt");
+        string[] lines = File.ReadAllLines("inputs/day06other.txt");
         string[][] grid = [.. lines.Select(line => Spaces().Split(line))];
         long grandTotal = 0;
         for (int col = 0; col < grid[0].Length; col++)
