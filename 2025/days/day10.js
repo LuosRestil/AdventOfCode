@@ -17,7 +17,7 @@ console.log(
 
 let joltageTotal = 0;
 for (let [idx, machine] of machines.entries()) {
-  console.log("processing " + idx);
+  console.log('processing ' + idx);
   joltageTotal += bfsJoltage(machine);
 }
 console.log(`Part 2: ${joltageTotal}`);
@@ -109,4 +109,41 @@ function parseMachine(line) {
     .split(",")
     .map((num) => parseInt(num));
   return { lights, buttons, joltage };
+}
+
+function greedyClick(machine) {
+  let total = machine.joltage.reduce((acc, curr) => acc + curr);
+  let weights = [...machine.joltage];
+  let maxWeight = 0;
+  for (let i = 0; i < machine.joltage.length; i++) {
+    weights[i] = Math.round((weights[i] / total) * 100);
+    if (weights[i] > maxWeight) maxWeight = weights[i];
+  }
+
+  weights = weights.map((weight) => {
+    let normalized = weight - Math.floor(maxWeight / 2);
+    let squared = normalized ** 2;
+    if (normalized < 0) squared *= -1;
+    return squared;
+  });
+
+  let scores = [];
+  let winner = -Infinity;
+  let winnerWeight = -Infinity;
+  for (let i = 0; i < machine.buttons.length; i++) {
+    let weight = 0;
+    for (let num of machine.buttons[i]) {
+      weight += weights[num];
+    }
+    if (weight > winnerWeight) {
+      winnerWeight = weight;
+      winner = i;
+    }
+    scores[i] = weight;
+  }
+
+  
+  for (let idx of machine.buttons[winner]) {
+    machine.joltage[idx]--;
+  }
 }

@@ -30,6 +30,9 @@
         border: none;
         border-radius: 5px;
       }
+      .red {
+        background-color: red;
+      }
       #joltage {
         font-size: 40px;
         font-weight: bold;
@@ -38,6 +41,13 @@
         justify-content: center;
         margin-top: 25%;
       }
+      #clicks-text {
+        position: absolute;
+        bottom: 10px;
+        left: 10px;
+        font-size: 32px;
+        font-weight: bold;
+      }
     </style>
   </head>
   <body>
@@ -45,18 +55,21 @@
     <div id="joltage">
       <p id="joltage-text"></p>
     </div>
+    <p id="clicks-text">0</p>
     <script>
       const lightsRe = /\[(.+)\]/;
       const buttonsRe = /\(([^\)]+)\)/g;
       const joltageRe = /\{(.+)\}/;
 
       let machine = parseMachine(
-        "[..#####.##] (1,3,4,6,7,8,9) (4) (0,2) (0,2,3,4,5,7,8,9) (3,6,7,9) (1,5,8) (0,1,2,3,4,6,8) (1,7,8) (0,1,2,3,4,8,9) (2,7,9) (0,1,2,5,6,8) (2,4,7,8) (6,8,9) {73,75,92,46,75,30,45,37,109,39}"
+        "[#...#] (1,3) (2,3,4) (0,2,3) (0,1,2) (2,3) {37,24,60,50,16}"
       );
+      let clicks = 0;
 
-      const buttons = document.getElementById('buttons');
-      const joltageText = document.getElementById('joltage-text');
-      joltageText.textContent = machine.joltage.join(', ');
+      const buttons = document.getElementById("buttons");
+      const joltageText = document.getElementById("joltage-text");
+      joltageText.textContent = machine.joltage.join(", ");
+      const clicksText = document.getElementById("clicks-text");
 
       for (let button of machine.buttons) {
         btn = document.createElement("button");
@@ -65,16 +78,52 @@
           for (let idx of button) {
             machine.joltage[idx]--;
           }
-          joltageText.textContent = machine.joltage.join(', ');
+          joltageText.textContent = machine.joltage.join(", ");
           calculateButtonPriority();
+          clicks++;
+          clicksText.textContent = clicks;
         };
-        btn.classList.add('btn');
+        btn.classList.add("btn");
         buttons.appendChild(btn);
       }
       calculateButtonPriority();
 
       function calculateButtonPriority() {
-        
+        let total = machine.joltage.reduce((acc, curr) => acc + curr);
+        let weights = [...machine.joltage];
+        let maxWeight = 0;
+        for (let i = 0; i < machine.joltage.length; i++) {
+          weights[i] = Math.round((weights[i] / total) * 100);
+          if (weights[i] > maxWeight) maxWeight = weights[i];
+        }
+
+        weights = weights.map((weight) => {
+          let normalized = weight - Math.floor(maxWeight / 2);
+          let squared = normalized ** 2;
+          if (normalized < 0) squared *= -1;
+          return squared;
+        });
+
+        let scores = [];
+        let winner = -Infinity;
+        let winnerWeight = -Infinity;
+        for (let i = 0; i < machine.buttons.length; i++) {
+          let weight = 0;
+          for (let num of machine.buttons[i]) {
+            weight += weights[num];
+          }
+          if (weight > winnerWeight) {
+            winnerWeight = weight;
+            winner = i;
+          }
+          scores[i] = weight;
+        }
+        let buttons = document.getElementsByClassName("btn");
+        for (let i = 0; i < buttons.length; i++) {
+          let button = buttons[i];
+          button.classList.remove("red");
+        }
+        buttons[winner].classList.add("red");
       }
 
       function parseMachine(line) {
