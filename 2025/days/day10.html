@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        width: 100vw;
+        height: 100vh;
+      }
+      #buttons {
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
+        width: 100%;
+        padding: 20px;
+      }
+      .btn {
+        font-size: 18px;
+        font-weight: bold;
+        padding: 10px 15px;
+        color: white;
+        background-color: dodgerblue;
+        border: none;
+        border-radius: 5px;
+      }
+      #joltage {
+        font-size: 40px;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 25%;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="buttons"></div>
+    <div id="joltage">
+      <p id="joltage-text"></p>
+    </div>
+    <script>
+      const lightsRe = /\[(.+)\]/;
+      const buttonsRe = /\(([^\)]+)\)/g;
+      const joltageRe = /\{(.+)\}/;
+
+      let machine = parseMachine(
+        "[..#####.##] (1,3,4,6,7,8,9) (4) (0,2) (0,2,3,4,5,7,8,9) (3,6,7,9) (1,5,8) (0,1,2,3,4,6,8) (1,7,8) (0,1,2,3,4,8,9) (2,7,9) (0,1,2,5,6,8) (2,4,7,8) (6,8,9) {73,75,92,46,75,30,45,37,109,39}"
+      );
+
+      const buttons = document.getElementById('buttons');
+      const joltageText = document.getElementById('joltage-text');
+      joltageText.textContent = machine.joltage.join(', ');
+
+      for (let button of machine.buttons) {
+        btn = document.createElement("button");
+        btn.textContent = button.join(", ");
+        btn.onclick = () => {
+          for (let idx of button) {
+            machine.joltage[idx]--;
+          }
+          joltageText.textContent = machine.joltage.join(', ');
+          calculateButtonPriority();
+        };
+        btn.classList.add('btn');
+        buttons.appendChild(btn);
+      }
+      calculateButtonPriority();
+
+      function calculateButtonPriority() {
+        
+      }
+
+      function parseMachine(line) {
+        let lights = line.match(lightsRe)[1];
+        let buttons = Array.from(
+          line
+            .matchAll(buttonsRe)
+            .map((res) => res[1].split(",").map((num) => parseInt(num)))
+        );
+        let joltage = line
+          .match(joltageRe)[1]
+          .split(",")
+          .map((num) => parseInt(num));
+        return { lights, buttons, joltage };
+      }
+    </script>
+  </body>
+</html>
