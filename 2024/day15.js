@@ -73,7 +73,7 @@ grid = input[0]
   )
   .map(row => row.split(''));
 
-botPos = utils.find2D(grid, BOT);
+botPos = find2D(grid, BOT);
 
 viz.start();
 for (let move of moves) {

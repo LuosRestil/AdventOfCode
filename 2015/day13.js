@@ -1,5 +1,3 @@
-// const fs = require('fs');
-// const { getAllPermutations } = require('../utils');
 import fs from 'fs';
 import { getAllPermutations } from '../utils.js';
 
