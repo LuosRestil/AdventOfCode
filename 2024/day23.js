@@ -1,7 +1,6 @@
-import utils from "../utils.js";
+import { getHashKey, getInput } from "../utils.js";
 
-const lines = utils
-  .getInput("day23.txt")
+const lines = getInput("day23.txt")
   .split("\n")
   .map((line) => line.split("-"));
 let connections = {};
@@ -24,7 +23,7 @@ for (let key in connections) {
         let b = connections[key][j];
         if (b === key) continue;
         if (connections[a].includes(b)) {
-          seen.add(utils.getHashKey(...[key, a, b].toSorted()))
+          seen.add(getHashKey(...[key, a, b].toSorted()))
         }
       }
     }

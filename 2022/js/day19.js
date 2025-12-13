@@ -1,4 +1,4 @@
-const fs = require('fs');
+import fs from 'fs';
 
 const blueprints = fs.readFileSync('inputs/day19.txt', 'utf8')
     .split('\n')

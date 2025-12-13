@@ -1,4 +1,4 @@
-const fs = require('fs');
+import fs from 'fs';
 let grid = fs.readFileSync('inputs/day08.txt', 'utf8')
   .split('\n')
   .map(row => row.split("").map(digit => parseInt(digit)));

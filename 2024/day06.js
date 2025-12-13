@@ -1,6 +1,6 @@
 console.time("time");
 
-const fs = require("fs");
+import fs from 'fs';
 
 const nextPosMods = {
   "^": [-1, 0],

@@ -1,4 +1,4 @@
-const fs = require('fs');
+import fs from 'fs';
 
 const jetPattern = fs.readFileSync('inputs/day17.txt', 'utf8').split('').map(char => char === '<' ? -1 : 1);
 const blocks = [

@@ -1,5 +1,5 @@
 console.time('exec');
-const fs = require('fs');
+import fs from 'fs';
 
 let input = fs.readFileSync('inputs/day17.txt', 'utf-8').split('\n').map(numString => parseInt(numString)).sort((a, b) => b - a);
 

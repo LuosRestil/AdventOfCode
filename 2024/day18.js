@@ -1,11 +1,10 @@
-import utils from "../utils.js";
+import { getHashKey, getNeighbors, isInGrid, gridGetPos, getInput } from "../utils.js";
 
 const sample = false;
 const filename = sample ? "day18sample.txt" : "day18.txt";
 const dimensions = sample ? 7 : 71;
 
-const bytes = utils
-  .getInput(filename)
+const bytes = getInput(filename)
   .split("\n")
   .map((line) => line.split(",").map((num) => Number(num)));
 
@@ -24,15 +23,15 @@ function solveForBytes(numBytes) {
   let seen = { "0:0": 0 };
   while (queue.length) {
     let pos = queue.pop();
-    let posHashKey = utils.getHashKey(...pos);
+    let posHashKey = getHashKey(...pos);
     let posCost = seen[posHashKey];
-    const neighbors = utils.getNeighbors(pos);
+    const neighbors = getNeighbors(pos);
     for (let neighbor of neighbors) {
       if (
-        utils.isInGrid(grid, neighbor) &&
-        utils.gridGetPos(grid, neighbor) !== "#"
+        isInGrid(grid, neighbor) &&
+        gridGetPos(grid, neighbor) !== "#"
       ) {
-        const neighborHashKey = utils.getHashKey(...neighbor);
+        const neighborHashKey = getHashKey(...neighbor);
         if (
           seen[neighborHashKey] === undefined ||
           seen[neighborHashKey] > posCost + 1
@@ -45,5 +44,5 @@ function solveForBytes(numBytes) {
   }
 
   let target = [dimensions - 1, dimensions - 1];
-  console.log(seen[utils.getHashKey(...target)]);
+  console.log(seen[getHashKey(...target)]);
 }

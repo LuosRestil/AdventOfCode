@@ -1,5 +1,5 @@
 console.time('runtime');
-const fs = require("fs");
+import fs from 'fs';
 const input = fs.readFileSync("inputs/day10.txt", { encoding: "utf-8" });
 let grid = input.split("\n");
 

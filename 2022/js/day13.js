@@ -1,4 +1,4 @@
-const fs = require('fs');
+import fs from 'fs';
 
 // Part 1
 let pairs = fs.readFileSync('inputs/day13.txt', 'utf8')

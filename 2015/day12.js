@@ -1,4 +1,4 @@
-const fs = require('fs');
+import fs from 'fs';
 
 let input = JSON.parse(fs.readFileSync('inputs/day12.json', 'utf8'));
 

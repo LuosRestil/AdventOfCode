@@ -1,4 +1,4 @@
-let {snafuToDecimal, decimalToSnafu, charMap} = require('./day25');
+import {snafuToDecimal, decimalToSnafu, charMap} from './day25.js';
 
 let conversions1 = `        1              1
         2              2

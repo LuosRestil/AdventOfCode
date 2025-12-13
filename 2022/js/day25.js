@@ -1,5 +1,5 @@
-const fs = require('fs');
-let charMap = {'0': 0, '1': 1, '2': 2, '-': -1, '=': -2};
+import fs from 'fs';
+export let charMap = {'0': 0, '1': 1, '2': 2, '-': -1, '=': -2};
 let reverseCharMap = ['=', '-', '0', '1', '2'];
 let snafus = fs.readFileSync('inputs/day25.txt', 'utf8').split('\n').map(snafu => snafu.split('').map(char => charMap[char]));;
 let total = 0;
@@ -8,7 +8,7 @@ for (let snafu of snafus) {
 }
 console.log('Answer 1: ' + decimalToSnafu(total));
 
-function snafuToDecimal(snafu) {
+export function snafuToDecimal(snafu) {
     let total = 0;
     for (let i = 0; i < snafu.length; i++) {
         let place = snafu.length - 1 - i;
@@ -17,7 +17,7 @@ function snafuToDecimal(snafu) {
     return total;
 }
 
-function decimalToSnafu(decimal) {
+export function decimalToSnafu(decimal) {
     let snafu = [];
     let maxPower = 0;
     while (getMaxDecimal(maxPower) < decimal) {
@@ -45,7 +45,3 @@ function getMaxDecimal(power) {
     }
     return total;
 }
-
-module.exports.snafuToDecimal = snafuToDecimal;
-module.exports.decimalToSnafu = decimalToSnafu;
-module.exports.charMap = charMap;

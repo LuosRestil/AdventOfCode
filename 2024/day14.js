@@ -1,6 +1,6 @@
-const { getInput, getHashKey } = require("../utils");
-const { createCanvas } = require("canvas");
-const fs = require("fs");
+import { getInput, getHashKey } from "../utils.js";
+import { createCanvas } from "canvas";
+import fs from "fs";
 
 console.time("time");
 

@@ -1,4 +1,4 @@
-const { getInput } = require("../utils");
+import { getInput } from "../utils.js";
 
 const input = getInput("day16.txt").split("\n\n");
 

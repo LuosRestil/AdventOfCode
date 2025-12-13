@@ -1,5 +1,7 @@
-const fs = require('fs');
-const { getAllPermutations } = require('../utils');
+// const fs = require('fs');
+// const { getAllPermutations } = require('../utils');
+import fs from 'fs';
+import { getAllPermutations } from '../utils.js';
 
 let input = fs.readFileSync('inputs/day13.txt', 'utf8').split('\n');
 

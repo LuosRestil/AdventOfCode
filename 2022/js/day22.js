@@ -1,4 +1,4 @@
-const fs = require('fs');
+import fs from 'fs';
 let infile = 'inputs/day22.txt';
 let input = fs.readFileSync(infile, 'utf8').split('\n\n');
 let instructions = [...input[1].matchAll(/[0-9]+|[LR]+/g)].map(match => match[0]);

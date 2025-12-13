@@ -1,6 +1,6 @@
 console.time("time");
 
-const { getInput } = require("../utils");
+import { getInput } from "../utils.js";
 
 const packages = getInput("day24.txt")
   .split("\n")

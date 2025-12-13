@@ -1,4 +1,4 @@
-const { getInput } = require("../../utils");
+import { getInput } from "../../utils.js";
 
 let scanners = getInput("day19sample.txt")
   .split("\n\n")

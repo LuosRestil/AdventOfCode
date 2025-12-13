@@ -1,6 +1,6 @@
-import utils from "../utils.js";
+import { getInput, getHashKey, find2D, pointsAreEqual } from "../utils.js";
 
-let codes = utils.getInput("day21.txt").split("\n");
+let codes = getInput("day21.txt").split("\n");
 
 let numPad = `
 #####
@@ -46,8 +46,8 @@ function robotPushSeq(seq, pad) {
   let paths = [""];
   for (let i = 0; i < seq.length; i++) {
     let nextPaths = [];
-    let hashKey = utils.getHashKey(i === 0 ? "A" : seq[i - 1], seq[i]);
-    let stepPaths = pad[utils.getHashKey(i === 0 ? "A" : seq[i - 1], seq[i])];
+    let hashKey = getHashKey(i === 0 ? "A" : seq[i - 1], seq[i]);
+    let stepPaths = pad[getHashKey(i === 0 ? "A" : seq[i - 1], seq[i])];
     if (!stepPaths) {
       console.log("well fuck");
     }
@@ -66,20 +66,20 @@ function getShortestPaths(grid, chars) {
   let map = {};
   for (let a of chars) {
     for (let b of chars) {
-      map[utils.getHashKey(a, b)] = getShortestPathsBetween(a, b, grid);
+      map[getHashKey(a, b)] = getShortestPathsBetween(a, b, grid);
     }
   }
   return map;
 }
 
 function getShortestPathsBetween(a, b, grid) {
-  let aPos = utils.find2D(grid, a);
-  let bPos = utils.find2D(grid, b);
+  let aPos = find2D(grid, a);
+  let bPos = find2D(grid, b);
   const seen = { [a]: { paths: [""], cost: 0 } };
   let queue = [{ ...seen[a], pos: aPos }];
   while (queue.length) {
     let curr = queue.shift();
-    if (utils.pointsAreEqual(curr.pos, bPos)) {
+    if (pointsAreEqual(curr.pos, bPos)) {
       continue;
     }
     // up

@@ -1,4 +1,4 @@
-const fs = require('fs');
+import fs from 'fs';
 const input = fs.readFileSync('inputs/day18.txt', 'utf8')
     .split('\n')
     .map(line => line.split(',').map(num => parseInt(num)));

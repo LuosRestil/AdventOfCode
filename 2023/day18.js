@@ -1,4 +1,4 @@
-const fs = require("fs");
+import fs from 'fs';
 const input = fs.readFileSync("inputs/day18.txt", { encoding: "utf-8" });
 let lines = input.split("\n").map((line) => {
   const splitLine = line.split(" ");

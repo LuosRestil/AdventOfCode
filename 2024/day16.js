@@ -1,4 +1,4 @@
-import utils from "../utils.js";
+import { getHashKey, getPrevIdx, getNextIdx, gridGetPos, getInput } from "../utils.js";
 
 console.time('time');
 
@@ -9,8 +9,7 @@ const posOffsets = [
   [0, -1],
 ];
 
-const maze = utils
-  .getInput("day16.txt")
+const maze = getInput("day16.txt")
   .split("\n")
   .map((row) => row.split(""));
 
@@ -25,20 +24,20 @@ for (let i = 0; i < maze.length; i++) {
 }
 
 const queue = [{ pos: startPos, dir: 1, cost: 0 }];
-const startHashKey = utils.getHashKey(...startPos);
+const startHashKey = getHashKey(...startPos);
 const seen = {[startHashKey]: [null, {cost: 0, from: []}]};
 
 while (queue.length) {
   const next = queue.shift();
   const { pos, dir, cost } = next;
-  const seenFromHashKey = utils.getHashKey(pos[0], pos[1], dir);
-  if (utils.gridGetPos(maze, pos) === "E") {
+  const seenFromHashKey = getHashKey(pos[0], pos[1], dir);
+  if (gridGetPos(maze, pos) === "E") {
     continue;
   }
   // look in dir
   const forwardPos = [pos[0] + posOffsets[dir][0], pos[1] + posOffsets[dir][1]];
-  if (utils.gridGetPos(maze, forwardPos) !== "#") {
-    const forwardHashKey = utils.getHashKey(forwardPos[0], forwardPos[1]);
+  if (gridGetPos(maze, forwardPos) !== "#") {
+    const forwardHashKey = getHashKey(forwardPos[0], forwardPos[1]);
     if (!seen[forwardHashKey]) {
       seen[forwardHashKey] = [];
     }
@@ -57,13 +56,13 @@ while (queue.length) {
   }
 
   // turn left
-  const leftDir = utils.getPrevIdx(posOffsets, dir);
+  const leftDir = getPrevIdx(posOffsets, dir);
   const leftPos = [
     pos[0] + posOffsets[leftDir][0],
     pos[1] + posOffsets[leftDir][1],
   ];
-  if (utils.gridGetPos(maze, leftPos) !== '#') {
-    const leftHashKey = utils.getHashKey(pos[0], pos[1]);
+  if (gridGetPos(maze, leftPos) !== '#') {
+    const leftHashKey = getHashKey(pos[0], pos[1]);
     if (!seen[leftHashKey]) {
       seen[leftHashKey] = [];
     }
@@ -82,13 +81,13 @@ while (queue.length) {
   }
 
   // turn right
-  const rightDir = utils.getNextIdx(posOffsets, dir);
+  const rightDir = getNextIdx(posOffsets, dir);
   const rightPos = [
     pos[0] + posOffsets[rightDir][0],
     pos[1] + posOffsets[rightDir][1],
   ];
-  if (utils.gridGetPos(maze, rightPos) !== '#') {
-    const rightHashKey = utils.getHashKey(pos[0], pos[1]);
+  if (gridGetPos(maze, rightPos) !== '#') {
+    const rightHashKey = getHashKey(pos[0], pos[1]);
     if (!seen[rightHashKey]) {
       seen[rightHashKey] = [];
     }
@@ -107,7 +106,7 @@ while (queue.length) {
   }
 }
 
-const endHashKey = utils.getHashKey(endPos[0], endPos[1]);
+const endHashKey = getHashKey(endPos[0], endPos[1]);
 let lowestCost = Infinity;
 let lowestCostDir = -1;
 for (let i = 0; i < seen[endHashKey].length; i++) {
@@ -133,7 +132,7 @@ function countPath(startKey, startDir) {
     for (let from of entry.from) {
       const [fRow, fCol, fDirStr] = from.split(':');
       const fDir = Number(fDirStr);
-      const fKey = utils.getHashKey(fRow, fCol);
+      const fKey = getHashKey(fRow, fCol);
       queue.push({key: fKey, dir: fDir});
     }
   }

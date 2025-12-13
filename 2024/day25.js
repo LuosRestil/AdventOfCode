@@ -1,6 +1,6 @@
-import utils from '../utils.js';
+import { getInput } from '../utils.js';
 
-const input = utils.getInput('day25.txt').split('\n\n');
+const input = getInput('day25.txt').split('\n\n');
 
 const locks = [];
 const keys = [];

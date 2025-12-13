@@ -1,4 +1,4 @@
-const { getInput } = require('../utils');
+import { getInput } from '../utils.js';
 
 const input = getInput('day06.txt').split('\n');
 const times = input[0].split(/\s+/g).slice(1);

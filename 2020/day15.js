@@ -1,4 +1,4 @@
-const { getInput } = require('../utils');
+import { getInput } from '../utils.js';
 
 let input = getInput('day15.txt').split(',').map(num => parseInt(num));
 

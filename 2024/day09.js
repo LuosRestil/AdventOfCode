@@ -1,6 +1,6 @@
 console.time("time");
 
-const fs = require("fs");
+import fs from 'fs';
 
 const filepath = "inputs/day09.txt";
 const diskmap = fs.readFileSync(filepath, { encoding: "utf-8" });

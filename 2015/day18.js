@@ -1,5 +1,5 @@
 console.time('exec');
-const fs = require('fs');
+import fs from 'fs';
 
 let input = fs.readFileSync('inputs/day18.txt', 'utf-8').split('\n').map(row => row.split(""));
 

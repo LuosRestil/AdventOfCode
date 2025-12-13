@@ -1,4 +1,4 @@
-const fs = require('fs');
+import fs from 'fs';
 
 let input = fs.readFileSync('inputs/day07.txt', 'utf8');
 input = input.split("\n");

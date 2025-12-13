@@ -1,17 +1,17 @@
-const { getInput } = require('../../utils');
+import { getInput } from "../../utils.js";
 
 const input = getInput('day20.txt').split('\n\n');
 let algo = input[0];
 let inputImage = input[1];
 
 // Pt. 1
-// let iterations = 2;
+let iterations = 2;
 // Pt. 2
-iterations = 50;
+// iterations = 50;
 
 let padVal = '.';
 
-image = inputImage.split("\n").map(row => row.split(""));
+let image = inputImage.split("\n").map(row => row.split(""));
 
 for (let i = 0; i < iterations; i++) {
   image = process(image, algo, padVal);

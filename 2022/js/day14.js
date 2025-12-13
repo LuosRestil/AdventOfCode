@@ -1,4 +1,4 @@
-const fs = require('fs');
+import fs from 'fs';
 const SAND_SOURCE_INDEX = 500;
 
 let input = fs.readFileSync('inputs/day14.txt', 'utf8')

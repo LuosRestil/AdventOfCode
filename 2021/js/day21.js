@@ -1,4 +1,4 @@
-const { getInput } = require('../../utils');
+import { getInput } from "../../utils.js";
 
 const input = getInput('day21.txt').split('\n');
 const p1StartPos = parseInt(input[0][input[0].length - 1]);

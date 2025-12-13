@@ -1,4 +1,4 @@
-const fs = require('fs');
+import fs from 'fs';
 let buffer = fs.readFileSync('inputs/day06.txt', 'utf8');
 
 function findMarker(buffer, markerSize) {

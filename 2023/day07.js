@@ -1,4 +1,4 @@
-const fs = require("fs");
+import fs from 'fs';
 const input = fs.readFileSync("inputs/day07.txt", { encoding: "utf-8" });
 const hands = input.split("\n").map((hand) => hand.split(" ")); // hand [0], bid [1]
 let cardStrengths = {

@@ -1,4 +1,4 @@
-const fs = require('fs');
+import fs from 'fs';
 let input = fs.readFileSync('inputs/day24.txt', 'utf8')
     .split('\n');
 input = input.slice(1, input.length - 1).map(row => row.slice(1, row.length - 1)); // ignore walls

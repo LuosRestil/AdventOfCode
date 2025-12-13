@@ -1,8 +1,8 @@
-import utils from "../utils.js";
+import { getInput } from "../utils.js";
 
 console.time('time');
 
-const input = utils.getInput('day19.txt').split('\n\n');
+const input = getInput('day19.txt').split('\n\n');
 
 const towels = input[0].split(', ');
 const designs = input[1].split('\n');

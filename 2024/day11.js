@@ -1,6 +1,6 @@
 console.time('time');
 
-const fs = require('fs');
+import fs from 'fs';
 
 const stones = fs.readFileSync('inputs/day11.txt', {encoding: 'utf-8'}).split(' ');
 

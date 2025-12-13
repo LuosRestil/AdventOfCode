@@ -1,4 +1,4 @@
-import utils from '../utils.js';
+import { getInput, find2D, sleep } from '../utils.js';
 import viz from '../terminalViz.js';
 
 process.on('SIGINT', () => {
@@ -10,14 +10,14 @@ console.time('time');
 
 const [BOX, WALL, BOT, EMPTY] = ["O", "#", "@", "."];
 
-const input = utils.getInput("day15sample.txt").split("\n\n");
+const input = getInput("day15sample.txt").split("\n\n");
 const moves = input[1].replaceAll("\n", "");
 
 let grid = input[0]
   .split("\n")
   .map((row) => row.split(""));
 
-let botPos = utils.find2D(grid, BOT);
+let botPos = find2D(grid, BOT);
 
 const dirMap = {
   "^": [-1, 0],
@@ -113,7 +113,7 @@ for (let move of moves) {
     }
   }
   grid[botPos[0]][botPos[1]] = move;
-  await utils.sleep(333);
+  await sleep(333);
 }
 viz.printGrid(grid);
 viz.end();

@@ -1,4 +1,4 @@
-const fs = require('fs');
+import fs from 'fs';
 let letterGrid = fs.readFileSync('inputs/day12.txt', 'utf8').split('\n').map(line => line.split(''));
 
 class Cell {  

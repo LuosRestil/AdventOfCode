@@ -1,14 +1,14 @@
 import fs from "fs";
 import path from "path";
 
-function getInput(filename) {
+export function getInput(filename) {
   const baseDir = path.dirname(process.argv[1]);
   return fs.readFileSync(path.join(baseDir, "inputs", filename), {
     encoding: "utf-8",
   });
 }
 
-function getAllPermutations(list) {
+export function getAllPermutations(list) {
   if (list.length === 1) {
     return [list];
   }
@@ -27,23 +27,23 @@ function getAllPermutations(list) {
   return perms;
 }
 
-function getHashKey(...args) {
+export function getHashKey(...args) {
   return args.join(":");
 }
 
-function getNextIdx(arr, idx) {
+export function getNextIdx(arr, idx) {
   idx++;
   if (idx === arr.length) idx = 0;
   return idx;
 }
 
-function getPrevIdx(arr, idx) {
+export function getPrevIdx(arr, idx) {
   idx--;
   if (idx < 0) idx = arr.length - 1;
   return idx;
 }
 
-function find2D(grid, char) {
+export function find2D(grid, char) {
   for (let i = 0; i < grid.length; i++) {
     for (let j = 0; j < grid[0].length; j++) {
       if (grid[i][j] === char) return [i, j];
@@ -52,15 +52,15 @@ function find2D(grid, char) {
   return null;
 }
 
-function sleep(ms) {
+export function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-function pointsAreEqual(a, b) {
+export function pointsAreEqual(a, b) {
   return a[0] === b[0] && a[1] === b[1];
 }
 
-function getNeighbors(pos, dist = 1) {
+export function getNeighbors(pos, dist = 1) {
   return [
     [pos[0] - dist, pos[1]],
     [pos[0] + dist, pos[1]],
@@ -69,7 +69,7 @@ function getNeighbors(pos, dist = 1) {
   ];
 }
 
-function isInGrid(grid, pos) {
+export function isInGrid(grid, pos) {
   return (
     pos[0] >= 0 &&
     pos[0] < grid.length &&
@@ -78,15 +78,15 @@ function isInGrid(grid, pos) {
   );
 }
 
-function gridGetPos(grid, pos) {
+export function gridGetPos(grid, pos) {
   return grid[pos[0]][pos[1]];
 }
 
-function gridSetPos(grid, pos, val) {
+export function gridSetPos(grid, pos, val) {
   grid[pos[0]][pos[1]] = val;
 }
 
-function printGrid(grid) {
+export function printGrid(grid) {
   for (let i = 0; i < grid.length; i++) {
     for (let j = 0; j < grid[0].length; j++) {
       process.stdout.write(grid[i][j]);
@@ -95,11 +95,11 @@ function printGrid(grid) {
   }
 }
 
-function getManhattanDistance(a, b) {
+export function getManhattanDistance(a, b) {
   return Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]);
 }
 
-function getAllNeighborsAtManhattanDistance(pos, dist) {
+export function getAllNeighborsAtManhattanDistance(pos, dist) {
   const neighbors = [];
   for (let row = pos[0] - dist, offset = 0; row <= pos[0] + dist; row++, offset = dist - Math.abs(pos[0]-row)) {
     for (let col = pos[1] - offset; col <= pos[1] + offset; col++) {
@@ -110,20 +110,6 @@ function getAllNeighborsAtManhattanDistance(pos, dist) {
   return neighbors;
 }
 
-export default {
-  getInput,
-  getAllPermutations,
-  getHashKey,
-  getNextIdx,
-  getPrevIdx,
-  find2D,
-  sleep,
-  pointsAreEqual,
-  getNeighbors,
-  isInGrid,
-  gridGetPos,
-  gridSetPos,
-  printGrid,
-  getManhattanDistance,
-  getAllNeighborsAtManhattanDistance
-};
+export function sayHello() {
+  console.log('hello');
+}

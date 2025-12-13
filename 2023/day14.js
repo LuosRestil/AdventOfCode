@@ -1,4 +1,4 @@
-const fs = require('fs');
+import fs from 'fs';
 const input = fs.readFileSync('inputs/day14.txt', {encoding: 'utf-8'});
 const grid = input.split('\n').map(row => row.split(''));
 

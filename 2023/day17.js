@@ -1,5 +1,5 @@
 // read input, create 2d array of numbers
-const fs = require("fs");
+import fs from 'fs';
 const input = fs.readFileSync("inputs/day17.txt", { encoding: "utf-8" });
 const grid = input
   .split("\n")

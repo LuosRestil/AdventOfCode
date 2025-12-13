@@ -1,6 +1,6 @@
 console.time('time');
 
-const fs = require("fs");
+import fs from 'fs';
 
 const lines = fs
   .readFileSync("inputs/day07.txt", {encoding: 'utf-8'})

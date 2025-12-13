@@ -1,6 +1,6 @@
-import utils from "../utils.js";
+import { getInput } from "../utils.js";
 
-const input = utils.getInput("day24edit.txt").split("\n\n");
+const input = getInput("day24edit.txt").split("\n\n");
 const initVals = input[0]
   .split("\n")
   .map((line) => line.split(": "))

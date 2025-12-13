@@ -1,6 +1,4 @@
-const { getInput, isOnGrid, getHashKey } = require("../utils");
-
-console.time('time');
+import { getInput, isInGrid, getHashKey } from "../utils.js";
 
 const grid = getInput("day12.txt").split("\n");
 const seen = new Set();
@@ -50,7 +48,7 @@ function processRegion(row, col) {
 
     for (let cell of neighbors) {
       if (
-        !isOnGrid(grid, cell.loc[0], cell.loc[1]) ||
+        !isInGrid(grid, cell.loc[0], cell.loc[1]) ||
         grid[cell.loc[0]][cell.loc[1]] !== crop
       ) {
         // add edge
