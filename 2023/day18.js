@@ -1,14 +1,51 @@
-import fs from 'fs';
-const input = fs.readFileSync("inputs/day18.txt", { encoding: "utf-8" });
+import { getHashKey, getInput } from "../utils.js";
+
+const input = getInput("day18.txt");
 let lines = input.split("\n").map((line) => {
   const splitLine = line.split(" ");
   return {
     dir: splitLine[0],
     dist: parseInt(splitLine[1]),
+    color: splitLine[2].slice(1, splitLine[2].length - 1),
   };
 });
 
-console.log("Answer 1: " + doTheThing(lines));
+console.log(`Part 1: ${getArea(lines)}`);
+
+function getArea(lines) {
+  let curr = [0, 0];
+  let map = { 0: [0] }; // keys are path rows, vals are path columns
+  for (let line of lines) {
+    if (line.dir === "U" || line.dir === "D") {
+      for (let i = 0; i < line.dist; i++) {
+        curr[0] += line.dir === "U" ? -1 : line.dir === "D" ? 1 : 0;
+        if (!map[curr[0]]) map[curr[0]] = [];
+        map[curr[0]].push(curr[1]);
+      }
+    } else {
+      curr[1] += line.dir === 'L' ? -line.dist : line.dist;
+      map[curr[0]].push(curr[1]);
+    }
+  }
+  let total = 0;
+  for (let row in map) {
+    let rowTotal = 0;
+    let cols = map[row].toSorted((a, b) => a - b);
+    for (let i = 0; i < cols.length; i++) {
+      if (i == cols.length - 1 || cols[i + 1] === cols[i] + 1) {
+        rowTotal += 1;
+        continue;
+      }
+      let gapLen = cols[i + 1] - cols[i];
+      rowTotal += gapLen;
+    }
+    // console.log(row, rowTotal);
+    total += rowTotal;
+  }
+  return total;
+}
+
+console.log("Answer 1: " + doTheThing(lines, true));
 
 let digitToDir = {
   0: "R",
@@ -27,7 +64,6 @@ lines = input.split("\n").map((line) => {
 
   return { dir, dist };
 });
-
 
 function doTheThing(lines, print = false) {
   let nodes = [[0, 0]];
@@ -84,14 +120,14 @@ function doTheThing(lines, print = false) {
     } else throw new Error("oh god oh fuck");
   }
 
-  let toFill = [floodFillTarget];
-  while (toFill.length) {
-    let curr = toFill.pop();
-    grid[curr[0]][curr[1]] = "#";
-    for (let neighbor of getNeighbors(grid, curr[0], curr[1])) {
-      if (grid[neighbor[0]][neighbor[1]] !== "#") toFill.push(neighbor);
-    }
-  }
+  // let toFill = [floodFillTarget];
+  // while (toFill.length) {
+  //   let curr = toFill.pop();
+  //   grid[curr[0]][curr[1]] = "#";
+  //   for (let neighbor of getNeighbors(grid, curr[0], curr[1])) {
+  //     if (grid[neighbor[0]][neighbor[1]] !== "#") toFill.push(neighbor);
+  //   }
+  // }
 
   let count = 0;
   for (let i = 0; i < grid.length; i++) {
@@ -101,7 +137,13 @@ function doTheThing(lines, print = false) {
   }
 
   if (print) {
-    grid.forEach((row) => console.log(row.join("")));
+    for (let i = 0; i < grid.length; i++) {
+      console.log(i + ": " + grid[i].join(""));
+    }
+    // grid.forEach((row) => console.log(row.join("")));
+    // for (let i = grid.length - 1; i >= 0; i--) {
+    //   console.log(i + ": " + grid[i].filter(char => char === '#').length);
+    // }
   }
   return count;
 }

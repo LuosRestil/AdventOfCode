@@ -109,7 +109,3 @@ export function getAllNeighborsAtManhattanDistance(pos, dist) {
   }
   return neighbors;
 }
-
-export function sayHello() {
-  console.log('hello');
-}

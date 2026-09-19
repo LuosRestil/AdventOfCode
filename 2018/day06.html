@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: slategray;
+      }
+      canvas {
+        image-rendering: pixelated;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas></canvas>
+    <script type="module">
+      let canvas = document.querySelector("canvas");
+      let ctx = canvas.getContext("2d");
+      let res = await fetch("inputs/day06.txt");
+      let text = await res.text();
+      let points = text.split("\n").map((row) => {
+        return {
+          pos: row.split(", ").map((num) => parseInt(num)),
+          count: 0,
+          infinite: false,
+          color: [
+            Math.random() * 255,
+            Math.random() * 255,
+            Math.random() * 255,
+          ],
+        };
+      });
+      canvas.width = Math.max(...points.map((pt) => pt.pos[0])) + 1;
+      canvas.height = Math.max(...points.map((pt) => pt.pos[1])) + 1;
+
+      ctx.fillStyle = "black";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      let pixels = imageData.data;
+
+      for (let x = 0; x < canvas.width; x++) {
+        for (let y = 0; y < canvas.height; y++) {
+          let pixelIdx = getPixelIdx(x, y);
+
+          let nearestPoint = null;
+          let nearestDist = Infinity;
+          for (let pt of points) {
+            let dist = manhattanDistance(x, y, pt.pos[0], pt.pos[1]);
+            if (dist === nearestDist) {
+              // equidistant to multiple points
+              nearestPoint = null;
+            } else if (dist < nearestDist) {
+              nearestDist = dist;
+              nearestPoint = pt;
+            }
+          }
+          if (nearestPoint === null) {
+            pixels[pixelIdx] = 0;
+            pixels[pixelIdx + 1] = 0;
+            pixels[pixelIdx + 2] = 0;
+          } else {
+            nearestPoint.count++;
+            if (
+              x === 0 ||
+              y === 0 ||
+              x === canvas.width ||
+              y === canvas.height
+            ) {
+              nearestPoint.infinite = true;
+            }
+            if (nearestDist === 0) {
+              pixels[pixelIdx] = 255;
+            } else {
+              pixels[pixelIdx] = nearestPoint.color[0];
+              pixels[pixelIdx + 1] = nearestPoint.color[1];
+              pixels[pixelIdx + 2] = nearestPoint.color[2];
+            }
+          }
+        }
+      }
+
+      for (let pt of points) {
+        let pixelIdx = getPixelIdx(pt[0], pt[1]);
+        pixels[pixelIdx] = 255;
+        pixels[pixelIdx + 1] = 0;
+        pixels[pixelIdx + 2] = 0;
+      }
+
+      ctx.putImageData(imageData, 0, 0);
+
+      let scale = Math.floor(
+        Math.min(
+          window.innerWidth / canvas.width,
+          window.innerHeight / canvas.height,
+        ),
+      );
+
+      canvas.style.width = `${canvas.width * scale}px`;
+      canvas.style.height = `${canvas.width * scale}px`;
+
+      console.log(
+        points
+          .filter((pt) => !pt.infinite)
+          .toSorted((a, b) => b.count - a.count)[0].count,
+      );
+
+      function drawPt(x, y) {
+        ctx.beginPath();
+        ctx.arc(x, y, 3, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      function manhattanDistance(x1, y1, x2, y2) {
+        return Math.abs(x1 - x2) + Math.abs(y1 - y2);
+      }
+
+      function getPixelIdx(x, y) {
+        return y * canvas.width * 4 + x * 4;
+      }
+    </script>
+  </body>
+</html>
