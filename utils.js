@@ -17,7 +17,7 @@ export function getAllPermutations(list) {
   for (let i = 0; i < list.length; i++) {
     let curr = list[i];
     let remaining = getAllPermutations(
-      list.slice(0, i).concat(list.slice(i + 1, list.length))
+      list.slice(0, i).concat(list.slice(i + 1, list.length)),
     );
     for (let perm of remaining) {
       perms.push([curr, ...perm]);
@@ -101,11 +101,70 @@ export function getManhattanDistance(a, b) {
 
 export function getAllNeighborsAtManhattanDistance(pos, dist) {
   const neighbors = [];
-  for (let row = pos[0] - dist, offset = 0; row <= pos[0] + dist; row++, offset = dist - Math.abs(pos[0]-row)) {
+  for (
+    let row = pos[0] - dist, offset = 0;
+    row <= pos[0] + dist;
+    row++, offset = dist - Math.abs(pos[0] - row)
+  ) {
     for (let col = pos[1] - offset; col <= pos[1] + offset; col++) {
       if (row === 0 && col === 0) continue;
       neighbors.push([row, col]);
     }
   }
   return neighbors;
+}
+export class Vec2 {
+  constructor(x, y) {
+    this.x = x;
+    this.y = y;
+  }
+
+  add(other) {
+    this.x += other.x;
+    this.y += other.y;
+    return this;
+  }
+
+  sub(other) {
+    this.x -= other.x;
+    this.y -= other.y;
+    return this;
+  }
+
+  scale(scalar) {
+    this.x *= scalar;
+    this.y *= scalar;
+    return this;
+  }
+
+  mag() {
+    return Math.sqrt(this.x * this.x + this.y * this.y);
+  }
+
+  normalize() {
+    this.scale(1 / this.mag());
+    return this;
+  }
+
+  setMag(mag) {
+    this.normalize().scale(mag);
+    return this;
+  }
+
+  copy() {
+    return new Vec2(this.x, this.y);
+  }
+
+  rotateDegrees(degrees) {
+    let rad = Vec2.degToRad(degrees);
+    let newX = this.x * Math.cos(rad) - this.y * Math.sin(rad);
+    let newY = this.x * Math.sin(rad) + this.y * Math.cos(rad);
+    this.x = newX;
+    this.y = newY;
+    return this;
+  }
+
+  static degToRad(degrees) {
+    return degrees * (Math.PI / 180);
+  }
 }

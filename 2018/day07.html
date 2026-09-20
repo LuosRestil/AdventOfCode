@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: rgb(30, 30, 30);
+      }
+      canvas {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas></canvas>
+    <script type="module">
+      let lastClicked = null;
+      let answer = "";
+      let selectedNode = null;
+      let canvas = document.querySelector("canvas");
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      let ctx = canvas.getContext("2d");
+      ctx.font = "bold 24px monospace";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+
+      let nodeSize = canvas.width / 52;
+
+      let steps = {};
+
+      let res = await fetch("inputs/day07.txt");
+      let text = await res.text();
+      let input = text
+        .split("\n")
+        .map((row) => row.split(" "))
+        .map((row) => [row[1], row[7]]);
+
+      for (let row of input) {
+        if (!steps[row[0]]) {
+          steps[row[0]] = {
+            from: [],
+            to: [],
+            done: false,
+            x: Math.random() * canvas.width - nodeSize,
+            y: Math.random() * canvas.height,
+            ready: false,
+          };
+        }
+        if (!steps[row[1]]) {
+          steps[row[1]] = {
+            from: [],
+            to: [],
+            done: false,
+            x: Math.random() * canvas.width - nodeSize,
+            y: Math.random() * canvas.height,
+            ready: false,
+          };
+        }
+        steps[row[0]].to.push(row[1]);
+        steps[row[1]].from.push(row[0]);
+      }
+      let letters = Object.keys(steps).toSorted();
+      for (let i = 0; i < letters.length; i++) {
+        steps[letters[i]].x = nodeSize + i * (nodeSize * 2);
+        steps[letters[i]].y = canvas.height / 2;
+      }
+
+      readySweep();
+
+      canvas.addEventListener("mousedown", (evt) => {
+        for (let step in steps) {
+          let node = steps[step];
+          let distSq = getDistSq(evt.clientX, evt.clientY, node.x, node.y);
+          if (distSq < nodeSize * nodeSize) {
+            node.done = true;
+            answer += step;
+            console.log(answer);
+            readySweep();
+            break;
+          }
+        }
+      });
+      window.addEventListener("contextmenu", (evt) => {
+        evt.preventDefault();
+      });
+
+      loop();
+
+      function loop() {
+        requestAnimationFrame(loop);
+
+        ctx.fillStyle = "rgb(180, 180, 180)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        for (let node of Object.entries(steps)) {
+          drawNode(node);
+        }
+      }
+
+      function drawNode(node) {
+        let letter = node[0];
+        let step = node[1];
+
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = "black";
+        if (step.done) {
+          ctx.fillStyle = "limegreen";
+        } else if (step.ready) {
+          ctx.fillStyle = "yellow";
+        } else {
+          ctx.fillStyle = "white";
+        }
+        ctx.beginPath();
+        ctx.arc(step.x, step.y, nodeSize, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = "black";
+        ctx.fillText(letter, step.x, step.y);
+      }
+
+      function getDistSq(x1, y1, x2, y2) {
+        let dx = x1 - x2;
+        let dy = y1 - y2;
+        return dx * dx + dy * dy;
+      }
+
+      function lerp(a, b, t) {
+        return a + (b - a) * t;
+      }
+
+      function readySweep() {
+        for (let step in steps) {
+          let node = steps[step];
+          node.ready = node.from.length === 0 || node.from.every((from) => steps[from].done);
+        }
+      }
+    </script>
+  </body>
+</html>
