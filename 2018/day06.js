@@ -3,7 +3,7 @@ import fs from "fs";
 console.time();
 
 let pts = fs
-  .readFileSync("inputs/day06.txt", "utf-8")
+  .readFileSync(path.join(import.meta.dirname, "inputs", "day06.txt"), "utf-8")
   .split("\n")
   .map((row) => {
     return {

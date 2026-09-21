@@ -1,7 +1,10 @@
 import fs from "fs";
+import path from "node:path";
+
+console.time();
 
 let input = fs
-  .readFileSync("inputs/day07.txt", "utf-8")
+  .readFileSync(path.join(import.meta.dirname, "inputs", "day07.txt"), "utf-8")
   .split("\n")
   .map((row) => row.split(" "))
   .map((row) => [row[1], row[7]]);
@@ -27,6 +30,8 @@ while (answer.length < letters.length) {
 }
 
 console.log(`Part 2: ${ticks}, ${answer}`); // off by one for some reason, probably just the order of work
+
+console.timeEnd();
 
 function tick() {
   ticks++;

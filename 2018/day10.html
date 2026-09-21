@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>2018 Day 09</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: rgb(30, 30, 30);
+      }
+      canvas {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas></canvas>
+    <script type="module">
+      let canvas = document.querySelector("canvas");
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      console.log(canvas.width, canvas.height);
+      let ctx = canvas.getContext("2d");
+
+      let res = await fetch("inputs/day10.txt");
+      let text = await res.text();
+      let points = text.split("\n").map((row) => {
+        let matches = [...row.matchAll(/<(.+?)>/g)];
+        let pos = matches[0][1]
+          .trimStart()
+          .split(/,\s+/)
+          .map((num) => parseInt(num));
+        let vel = matches[1][1]
+          .trimStart()
+          .split(/,\s+/)
+          .map((num) => parseInt(num));
+        return { pos, vel };
+      });
+
+      let lastTimestamp = 0;
+
+      let iterations = 0;
+      while (
+        !points.every(
+          (point) =>
+            point.pos[0] > 0 &&
+            point.pos[1] > 0 &&
+            point.pos[0] < canvas.width &&
+            point.pos[1] < canvas.height,
+        )
+      ) {
+        iterations++;
+        for (let point of points) {
+          point.pos[0] += point.vel[0];
+          point.pos[1] += point.vel[1];
+        }
+      }
+
+      let looping = true;
+      document.addEventListener("keypress", (evt) => {
+        tick();
+      });
+
+      function tick() {
+        iterations++;
+        console.log(iterations);
+        ctx.fillStyle = "rgb(180, 180, 180)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        for (let point of points) {
+          point.pos[0] += point.vel[0];
+          point.pos[1] += point.vel[1];
+        }
+
+        ctx.fillStyle = "black";
+        for (let point of points) {
+          ctx.fillRect(point.pos[0], point.pos[1], 1, 1);
+        }
+      }
+    </script>
+  </body>
+</html>

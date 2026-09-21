@@ -1,6 +1,8 @@
 import fs from "fs";
 import path from "node:path";
 
+console.time();
+
 const input = fs
   .readFileSync(path.join(import.meta.dirname, "inputs", "day08.txt"), "utf-8")
   .split(" ")
@@ -11,6 +13,8 @@ let root = getNode(input, ptr);
 
 console.log(`Part 1: ${getRawMetadataValue(root)}`);
 console.log(`Part 2: ${getDerivedMetadataValue(root)}`);
+
+console.timeEnd();
 
 function getNode() {
   let childCount = input[ptr++];

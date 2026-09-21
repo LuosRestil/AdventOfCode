@@ -1,8 +1,12 @@
+console.time();
+
 let numPlayers = 473;
 let lastMarble = 70904;
 
 console.log(`Part 1: ${playGame2(numPlayers, lastMarble)}`);
 console.log(`Part 2: ${playGame2(numPlayers, lastMarble * 100)}`);
+
+console.timeEnd();
 
 function playGame(numPlayers, lastMarble) {
   let marble = 1;
