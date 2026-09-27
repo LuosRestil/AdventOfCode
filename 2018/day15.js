@@ -1,14 +1,27 @@
 import fs from "fs";
 import path from "node:path";
 
-let grid = getGrid("day15sample1.txt");
+let grid = getGrid("day15.txt");
 let entities = getEntities();
 let iters = 0;
 let done = false;
+// console.log();
+// console.log(iters);
+// console.log();
 while (!done) {
   done = tick();
-  console.log(iters);
+  // console.log();
+  // console.log(iters);
+  // console.log();
+  // printGrid(grid);
 }
+
+entities = entities.filter((entity) => entity.hp > 0);
+let remainingHp = entities.reduce((acc, curr) => acc + curr.hp, 0);
+console.log(`remaining hp: ${remainingHp}`);
+console.log(`iters: ${iters}`);
+console.log(`Part 1: ${iters * remainingHp}`);
+printGrid(grid);
 
 function tick() {
   // sort entities in reading order
@@ -29,7 +42,10 @@ function tick() {
       let shortestPaths = [];
       let shortestLen = Infinity;
       for (let cell of cells) {
-        let cellShortestPaths = getShortestPaths({row: entity.row, col: entity.col}, cell);
+        let cellShortestPaths = getShortestPaths(
+          { row: entity.row, col: entity.col },
+          cell,
+        );
         if (!cellShortestPaths.length) continue;
         let len = cellShortestPaths[0].length;
         if (len < shortestLen) {
@@ -44,9 +60,9 @@ function tick() {
       if (!shortestPaths.length) continue;
       // sort shortest paths by first step in reading order
       shortestPaths.sort((a, b) =>
-        a[0].row === b[0].row ? a[0].col - b[0].col : a[0].row - b[0].row,
+        a[1].row === b[1].row ? a[1].col - b[1].col : a[1].row - b[1].row,
       );
-      let destination = shortestPaths[0][0];
+      let destination = shortestPaths[0][1];
       // move to first step of first path
       grid[entity.row][entity.col] = ".";
       entity.row = destination.row;
@@ -68,7 +84,11 @@ function tick() {
       return a.hp - b.hp;
     });
     // attack first adjacent enemy
-    adjacentEnemies[0].hp -= entity.power;
+    let target = adjacentEnemies[0];
+    target.hp -= entity.power;
+    if (target.hp <= 0) {
+      grid[target.row][target.col] = ".";
+    }
   }
 
   entities = entities.filter((entity) => entity.hp > 0);
@@ -88,13 +108,12 @@ function getAllEnemies(entity) {
 }
 
 function getAdjacentEnemies(entity) {
-  let enemyType = entity.char === "G" ? "E" : "G";
   let adjacentEnemies = [
     entities.find((e) => e.row === entity.row - 1 && e.col === entity.col),
     entities.find((e) => e.row === entity.row + 1 && e.col === entity.col),
     entities.find((e) => e.row === entity.row && e.col === entity.col - 1),
     entities.find((e) => e.row === entity.row && e.col === entity.col + 1),
-  ].filter((e) => e?.hp > 0);
+  ].filter((e) => e?.hp > 0 && e.type !== entity.type);
   return adjacentEnemies;
 }
 
@@ -144,7 +163,6 @@ function getEntities() {
 function getShortestPaths(src, dest) {
   let res = [];
   let queue = [{ loc: src, from: null }];
-  let memo = new Set();
   while (queue.length) {
     let step = queue.shift();
     if (step.loc.row === dest.row && step.loc.col === dest.col) {
@@ -160,9 +178,15 @@ function getShortestPaths(src, dest) {
       { loc: { row: step.loc.row, col: step.loc.col - 1 }, from: step },
       { loc: { row: step.loc.row, col: step.loc.col + 1 }, from: step },
     ];
-    for (let neighbor of neighbors) { 
-      let open = grid[neighbor.loc.row][neighbor.loc.col] === '.' || neighbor.loc.row === dest.row && neighbor.loc.col === dest.col;
-      let seen = getPath(neighbor).slice(0,-1).find(loc => loc.row === neighbor.loc.row && loc.col === neighbor.loc.col);
+    for (let neighbor of neighbors) {
+      let open =
+        grid[neighbor.loc.row][neighbor.loc.col] === "." ||
+        (neighbor.loc.row === dest.row && neighbor.loc.col === dest.col);
+      let seen = getPath(neighbor)
+        .slice(0, -1)
+        .find(
+          (loc) => loc.row === neighbor.loc.row && loc.col === neighbor.loc.col,
+        );
       if (open && !seen) {
         queue.push(neighbor);
       }
@@ -181,10 +205,8 @@ function getPath(node) {
   return path;
 }
 
-function locsEqual(a, b) {
-  return a.row === b.row && a.col === b.col;
-}
-
-function keyify(loc) {
-  return `${row}:${col}`;
+function printGrid(grid) {
+  for (let i = 0; i < grid.length; i++) {
+    console.log(grid[i].join(""));
+  }
 }
