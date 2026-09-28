@@ -1,27 +1,47 @@
+// remaining hp: 2809
+// iters: 74
+// Part 1: 207866 TOO LOW
+// check for off-by-one error by bumping iters to 75
+// Part 1: 210675 STILL TOO LOW
+
 import fs from "fs";
 import path from "node:path";
 
-let grid = getGrid("day15.txt");
-let entities = getEntities();
-let iters = 0;
-let done = false;
-// console.log();
-// console.log(iters);
-// console.log();
-while (!done) {
-  done = tick();
-  // console.log();
-  // console.log(iters);
-  // console.log();
-  // printGrid(grid);
-}
+console.time();
 
-entities = entities.filter((entity) => entity.hp > 0);
-let remainingHp = entities.reduce((acc, curr) => acc + curr.hp, 0);
-console.log(`remaining hp: ${remainingHp}`);
-console.log(`iters: ${iters}`);
-console.log(`Part 1: ${iters * remainingHp}`);
-printGrid(grid);
+let grid;
+let entities;
+let iters;
+
+console.log("Part 1");
+console.log(run(3));
+console.log("Part 2");
+console.log(run(25));
+
+console.timeEnd();
+
+function run(elfAttackPower) {
+  grid = getGrid("day15.txt");
+  entities = getEntities(elfAttackPower);
+  iters = 0;
+  let startElfCount = entities.filter((e) => e.type === "E").length;
+  let done = false;
+
+  while (!done) {
+    done = tick();
+  }
+
+  entities = entities.filter((entity) => entity.hp > 0);
+  let remainingHp = entities.reduce((acc, curr) => acc + curr.hp, 0);
+  let endElfCount = entities.filter((e) => e.type === "E").length;
+  return {
+    remainingHp,
+    iters,
+    score: iters * remainingHp,
+    startElfCount,
+    endElfCount,
+  };
+}
 
 function tick() {
   // sort entities in reading order
@@ -39,34 +59,45 @@ function tick() {
       // get cells adjacent to enemies
       let cells = getCellsAdjacentToEnemies(enemies);
       // get shortest paths to each cell
-      let shortestPaths = [];
-      let shortestLen = Infinity;
+      let shortestDist = Infinity;
+      let nearestCells = [];
       for (let cell of cells) {
-        let cellShortestPaths = getShortestPaths(
-          { row: entity.row, col: entity.col },
-          cell,
-        );
-        if (!cellShortestPaths.length) continue;
-        let len = cellShortestPaths[0].length;
-        if (len < shortestLen) {
-          shortestLen = len;
-          shortestPaths = cellShortestPaths;
-        } else if (len === shortestLen) {
-          for (let path of cellShortestPaths) {
-            shortestPaths.push(path);
-          }
+        let dist = getShortestDistance(entity, cell);
+        if (dist === null) continue;
+        if (dist < shortestDist) {
+          nearestCells = [cell];
+          shortestDist = dist;
+        } else if (dist === shortestDist) {
+          nearestCells.push(cell);
         }
       }
-      if (!shortestPaths.length) continue;
-      // sort shortest paths by first step in reading order
-      shortestPaths.sort((a, b) =>
-        a[1].row === b[1].row ? a[1].col - b[1].col : a[1].row - b[1].row,
+      if (!nearestCells.length) continue;
+      nearestCells.sort((a, b) =>
+        a.row === b.row ? a.col - b.col : a.row - b.row,
       );
-      let destination = shortestPaths[0][1];
+      let destination = nearestCells[0];
+      let neighbors = [
+        // reading order
+        { row: entity.row - 1, col: entity.col }, // up
+        { row: entity.row, col: entity.col - 1 }, // left
+        { row: entity.row, col: entity.col + 1 }, // right
+        { row: entity.row + 1, col: entity.col }, // down
+      ];
+      let move = null;
+      for (let neighbor of neighbors) {
+        if (grid[neighbor.row][neighbor.col] !== ".") {
+          continue;
+        }
+        let dist = getShortestDistance(neighbor, destination);
+        if (dist === shortestDist - 1) {
+          move = neighbor;
+          break;
+        }
+      }
       // move to first step of first path
       grid[entity.row][entity.col] = ".";
-      entity.row = destination.row;
-      entity.col = destination.col;
+      entity.row = move.row;
+      entity.col = move.col;
       grid[entity.row][entity.col] = entity.type;
       // recheck for adjacent enemies
       adjacentEnemies = getAdjacentEnemies(entity, enemies);
@@ -147,66 +178,83 @@ function getGrid(file) {
     .map((row) => row.split(""));
 }
 
-function getEntities() {
+function getEntities(elfAttackPower) {
   let entities = [];
   for (let row = 0; row < grid.length; row++) {
     for (let col = 0; col < grid[0].length; col++) {
       let char = grid[row][col];
       if (char === "G" || char === "E") {
-        entities.push({ row, col, hp: 200, power: 3, type: char });
+        entities.push({
+          row,
+          col,
+          hp: 200,
+          power: char === "G" ? 3 : elfAttackPower,
+          type: char,
+        });
       }
     }
   }
   return entities;
 }
 
-function getShortestPaths(src, dest) {
-  let res = [];
-  let queue = [{ loc: src, from: null }];
-  while (queue.length) {
-    let step = queue.shift();
-    if (step.loc.row === dest.row && step.loc.col === dest.col) {
-      res.push(getPath(step));
-      continue;
-    }
-    if (res.length && getPath(step).length >= res[0].length) {
-      continue;
-    }
-    let neighbors = [
-      { loc: { row: step.loc.row - 1, col: step.loc.col }, from: step },
-      { loc: { row: step.loc.row + 1, col: step.loc.col }, from: step },
-      { loc: { row: step.loc.row, col: step.loc.col - 1 }, from: step },
-      { loc: { row: step.loc.row, col: step.loc.col + 1 }, from: step },
-    ];
-    for (let neighbor of neighbors) {
-      let open =
-        grid[neighbor.loc.row][neighbor.loc.col] === "." ||
-        (neighbor.loc.row === dest.row && neighbor.loc.col === dest.col);
-      let seen = getPath(neighbor)
-        .slice(0, -1)
-        .find(
-          (loc) => loc.row === neighbor.loc.row && loc.col === neighbor.loc.col,
-        );
-      if (open && !seen) {
-        queue.push(neighbor);
-      }
-    }
-  }
-  return res;
-}
-
-function getPath(node) {
-  let path = [node.loc];
-  while (node.from) {
-    node = node.from;
-    path.push(node.loc);
-  }
-  path.reverse();
-  return path;
-}
-
 function printGrid(grid) {
   for (let i = 0; i < grid.length; i++) {
     console.log(grid[i].join(""));
   }
+}
+
+function getShortestDistance(src, dest) {
+  let openSet = [{ row: src.row, col: src.col, from: [], depth: 0 }];
+  let closedSet = {};
+  while (openSet.length) {
+    let winner = 0;
+    let winnerF = Infinity;
+    for (let i = 0; i < openSet.length; i++) {
+      let f = openSet[i].depth + manhattanDistance(openSet[i], dest);
+      if (f < winnerF) {
+        winnerF = f;
+        winner = i;
+      }
+    }
+    let curr = openSet.splice(winner, 1)[0];
+
+    if (curr.row === dest.row && curr.col === dest.col) {
+      return curr.depth;
+    }
+
+    if (!closedSet[curr.row]) closedSet[curr.row] = {};
+    closedSet[curr.row][curr.col] = true;
+
+    let neighbors = [
+      { row: curr.row - 1, col: curr.col },
+      { row: curr.row + 1, col: curr.col },
+      { row: curr.row, col: curr.col - 1 },
+      { row: curr.row, col: curr.col + 1 },
+    ];
+    for (let neighbor of neighbors) {
+      let char = grid[neighbor.row][neighbor.col];
+      if (char !== ".") {
+        continue;
+      }
+      if (closedSet[neighbor.row]?.[neighbor.col]) continue;
+      neighbor.depth = curr.depth + 1;
+      neighbor.from = curr;
+      let existing = openSet.find(
+        (elem) => elem.row === neighbor.row && elem.col === neighbor.col,
+      );
+      if (existing) {
+        if (neighbor.depth < existing.depth) {
+          existing.depth = neighbor.depth;
+          existing.from = curr;
+        }
+      } else {
+        openSet.push(neighbor);
+      }
+    }
+  }
+  return null;
+}
+
+function manhattanDistance(a, b) {
+  return Math.abs(a.row - b.row) + Math.abs(a.col - b.col);
 }
