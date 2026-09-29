@@ -38,14 +38,12 @@
       // screen and grid sizing
       let dim = grid.length;
       let screenSize = Math.min(window.innerWidth, window.innerHeight);
-      canvas.width = screenSize;
-      canvas.height = screenSize;
-      canvas.width = screenSize * window.devicePixelRatio;
-      canvas.height = screenSize * window.devicePixelRatio;
-      canvas.style.width = screenSize + "px";
-      canvas.style.height = screenSize + "px";
+      const cellSize = Math.floor(screenSize / dim);
+      canvas.width = cellSize * dim * window.devicePixelRatio;
+      canvas.height = cellSize * dim * window.devicePixelRatio;
+      canvas.style.width = cellSize * dim + "px";
+      canvas.style.height = cellSize * dim + "px";
       ctx.scale(devicePixelRatio, devicePixelRatio);
-      const cellSize = Math.round(screenSize / dim);
 
       let entities = getEntities(3);
       let iters = 0;
@@ -53,11 +51,12 @@
 
       let tweens = [];
       let splats = [];
+      let missiles = [];
 
       // loop setup
       let lastTimestamp = 0;
       let elapsed = 0;
-      let framerate = 1 / 120;
+      let framerate = 1 / 10;
       let tickGenerator = tick();
       requestAnimationFrame(loop);
 
@@ -100,6 +99,11 @@
           splat.update(dt);
         }
         splats = splats.filter((splat) => !splat.dead);
+
+        for (let missile of missiles) {
+          missile.update(dt);
+        }
+        missiles = missiles.filter((missile) => missile.life > 0);
       }
 
       function draw() {
@@ -125,10 +129,8 @@
             drawEntity(entity);
           }
         }
-
-        for (let splat of splats) {
-          splat.draw();
-        }
+        splats.forEach((splat) => splat.draw());
+        missiles.forEach((missile) => missile.draw());
       }
 
       function drawEntity(entity) {
@@ -170,11 +172,12 @@
         ctx.fillStyle = "white";
         ctx.textAlign = "left";
         ctx.textBaseline = "alphabetic";
-        ctx.font = `bold ${cellSize * 0.75}px monospace`;
+        let fontSize = canvas.width/100;
+        ctx.font = `bold ${fontSize}px monospace`;
         let remainingHp = entities.reduce((acc, curr) => acc + curr.hp, 0);
-        ctx.fillText(`Remaining HP: ${remainingHp}`, 10, 25);
-        ctx.fillText(`Iterations: ${iters}`, 10, 55);
-        ctx.fillText(`Score: ${iters * remainingHp}`, 10, 85);
+        ctx.fillText(`Remaining HP: ${remainingHp}`, 10, fontSize*1.2);
+        ctx.fillText(`Iterations: ${iters}`, 10, fontSize*1.2 + fontSize * 1.2);
+        ctx.fillText(`Score: ${iters * remainingHp}`, 10, fontSize * 1.2 + fontSize * 1.2 + fontSize * 1.2);
       }
 
       async function getGrid(file) {
@@ -298,6 +301,17 @@
           // attack first adjacent enemy
           let target = adjacentEnemies[0];
           target.hp -= entity.power;
+          missiles.push(
+            new Particle(
+              entity.displayX,
+              entity.displayY,
+              Math.sign(target.col - entity.col) * cellSize * 4,
+              Math.sign(target.row - entity.row) * cellSize * 4,
+              cellSize / 5,
+              entity.type === "G" ? "firebrick" : "yellow",
+              0.25,
+            ),
+          );
           if (target.hp <= 0) {
             grid[target.row][target.col] = ".";
             splats.push(
@@ -428,7 +442,7 @@
       }
 
       class Tween {
-        constructor(obj, prop, target, duration, callback) {
+        constructor(obj, prop, target, duration, delay = 0, callback = null) {
           this.ease = (t) =>
             t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
           this.elapsed = 0;
@@ -438,22 +452,30 @@
           this.startVal = obj[prop];
           this.target = target;
           this.duration = duration;
+          this.delay = delay;
           this.callback = callback;
           return this;
         }
 
         update(dt) {
-          this.elapsed += dt;
-          if (this.elapsed > this.duration) {
-            this.elapsed = this.duration;
-            this.complete = true;
-            if (this.callback) this.callback();
+          if (this.delay >= 0) {
+            this.delay -= dt;
+            if (this.delay < 0) {
+              this.elapsed -= this.delay;
+            }
+          } else {
+            this.elapsed += dt;
+            if (this.elapsed > this.duration) {
+              this.elapsed = this.duration;
+              this.complete = true;
+              if (this.callback) this.callback();
+            }
+            this.obj[this.prop] = lerp(
+              this.startVal,
+              this.target,
+              this.ease(this.elapsed / this.duration),
+            );
           }
-          this.obj[this.prop] = lerp(
-            this.startVal,
-            this.target,
-            this.ease(this.elapsed / this.duration),
-          );
         }
       }
 
@@ -470,8 +492,10 @@
               new Particle(
                 this.x,
                 this.y,
-                (Math.random() * this.particleMaxSpeed * 2) - this.particleMaxSpeed,
-                (Math.random() * this.particleMaxSpeed * 2) - this.particleMaxSpeed,
+                Math.random() * this.particleMaxSpeed * 2 -
+                  this.particleMaxSpeed,
+                Math.random() * this.particleMaxSpeed * 2 -
+                  this.particleMaxSpeed,
                 cellSize / 10,
                 color,
               ),
@@ -496,14 +520,14 @@
       }
 
       class Particle {
-        constructor(x, y, dx, dy, radius, color) {
+        constructor(x, y, dx, dy, radius, color, life) {
           this.x = x;
           this.y = y;
           this.dx = dx;
           this.dy = dy;
           this.radius = radius;
           this.color = color;
-          this.life = Math.random();
+          this.life = life ?? Math.random();
         }
 
         update(dt) {
