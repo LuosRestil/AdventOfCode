@@ -30,10 +30,6 @@
       let ctx = canvas.getContext("2d");
 
       let grid = await getGrid("day15.txt");
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      ctx.fillStyle = "rebeccapurple";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       // screen and grid sizing
       let dim = grid.length;
@@ -43,7 +39,7 @@
       canvas.height = cellSize * dim * window.devicePixelRatio;
       canvas.style.width = cellSize * dim + "px";
       canvas.style.height = cellSize * dim + "px";
-      ctx.scale(devicePixelRatio, devicePixelRatio);
+      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
 
       let entities = getEntities(3);
       let iters = 0;

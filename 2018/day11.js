@@ -1,3 +1,5 @@
+console.time();
+
 let gridSerialNumber = 8772;
 
 let grid = {};
@@ -9,12 +11,24 @@ for (let x = 1; x <= 300; x++) {
 }
 
 let part1Max = getMaxChunkPower(3);
-console.log(`Part 1: ${part1Max.maxChunk}, ${part1Max.maxChunkPower}`);
+console.log(`Part 1: ${part1Max.maxChunk}`);
 
-for (let chunkSize = 1; chunkSize <= 300; chunkSize++) {
+let lastPower = 0;
+let lastChunk = null;
+let lastSize = 0;
+for (let chunkSize = 1; chunkSize <= 100; chunkSize++) {
   let {maxChunkPower, maxChunk} = getMaxChunkPower(chunkSize);
-  console.log(maxChunkPower, maxChunk, chunkSize);
+  if (maxChunkPower > lastPower) {
+    lastPower = maxChunkPower;
+    lastChunk = maxChunk;
+    lastSize = chunkSize;
+  } else {
+    break;
+  }
 }
+console.log(`Part 2: ${lastChunk},${lastSize}`);
+
+console.timeEnd();
 
 function getCellPower(x, y) {
   let rackId = x + 10;

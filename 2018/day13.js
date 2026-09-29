@@ -1,6 +1,8 @@
 import fs from "fs";
 import path from "node:path";
 
+console.time();
+
 const grid = fs
   .readFileSync(
     path.join(import.meta.dirname, "inputs", "day13.txt"),
@@ -57,6 +59,8 @@ while (true) {
 
 console.log(`Part 1: ${firstCollisionLoc.x},${firstCollisionLoc.y}`);
 console.log(`Part 2: ${lastCartLoc.x},${lastCartLoc.y}`);
+
+console.timeEnd();
 
 function tick() {
   for (let cart of carts) {

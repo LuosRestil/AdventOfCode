@@ -27,10 +27,26 @@
     <canvas></canvas>
     <script type="module">
       let canvas = document.querySelector("canvas");
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      console.log(canvas.width, canvas.height);
+      canvas.width = window.innerWidth * window.devicePixelRatio;
+      canvas.height = window.innerHeight * window.devicePixelRatio;
+      let width = window.innerWidth;
+      let height = window.innerHeight;
+      canvas.style.width = width + "px";
+      canvas.style.height = height + "px";
       let ctx = canvas.getContext("2d");
+      ctx.scale(devicePixelRatio, devicePixelRatio);
+
+      ctx.fillStyle = "rgb(180, 180, 180)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.font = "32px monospace";
+      ctx.fillStyle = "rgb(50,50,50)";
+      ctx.fillText(
+        "Press any key to advance simulation",
+        width / 2,
+        height / 2,
+      );
 
       let res = await fetch("inputs/day10.txt");
       let text = await res.text();
@@ -73,7 +89,6 @@
 
       function tick() {
         iterations++;
-        console.log(iterations);
         ctx.fillStyle = "rgb(180, 180, 180)";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -86,6 +101,21 @@
         for (let point of points) {
           ctx.fillRect(point.pos[0], point.pos[1], 1, 1);
         }
+
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.font = "32px monospace";
+        ctx.fillStyle = "rgb(30,30,30)";
+        ctx.fillText(
+          "Press any key to advance simulation",
+          width / 2,
+          height / 2,
+        );
+
+        ctx.textAlign = "right";
+        ctx.textBaseline = "top";
+        ctx.font = "24px monospace";
+        ctx.fillText("iterations: " + iterations, width - 20, 20);
       }
     </script>
   </body>

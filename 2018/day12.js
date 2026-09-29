@@ -1,24 +1,28 @@
 import fs from "fs";
 import path from "node:path";
 
+console.time();
+
 const inputRows = fs
   .readFileSync(path.join(import.meta.dirname, "inputs", "day12.txt"), "utf-8")
   .split("\n");
 
 console.log(`Part 1: ${solveForIters(20)}`);
 
-let last = 0;
-for (let i = 0; i < 200; i++) {
-  let solution = solveForIters(i);
-  console.log(i, solution, solution - last);
-  last = solution;
-}
+// discovery...
+// let last = 0;
+// for (let i = 0; i < 200; i++) {
+//   let solution = solveForIters(i);
+//   console.log(i, solution, solution - last);
+//   last = solution;
+// }
 
 // from iteration 162 onwards, we always add 73 each iteration
 let iteration162 = 12203;
 let remainingIters = 50000000000 - 162;
-console.log(iteration162 + remainingIters * 73);
+console.log(`Part 2: ${iteration162 + remainingIters * 73}`);
 
+console.timeEnd();
 
 function solveForIters(iters) {
   let state = Object.fromEntries(
