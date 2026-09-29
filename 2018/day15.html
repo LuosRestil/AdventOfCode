@@ -26,14 +26,15 @@
   <body>
     <canvas></canvas>
     <script type="module">
+      console.log('fuckass');
       let canvas = document.querySelector("canvas");
       let ctx = canvas.getContext("2d");
 
-      // sim setup
       let grid = await getGrid("day15.txt");
-      let entities = getEntities(3);
-      let iters = 0;
-      let done = false;
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      ctx.fillStyle = 'rebeccapurple';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       // screen and grid sizing
       let dim = grid.length;
@@ -46,6 +47,12 @@
       canvas.style.height = screenSize + "px";
       ctx.scale(devicePixelRatio, devicePixelRatio);
       const cellSize = Math.round(screenSize / dim);
+
+      let entities = getEntities(3);
+      let iters = 0;
+      let done = false;
+
+      let tweens = [];
 
       // loop setup
       let lastTimestamp = 0;
@@ -82,7 +89,13 @@
       }
 
       function update(dt) {
-        // run animations
+        let filterTweens = false;
+        for (let tween of tweens) {
+          tween.update(dt);
+          if (tween.complete) filterTweens = true;
+        }
+        if (filterTweens)
+          this.tweens = tweens.filter((tween) => !tween.complete);
       }
 
       function draw() {
@@ -112,20 +125,16 @@
 
       function drawEntity(entity) {
         drawCircle(
-          entity.col * cellSize + cellSize / 2,
-          entity.row * cellSize + cellSize / 2,
+          entity.displayX,
+          entity.displayY,
           cellSize * 0.4,
-          entity.type === "G" ? "green" : "dodgerblue", // green, seagreen, olivedrab, olive, darkolivegreen, forestgreen
+          entity.type === "G" ? "green" : "dodgerblue",
         );
-        ctx.font = "10px monospace";
+        ctx.font = `${cellSize * 0.4}px monospace`;
         ctx.fillStyle = "white";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        ctx.fillText(
-          entity.hp,
-          entity.col * cellSize + cellSize / 2,
-          entity.row * cellSize + cellSize / 2,
-        );
+        ctx.fillText(entity.hp, entity.displayX, entity.displayY);
       }
 
       function drawWall(x, y) {
@@ -153,7 +162,7 @@
         ctx.fillStyle = "white";
         ctx.textAlign = "left";
         ctx.textBaseline = "alphabetic";
-        ctx.font ="bold 20px monospace";
+        ctx.font = `bold ${cellSize * 0.75}px monospace`;
         let remainingHp = entities.reduce((acc, curr) => acc + curr.hp, 0);
         ctx.fillText(`Remaining HP: ${remainingHp}`, 10, 25);
         ctx.fillText(`Iterations: ${iters}`, 10, 55);
@@ -175,6 +184,8 @@
               entities.push({
                 row,
                 col,
+                displayX: col * cellSize + cellSize / 2,
+                displayY: row * cellSize + cellSize / 2,
                 hp: 200,
                 power: char === "G" ? 3 : elfAttackPower,
                 type: char,
@@ -243,6 +254,22 @@
             grid[entity.row][entity.col] = ".";
             entity.row = move.row;
             entity.col = move.col;
+            tweens.push(
+              new Tween(
+                entity,
+                "displayX",
+                entity.col * cellSize + cellSize / 2,
+                framerate,
+              ),
+            );
+            tweens.push(
+              new Tween(
+                entity,
+                "displayY",
+                entity.col * cellSize + cellSize / 2,
+                framerate,
+              ),
+            );
             grid[entity.row][entity.col] = entity.type;
             // recheck for adjacent enemies
             adjacentEnemies = getAdjacentEnemies(entity, enemies);
@@ -379,6 +406,42 @@
 
       function manhattanDistance(a, b) {
         return Math.abs(a.row - b.row) + Math.abs(a.col - b.col);
+      }
+
+      function lerp(a, b, t) {
+        return a + (b - a) * t;
+      }
+
+      export default class Tween {
+        constructor(obj, prop, target, duration, callback) {
+          this.ease = (t) => t;
+          this.elapsed = 0;
+          this.complete = false;
+          this.obj = obj;
+          this.prop = prop;
+          this.startVal = obj[prop];
+          this.target = target;
+          this.duration = duration;
+          this.callback = callback;
+          return this;
+        }
+        withEasing(easingFunction) {
+          this.ease = easingFunction;
+          return this;
+        }
+        update(dt) {
+          this.elapsed += dt;
+          if (this.elapsed > this.duration) {
+            this.elapsed = this.duration;
+            this.complete = true;
+            if (this.callback) this.callback();
+          }
+          this.obj[this.prop] = lerp(
+            this.startVal,
+            this.target,
+            this.ease(this.elapsed / this.duration),
+          );
+        }
       }
     </script>
   </body>
