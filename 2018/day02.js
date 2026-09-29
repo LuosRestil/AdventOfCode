@@ -1,8 +1,11 @@
-import fs from 'fs';
+import fs from "fs";
+import path from "node:path";
 
 console.time();
 
-const lines = fs.readFileSync("inputs/day02.txt", "utf-8").split("\n");
+const lines = fs
+  .readFileSync(path.join(import.meta.dirname, "inputs", "day02.txt"), "utf-8")
+  .split("\n");
 let twos = 0;
 let threes = 0;
 for (let line of lines) {

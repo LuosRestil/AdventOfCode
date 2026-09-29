@@ -1,9 +1,10 @@
-import fs from 'fs';
+import fs from "fs";
+import path from "node:path";
 
 console.time();
 
 const nums = fs
-  .readFileSync("inputs/day01.txt", "utf-8")
+  .readFileSync(path.join(import.meta.dirname, "inputs", "day01.txt"), "utf-8")
   .split("\n")
   .map((num) => parseInt(num));
 

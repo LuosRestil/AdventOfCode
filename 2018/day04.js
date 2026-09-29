@@ -1,10 +1,11 @@
-import fs from 'fs'
+import fs from "fs";
+import path from "node:path";
 
 console.time();
 
 let sleepMap = {};
 const logs = fs
-  .readFileSync("inputs/day04.txt", "utf-8")
+  .readFileSync(path.join(import.meta.dirname, "inputs", "day04.txt"), "utf-8")
   .split("\n")
   .map((line) => {
     let sp = line.split("] ");
@@ -63,16 +64,16 @@ let longestSleeperMins = minsMap[longestSleeper];
 console.log(
   `Part 1: ${
     parseInt(longestSleeperMins[0]) * parseInt(longestSleeper.slice(1))
-  }`
+  }`,
 );
 let biggestMinuteEntry = Object.entries(minsMap).toSorted(
-  (a, b) => b[1][0][1] - a[1][0][1]
+  (a, b) => b[1][0][1] - a[1][0][1],
 )[0];
 console.log(
   `Part 2: ${
     parseInt(biggestMinuteEntry[0].slice(1)) *
     parseInt(biggestMinuteEntry[1][0])
-  }`
+  }`,
 );
 
 console.timeEnd();

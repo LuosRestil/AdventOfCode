@@ -1,22 +1,26 @@
-import fs from 'fs';
+import fs from "fs";
+import path from "node:path";
 
 console.time();
 
 const claims = fs
-  .readFileSync("inputs/day03.txt", "utf-8")
+  .readFileSync(path.join(import.meta.dirname, "inputs", "day03.txt"), "utf-8")
   .split("\n")
   .map((line) => {
-    let sp = line.split(' ');
-    let pos = sp[2].slice(0, sp[2].length - 1).split(',').map(num => parseInt(num));
-    let dim = sp[3].split('x').map(num => parseInt(num));
-    return {id: sp[0], pos, dim};
+    let sp = line.split(" ");
+    let pos = sp[2]
+      .slice(0, sp[2].length - 1)
+      .split(",")
+      .map((num) => parseInt(num));
+    let dim = sp[3].split("x").map((num) => parseInt(num));
+    return { id: sp[0], pos, dim };
   });
 
 const grid = makeGrid(1000);
 for (let claim of claims) {
   for (let i = claim.pos[0]; i < claim.pos[0] + claim.dim[0]; i++) {
     for (let j = claim.pos[1]; j < claim.pos[1] + claim.dim[1]; j++) {
-      grid[i][j] = grid[i][j] === '.' ? '!' : 'x';
+      grid[i][j] = grid[i][j] === "." ? "!" : "x";
     }
   }
 }
@@ -24,7 +28,7 @@ for (let claim of claims) {
 let overlap = 0;
 for (let i = 0; i < grid.length; i++) {
   for (let j = 0; j < grid.length; j++) {
-    if (grid[i][j] === 'x') overlap++;
+    if (grid[i][j] === "x") overlap++;
   }
 }
 console.log(`Part 1: ${overlap}`);
@@ -41,7 +45,7 @@ console.timeEnd();
 function overlaps(claim, grid) {
   for (let i = claim.pos[0]; i < claim.pos[0] + claim.dim[0]; i++) {
     for (let j = claim.pos[1]; j < claim.pos[1] + claim.dim[1]; j++) {
-      if (grid[i][j] === 'x') return true;
+      if (grid[i][j] === "x") return true;
     }
   }
   return false;

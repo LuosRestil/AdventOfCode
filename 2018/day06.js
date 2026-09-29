@@ -1,4 +1,5 @@
 import fs from "fs";
+import path from "node:path";
 
 console.time();
 
@@ -74,7 +75,8 @@ while (areaExpanded) {
       areaExpanded = true;
     }
   }
-  for (let y = topY + 1; y <= bottomY - 1; y++) { // offset by 1 so you don't double count corners
+  for (let y = topY + 1; y <= bottomY - 1; y++) {
+    // offset by 1 so you don't double count corners
     let leftDist = 0;
     let rightDist = 0;
     for (let pt of pts) {

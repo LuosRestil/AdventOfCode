@@ -1,8 +1,11 @@
-import fs from 'fs'
+import fs from "fs";
+import path from "node:path";
 
 console.time();
 
-let polymer = fs.readFileSync("inputs/day05.txt", "utf-8").split("");
+let polymer = fs
+  .readFileSync(path.join(import.meta.dirname, "inputs", "day05.txt"), "utf-8")
+  .split("");
 console.log(`Part 1: ${react(polymer).length}`);
 
 let chars = new Set();
@@ -44,8 +47,7 @@ function remove(char, polymer) {
   let newPolymer = [];
   for (let i = 0; i < polymer.length; i++) {
     const diff = Math.abs(char.charCodeAt(0) - polymer[i].charCodeAt(0));
-    if (diff !== 32 && diff !== 0)
-      newPolymer.push(polymer[i]);
+    if (diff !== 32 && diff !== 0) newPolymer.push(polymer[i]);
   }
   return newPolymer;
 }
