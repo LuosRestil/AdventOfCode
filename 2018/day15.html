@@ -26,14 +26,13 @@
   <body>
     <canvas></canvas>
     <script type="module">
-      console.log('fuckass');
       let canvas = document.querySelector("canvas");
       let ctx = canvas.getContext("2d");
 
       let grid = await getGrid("day15.txt");
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
-      ctx.fillStyle = 'rebeccapurple';
+      ctx.fillStyle = "rebeccapurple";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       // screen and grid sizing
@@ -53,11 +52,12 @@
       let done = false;
 
       let tweens = [];
+      let splats = [];
 
       // loop setup
       let lastTimestamp = 0;
       let elapsed = 0;
-      let framerate = 1 / 10;
+      let framerate = 1 / 120;
       let tickGenerator = tick();
       requestAnimationFrame(loop);
 
@@ -66,7 +66,7 @@
         elapsed += dt;
         lastTimestamp = timestamp;
 
-        if (elapsed >= framerate) {
+        if (elapsed >= framerate && !done) {
           elapsed -= framerate;
           let res = tickGenerator.next();
           if (res.value) {
@@ -81,7 +81,7 @@
         update(dt);
         draw();
 
-        if (!done) {
+        if (!done || splats.length) {
           requestAnimationFrame(loop);
         } else {
           drawAnswer();
@@ -94,8 +94,12 @@
           tween.update(dt);
           if (tween.complete) filterTweens = true;
         }
-        if (filterTweens)
-          this.tweens = tweens.filter((tween) => !tween.complete);
+        if (filterTweens) tweens = tweens.filter((tween) => !tween.complete);
+
+        for (let splat of splats) {
+          splat.update(dt);
+        }
+        splats = splats.filter((splat) => !splat.dead);
       }
 
       function draw() {
@@ -120,6 +124,10 @@
           if (entity.hp > 0) {
             drawEntity(entity);
           }
+        }
+
+        for (let splat of splats) {
+          splat.draw();
         }
       }
 
@@ -266,7 +274,7 @@
               new Tween(
                 entity,
                 "displayY",
-                entity.col * cellSize + cellSize / 2,
+                entity.row * cellSize + cellSize / 2,
                 framerate,
               ),
             );
@@ -292,6 +300,13 @@
           target.hp -= entity.power;
           if (target.hp <= 0) {
             grid[target.row][target.col] = ".";
+            splats.push(
+              new Splat(
+                target.displayX,
+                target.displayY,
+                target.type === "G" ? "green" : "dodgerblue",
+              ),
+            );
           }
           yield;
         }
@@ -412,9 +427,10 @@
         return a + (b - a) * t;
       }
 
-      export default class Tween {
+      class Tween {
         constructor(obj, prop, target, duration, callback) {
-          this.ease = (t) => t;
+          this.ease = (t) =>
+            t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
           this.elapsed = 0;
           this.complete = false;
           this.obj = obj;
@@ -425,10 +441,7 @@
           this.callback = callback;
           return this;
         }
-        withEasing(easingFunction) {
-          this.ease = easingFunction;
-          return this;
-        }
+
         update(dt) {
           this.elapsed += dt;
           if (this.elapsed > this.duration) {
@@ -441,6 +454,66 @@
             this.target,
             this.ease(this.elapsed / this.duration),
           );
+        }
+      }
+
+      class Splat {
+        particles = [];
+        dead = false;
+        particleMaxSpeed = 80;
+
+        constructor(x, y, color) {
+          this.x = x;
+          this.y = y;
+          for (let i = 0; i < 8; i++) {
+            this.particles.push(
+              new Particle(
+                this.x,
+                this.y,
+                (Math.random() * this.particleMaxSpeed * 2) - this.particleMaxSpeed,
+                (Math.random() * this.particleMaxSpeed * 2) - this.particleMaxSpeed,
+                cellSize / 10,
+                color,
+              ),
+            );
+          }
+        }
+
+        update(dt) {
+          for (let particle of this.particles) {
+            particle.update(dt);
+          }
+          if (this.particles.every((particle) => particle.life <= 0)) {
+            this.dead = true;
+          }
+        }
+
+        draw() {
+          for (let particle of this.particles) {
+            if (particle.life > 0) particle.draw();
+          }
+        }
+      }
+
+      class Particle {
+        constructor(x, y, dx, dy, radius, color) {
+          this.x = x;
+          this.y = y;
+          this.dx = dx;
+          this.dy = dy;
+          this.radius = radius;
+          this.color = color;
+          this.life = Math.random();
+        }
+
+        update(dt) {
+          this.x += this.dx * dt;
+          this.y += this.dy * dt;
+          this.life -= dt;
+        }
+
+        draw() {
+          drawCircle(this.x, this.y, this.radius, this.color);
         }
       }
     </script>
