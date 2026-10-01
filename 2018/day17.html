@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>2018 Day 17</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        width: 100vw;
+        height: 100vh;
+        background-color: rgb(30, 30, 30);
+      }
+      canvas {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas></canvas>
+    <script type="module">
+      let canvas = document.querySelector("canvas");
+      let ctx = canvas.getContext("2d");
+
+      let walls = {};
+      let floors = {};
+      let minY = Infinity;
+      let maxY = -Infinity;
+      const res = await fetch("inputs/day17.txt");
+      const text = await res.text();
+      text.split("\n").forEach((row) => {
+        let halves = row.split(", ");
+        if (halves[0].startsWith("x")) {
+          // wall
+          let x = parseInt(halves[0].slice(2));
+          let yRange = halves[1]
+            .slice(2)
+            .split("..")
+            .map((num) => parseInt(num));
+          if (!walls[x]) {
+            walls[x] = [];
+          }
+          walls[x].push({ x, top: yRange[0], bottom: yRange[1] });
+          if (yRange[0] < minY) minY = yRange[0];
+          if (yRange[1] > maxY) maxY = yRange[1];
+        } else {
+          // floor
+          let y = parseInt(halves[0].slice(2));
+          if (y < minY) minY = y;
+          if (y > maxY) maxY = y;
+          let xRange = halves[1]
+            .slice(2)
+            .split("..")
+            .map((num) => parseInt(num));
+          if (!floors[y]) {
+            floors[y] = [];
+          }
+          floors[y].push({ y, left: xRange[0], right: xRange[1] });
+        }
+      });
+      let floorYs = Object.keys(floors).toSorted((a, b) => a - b);
+      let wallXs = Object.keys(walls).toSorted((a, b) => a - b);
+
+      canvas.width = window.innerWidth;
+      canvas.height = maxY + 10;
+      ctx.fillStyle = "rebeccapurple";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = "white";
+      for (let x in walls) {
+        walls[x].sort((a, b) => a.top - b.top);
+        for (let wall of walls[x]) {
+          ctx.fillRect(x, wall.top, 1, wall.bottom - wall.top + 1);
+        }
+      }
+      for (let y in floors) {
+        floors[y].sort((a, b) => a.left - b.left);
+        for (let floor of floors[y]) {
+          ctx.fillRect(floor.left, y, floor.right - floor.left + 1, 1);
+        }
+      }
+
+      ctx.fillStyle = 'dodgerblue';
+      let total = 0;
+      let streams = [{ x: 500, top: minY }];
+      while (streams.length) {
+        let stream = streams.pop();
+        // get next floor
+        let floorY = floorYs.find(y => y > stream.top && floors[y]?.some(floor => floor.left < stream.x && floor.right > stream.x));
+        let floor = floors[floorY]?.find(
+          (floor) => floor.left < stream.x && floor.right > stream.x,
+        );
+        let wall = walls[stream.x]?.find((wall) => wall.top > stream.top);
+        let contactY = Math.min(floor?.y ?? Infinity, wall?.top ?? Infinity);
+        if (contactY === Infinity) {
+          // run to the bottom
+          let streamHeight = maxY - stream.top + 1;
+          total += streamHeight;
+          ctx.fillRect(stream.x, stream.top, 1, streamHeight);
+          continue;
+        }
+        stream.bottom = contactY - 1;
+        if (contactY === floor?.y) {
+          ctx.fillRect(stream.x, stream.top, 1, stream.bottom - stream.top + 1);
+          // TODO fill container, overflow
+        } else {
+
+          let streamHeight = stream.bottom - stream.top;
+          total += streamHeight;
+          ctx.fillRect(stream.x, stream.top, 1, streamHeight);
+          total += 3;
+          ctx.fillRect(stream.x - 1, stream.bottom, 3, 1);
+          streams.push({ x: stream.x - 1, top: stream.bottom + 1 });
+          streams.push({ x: stream.x + 1, top: stream.bottom + 1 });
+        }
+      }
+    </script>
+  </body>
+</html>
