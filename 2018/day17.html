@@ -17,6 +17,8 @@
       }
       canvas {
         display: block;
+        margin: auto;
+        image-rendering: pixelated;
       }
     </style>
   </head>
@@ -26,8 +28,10 @@
       let canvas = document.querySelector("canvas");
       let ctx = canvas.getContext("2d");
 
-      let walls = {};
-      let floors = {};
+      let wallsByX = {};
+      let floorsByY = {};
+      let allWalls = [];
+      let allFloors = [];
       let minY = Infinity;
       let maxY = -Infinity;
       const res = await fetch("inputs/day17.txt");
@@ -41,10 +45,12 @@
             .slice(2)
             .split("..")
             .map((num) => parseInt(num));
-          if (!walls[x]) {
-            walls[x] = [];
+          let wall = { x, top: yRange[0], bottom: yRange[1] };
+          if (!wallsByX[x]) {
+            wallsByX[x] = [];
           }
-          walls[x].push({ x, top: yRange[0], bottom: yRange[1] });
+          wallsByX[x].push(wall);
+          allWalls.push(wall);
           if (yRange[0] < minY) minY = yRange[0];
           if (yRange[1] > maxY) maxY = yRange[1];
         } else {
@@ -56,67 +62,85 @@
             .slice(2)
             .split("..")
             .map((num) => parseInt(num));
-          if (!floors[y]) {
-            floors[y] = [];
+          let floor = { y, left: xRange[0], right: xRange[1] };
+          if (!floorsByY[y]) {
+            floorsByY[y] = [];
           }
-          floors[y].push({ y, left: xRange[0], right: xRange[1] });
+          floorsByY[y].push(floor);
+          allFloors.push(floor);
         }
       });
-      let floorYs = Object.keys(floors).toSorted((a, b) => a - b);
-      let wallXs = Object.keys(walls).toSorted((a, b) => a - b);
+      let floorYs = Object.keys(floorsByY).toSorted((a, b) => a - b);
+      let wallXs = Object.keys(wallsByX).toSorted((a, b) => a - b);
 
-      canvas.width = window.innerWidth;
-      canvas.height = maxY + 10;
-      ctx.fillStyle = "rebeccapurple";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      const EMPTY = 0;
+      const SOLID = 1;
+      const WATER = 2;
+      let types = [EMPTY, SOLID, WATER];
+      let WIDTH = 1000;
+      let HEIGHT = maxY + 1;
+      canvas.width = WIDTH;
+      canvas.height = HEIGHT;
 
-      ctx.fillStyle = "white";
-      for (let x in walls) {
-        walls[x].sort((a, b) => a.top - b.top);
-        for (let wall of walls[x]) {
-          ctx.fillRect(x, wall.top, 1, wall.bottom - wall.top + 1);
+      let imageData = ctx.getImageData(0, 0, WIDTH, HEIGHT);
+      let pixels = imageData.data;
+
+      let grid = [];
+      for (let y = 0; y < HEIGHT; y++) {
+        let row = [];
+        for (let x = 0; x < WIDTH; x++) {
+          row.push(EMPTY);
+        }
+        grid.push(row);
+      }
+      for (let wall of allWalls) {
+        for (let y = wall.top; y <= wall.bottom; y++) {
+          grid[y][wall.x] = SOLID;
         }
       }
-      for (let y in floors) {
-        floors[y].sort((a, b) => a.left - b.left);
-        for (let floor of floors[y]) {
-          ctx.fillRect(floor.left, y, floor.right - floor.left + 1, 1);
+      for (let floor of allFloors) {
+        for (let x = floor.left; x <= floor.right; x++) {
+          grid[floor.y][x] = SOLID;
         }
       }
 
-      ctx.fillStyle = 'dodgerblue';
-      let total = 0;
       let streams = [{ x: 500, top: minY }];
       while (streams.length) {
         let stream = streams.pop();
-        // get next floor
-        let floorY = floorYs.find(y => y > stream.top && floors[y]?.some(floor => floor.left < stream.x && floor.right > stream.x));
-        let floor = floors[floorY]?.find(
-          (floor) => floor.left < stream.x && floor.right > stream.x,
-        );
-        let wall = walls[stream.x]?.find((wall) => wall.top > stream.top);
-        let contactY = Math.min(floor?.y ?? Infinity, wall?.top ?? Infinity);
-        if (contactY === Infinity) {
-          // run to the bottom
-          let streamHeight = maxY - stream.top + 1;
-          total += streamHeight;
-          ctx.fillRect(stream.x, stream.top, 1, streamHeight);
+        let currY = stream.top;
+        while (grid[currY][stream.x] !== SOLID && currY <= maxY) {
+          grid[currY][stream.x] = WATER;
+          currY++;
+        }
+        if (currY > maxY) {
+          // we reached the bottom
           continue;
         }
-        stream.bottom = contactY - 1;
-        if (contactY === floor?.y) {
-          ctx.fillRect(stream.x, stream.top, 1, stream.bottom - stream.top + 1);
-          // TODO fill container, overflow
-        } else {
+        currY--;
+        // seek left and right for walls or drops
+      }
 
-          let streamHeight = stream.bottom - stream.top;
-          total += streamHeight;
-          ctx.fillRect(stream.x, stream.top, 1, streamHeight);
-          total += 3;
-          ctx.fillRect(stream.x - 1, stream.bottom, 3, 1);
-          streams.push({ x: stream.x - 1, top: stream.bottom + 1 });
-          streams.push({ x: stream.x + 1, top: stream.bottom + 1 });
+      for (let y = 0; y < grid.length; y++) {
+        for (let x = 0; x < grid[0].length; x++) {
+          let type = grid[y][x];
+          if (type === SOLID) {
+            setPixel(x, y, 50, 50, 50);
+          } else if (type === WATER) {
+            setPixel(x, y, 30, 144, 255);
+          } else if (type === EMPTY) {
+            setPixel(x, y, 180, 180, 180);
+          }
         }
+      }
+
+      ctx.putImageData(imageData, 0, 0);
+
+      function setPixel(x, y, r, g, b) {
+        let idx = y * (WIDTH * 4) + x * 4;
+        pixels[idx] = r;
+        pixels[idx + 1] = g;
+        pixels[idx + 2] = b;
+        pixels[idx + 3] = 255;
       }
     </script>
   </body>
