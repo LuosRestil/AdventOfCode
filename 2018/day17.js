@@ -115,7 +115,6 @@ while (streams.length) {
         hasRightWall = true;
         break;
       } else {
-        console.log(`setting grid[${currY}][${currX}] to water`);
         grid[currY][currX] = WATER;
       }
       if (!hasRightWall && downRight === EMPTY) {

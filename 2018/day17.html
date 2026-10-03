@@ -105,34 +105,67 @@
       }
 
       let streams = [{ x: 500, top: minY }];
-      let stream = steps.pop();
-      let currY = stream.top;
-      let falling = true;
-      function step() {
+      let stream = streams.pop();
+      let currY, currX, falling, seekDir, hasLeftWall, hasRightWall;
+      let done = false;
+      resetState();
+
+      let shouldLoop = true;
+      document.addEventListener("keypress", () => {
+        shouldLoop = !shouldLoop;
+        if (shouldLoop) {
+          requestAnimationFrame(loop);
+        }
+      });
+
+      let framerate = 1 / 120;
+      let elapsed = 0;
+      let lastTimestamp = 0;
+
+      requestAnimationFrame(loop);
+      function loop(timestamp) {
+        let dt = Math.min(0.1, (timestamp - lastTimestamp) / 1000);
+        elapsed += dt;
+        lastTimestamp = timestamp;
+        if (elapsed >= framerate) {
+          elapsed -= framerate;
+          update();
+          draw();
+        }
+
+        if (shouldLoop) {
+          requestAnimationFrame(loop);
+        }
+      }
+
+      function update() {
+        if (done) return;
+
         if (falling) {
           if (grid[currY][stream.x] === EMPTY && currY <= maxY) {
             grid[currY][stream.x] = WATER;
             currY++;
+            if (currY > maxY) {
+              if (streams.length) {
+                stream = streams.pop();
+                resetState();
+              } else {
+                done = true;
+              }
+            }
+          } else {
+            currY--;
+            falling = false;
           }
+          return;
         }
-      }
 
-      while (streams.length) {
-        while (grid[currY][stream.x] === EMPTY && currY <= maxY) {
-          grid[currY][stream.x] = WATER;
-          currY++;
-        }
-        if (currY > maxY) {
-          // we reached the bottom
-          continue;
-        }
-        currY--;
-        // seek left and right for walls or drops
+        // seek left and right for walls and drops
         while (true) {
           let hasLeftWall = false;
           let hasRightWall = false;
-          // find left wall
-          let currX = stream.x;
+          currX = stream.x;
+          // left
           while (true) {
             currX--;
             let left = grid[currY][currX];
@@ -144,13 +177,14 @@
               grid[currY][currX] = WATER;
             }
             if (!hasLeftWall && downLeft === EMPTY) {
-              // console.log(`no left wall, new stream at ${currX}:${currY + 1}`);
-              streams.push({ x: currX, top: currY + 1 });
+              if (!streamsHasStream(currX, currY + 1)) {
+                streams.push({ x: currX, top: currY + 1 });
+              }
               break;
             }
           }
-          // find right wall
           currX = stream.x;
+          // right
           while (true) {
             currX++;
             let right = grid[currY][currX];
@@ -162,46 +196,64 @@
               grid[currY][currX] = WATER;
             }
             if (!hasRightWall && downRight === EMPTY) {
-              // console.log(`no right wall, new stream at ${currX}:${currY + 1}`);
-              streams.push({ x: currX, top: currY + 1 });
-              break;
+              if (!streamsHasStream(currX, currY + 1)) {
+                streams.push({ x: currX, top: currY + 1 });
+              }
             }
           }
-          console.log(hasLeftWall, hasRightWall);
-          // if both, currY-- and do it again until at least one wall is missing
           if (hasLeftWall && hasRightWall) {
-            // console.log('both walls, moving up');
             currY--;
+            grid[currY][currX] = WATER;
           } else {
-            break;
+            if (streams.length) {
+              stream = streams.pop();
+              resetState();
+            } else {
+              done = true;
+            }
           }
         }
+        return;
       }
 
-      // draw grid
-      for (let y = 0; y < grid.length; y++) {
-        for (let x = 0; x < grid[0].length; x++) {
-          let type = grid[y][x];
-          if (type === SOLID) {
-            setPixel(x, y, 50, 50, 50);
-          } else if (type === WATER) {
-            setPixel(x, y, 30, 144, 255);
-          } else if (type === EMPTY) {
-            setPixel(x, y, 180, 180, 180);
+      function draw() {
+        for (let y = 0; y < grid.length; y++) {
+          for (let x = 0; x < grid[0].length; x++) {
+            let type = grid[y][x];
+            if (type === SOLID) {
+              setPixel(x, y, 50, 50, 50);
+            } else if (type === WATER) {
+              setPixel(x, y, 30, 144, 255);
+            } else if (type === EMPTY) {
+              setPixel(x, y, 180, 180, 180);
+            }
           }
         }
+
+        setPixel(1419, 995, 255, 0, 0);
+
+        ctx.putImageData(imageData, 0, 0);
       }
-
-      setPixel(1419,995,255,0,0);
-
-      ctx.putImageData(imageData, 0, 0);
 
       function setPixel(x, y, r, g, b) {
         let idx = y * (WIDTH * 4) + x * 4;
         pixels[idx] = r;
         pixels[idx + 1] = g;
         pixels[idx + 2] = b;
-        pixels[idx + 3] = 255;
+        pixels[idx + 3] = x === currX && y === currY ? 255 : 155;
+      }
+
+      function resetState() {
+        currY = stream.top;
+        currX = stream.x;
+        falling = true;
+        seekDir = "left";
+        hasLeftWall = false;
+        hasRightWall = false;
+      }
+
+      function streamsHasStream(x, top) {
+        return !!streams.find((stream) => stream.x === x && stream.top === top);
       }
     </script>
   </body>
