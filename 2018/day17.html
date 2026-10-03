@@ -160,49 +160,48 @@
           return;
         }
 
-        // seek left and right for walls and drops
-        while (true) {
-          let hasLeftWall = false;
-          let hasRightWall = false;
-          currX = stream.x;
-          // left
-          while (true) {
-            currX--;
-            let left = grid[currY][currX];
-            let downLeft = grid[currY + 1][currX];
-            if (left === SOLID) {
-              hasLeftWall = true;
-              break;
-            } else {
-              grid[currY][currX] = WATER;
-            }
-            if (!hasLeftWall && downLeft === EMPTY) {
-              if (!streamsHasStream(currX, currY + 1)) {
-                streams.push({ x: currX, top: currY + 1 });
-              }
-              break;
-            }
+        if (seekDir === "left") {
+          currX--;
+          let left = grid[currY][currX];
+          let downLeft = grid[currY + 1][currX];
+          if (left === SOLID) {
+            hasLeftWall = true;
+            seekDir = "right";
+            currX = stream.x;
+          } else {
+            grid[currY][currX] = WATER;
           }
-          currX = stream.x;
-          // right
-          while (true) {
-            currX++;
-            let right = grid[currY][currX];
-            let downRight = grid[currY + 1][currX];
-            if (right === SOLID) {
-              hasRightWall = true;
-              break;
-            } else {
-              grid[currY][currX] = WATER;
+          if (!hasLeftWall && downLeft === EMPTY) {
+            if (!streamsHasStream(currX, currY + 1)) {
+              streams.push({ x: currX, top: currY + 1 });
             }
-            if (!hasRightWall && downRight === EMPTY) {
-              if (!streamsHasStream(currX, currY + 1)) {
-                streams.push({ x: currX, top: currY + 1 });
-              }
-            }
+            seekDir = "right";
           }
+          return;
+        }
+        if (seekDir === "right") {
+          currX++;
+          let right = grid[currY][currX];
+          let downRight = grid[currY + 1][currX];
+          if (right === SOLID) {
+            hasRightWall = true;
+            seekDir = "none";
+            currX = stream.x;
+          } else {
+            grid[currY][currX] = WATER;
+          }
+          if (!hasRightWall && downRight === EMPTY) {
+            if (!streamsHasStream(currX, currY + 1)) {
+              streams.push({ x: currX, top: currY + 1 });
+            }
+            seekDir = "none";
+          }
+          return;
+        }
+        if (seekDir === "none") {
           if (hasLeftWall && hasRightWall) {
             currY--;
+            seekDir = "left";
             grid[currY][currX] = WATER;
           } else {
             if (streams.length) {
@@ -212,8 +211,10 @@
               done = true;
             }
           }
+          hasLeftWall = false;
+          hasRightWall = false;
+          return;
         }
-        return;
       }
 
       function draw() {
