@@ -142,79 +142,83 @@
         if (done) return;
 
         if (falling) {
-          if (grid[currY][stream.x] === EMPTY && currY <= maxY) {
+          while (grid[currY][stream.x] === EMPTY && currY <= maxY) {
             grid[currY][stream.x] = WATER;
             currY++;
             if (currY > maxY) {
+              // reached the bottom
               if (streams.length) {
+                console.log(
+                  "reached the bottom, following next available stream",
+                );
                 stream = streams.pop();
                 resetState();
               } else {
                 done = true;
               }
             }
-          } else {
-            currY--;
-            falling = false;
+            console.log(`falling: ${currY}:${stream.x}`);
           }
+          if (grid[currY][stream.x] === SOLID) {
+            currY--;
+          } else {
+            console.log(`landed in water at row ${currY} col: ${stream.x}`);
+          }
+          falling = false;
           return;
         }
 
-        if (seekDir === "left") {
-          currX--;
-          let left = grid[currY][currX];
-          let downLeft = grid[currY + 1][currX];
+        let hasLeftWall = false;
+        let hasRightWall = false;
+        let currX = stream.x;
+        while (true) {
+          grid[currY][currX] = WATER;
+          let down = grid[currY + 1][currX];
+          let left = grid[currY][currX - 1];
+          let downLeft = grid[currY + 1][currX - 1];
           if (left === SOLID) {
             hasLeftWall = true;
-            seekDir = "right";
-            currX = stream.x;
-          } else {
-            grid[currY][currX] = WATER;
+            break;
           }
-          if (!hasLeftWall && downLeft === EMPTY) {
-            if (!streamsHasStream(currX, currY + 1)) {
-              streams.push({ x: currX, top: currY + 1 });
+          if (down === SOLID && downLeft === EMPTY) {
+            if (!streamsHasStream(currX - 1, currY)) {
+              console.log(`pushing stream x: ${currX - 1}, top: ${currY}`);
+              streams.push({ x: currX - 1, top: currY });
             }
-            seekDir = "right";
+            break;
           }
-          return;
+          currX--;
         }
-        if (seekDir === "right") {
-          currX++;
-          let right = grid[currY][currX];
-          let downRight = grid[currY + 1][currX];
+        currX = stream.x;
+        while (true) {
+          grid[currY][currX] = WATER;
+          let down = grid[currY + 1][currX];
+          let right = grid[currY][currX + 1];
+          let downRight = grid[currY + 1][currX + 1];
           if (right === SOLID) {
             hasRightWall = true;
-            seekDir = "none";
-            currX = stream.x;
-          } else {
-            grid[currY][currX] = WATER;
+            break;
           }
-          if (!hasRightWall && downRight === EMPTY) {
-            if (!streamsHasStream(currX, currY + 1)) {
-              streams.push({ x: currX, top: currY + 1 });
+          if (down === SOLID && downRight === EMPTY) {
+            if (!streamsHasStream(currX + 1, currY)) {
+              console.log(`pushing stream x: ${currX + 1}, top: ${currY}`);
+              streams.push({ x: currX + 1, top: currY });
             }
-            seekDir = "none";
+            break;
           }
-          return;
+          currX++;
         }
-        if (seekDir === "none") {
-          if (hasLeftWall && hasRightWall) {
-            currY--;
-            seekDir = "left";
-            grid[currY][currX] = WATER;
+        if (hasLeftWall && hasRightWall) {
+          currY--;
+        } else {
+          if (streams.length) {
+            stream = streams.pop();
+            resetState();
           } else {
-            if (streams.length) {
-              stream = streams.pop();
-              resetState();
-            } else {
-              done = true;
-            }
+            done = true;
           }
-          hasLeftWall = false;
-          hasRightWall = false;
-          return;
         }
+        return;
       }
 
       function draw() {
@@ -228,10 +232,11 @@
             } else if (type === EMPTY) {
               setPixel(x, y, 180, 180, 180);
             }
+            if (streamsHasStream(x, y)) {
+              setPixel(x, y, 255, 255, 0);
+            }
           }
         }
-
-        setPixel(1419, 995, 255, 0, 0);
 
         ctx.putImageData(imageData, 0, 0);
       }
@@ -241,16 +246,12 @@
         pixels[idx] = r;
         pixels[idx + 1] = g;
         pixels[idx + 2] = b;
-        pixels[idx + 3] = x === currX && y === currY ? 255 : 155;
+        pixels[idx + 3] = 255;
       }
 
       function resetState() {
         currY = stream.top;
-        currX = stream.x;
         falling = true;
-        seekDir = "left";
-        hasLeftWall = false;
-        hasRightWall = false;
       }
 
       function streamsHasStream(x, top) {
