@@ -161,58 +161,61 @@
         }
 
         // seek left and right for walls and drops
+
+        let hasLeftWall = false;
+        let hasRightWall = false;
+        currX = stream.x;
+        // left
         while (true) {
-          let hasLeftWall = false;
-          let hasRightWall = false;
-          currX = stream.x;
-          // left
-          while (true) {
-            currX--;
-            let left = grid[currY][currX];
-            let downLeft = grid[currY + 1][currX];
-            if (left === SOLID) {
-              hasLeftWall = true;
-              break;
-            } else {
-              grid[currY][currX] = WATER;
-            }
-            if (!hasLeftWall && downLeft === EMPTY) {
-              if (!streamsHasStream(currX, currY + 1)) {
-                streams.push({ x: currX, top: currY + 1 });
-              }
-              break;
-            }
-          }
-          currX = stream.x;
-          // right
-          while (true) {
-            currX++;
-            let right = grid[currY][currX];
-            let downRight = grid[currY + 1][currX];
-            if (right === SOLID) {
-              hasRightWall = true;
-              break;
-            } else {
-              grid[currY][currX] = WATER;
-            }
-            if (!hasRightWall && downRight === EMPTY) {
-              if (!streamsHasStream(currX, currY + 1)) {
-                streams.push({ x: currX, top: currY + 1 });
-              }
-            }
-          }
-          if (hasLeftWall && hasRightWall) {
-            currY--;
-            grid[currY][currX] = WATER;
+          console.log("look left");
+          currX--;
+          let left = grid[currY][currX];
+          let downLeft = grid[currY + 1][currX];
+          if (left === SOLID) {
+            hasLeftWall = true;
+            break;
           } else {
-            if (streams.length) {
-              stream = streams.pop();
-              resetState();
-            } else {
-              done = true;
+            grid[currY][currX] = WATER;
+          }
+          if (!hasLeftWall && downLeft === EMPTY) {
+            if (!streamsHasStream(currX, currY + 1)) {
+              streams.push({ x: currX, top: currY + 1 });
             }
+            break;
           }
         }
+        currX = stream.x;
+        // right
+        while (true) {
+          console.log("look right");
+          currX++;
+          let right = grid[currY][currX];
+          let downRight = grid[currY + 1][currX];
+          if (right === SOLID) {
+            hasRightWall = true;
+            break;
+          } else {
+            grid[currY][currX] = WATER;
+          }
+          if (!hasRightWall && downRight === EMPTY) {
+            if (!streamsHasStream(currX, currY + 1)) {
+              streams.push({ x: currX, top: currY + 1 });
+            }
+            break;
+          }
+        }
+        if (hasLeftWall && hasRightWall) {
+          currY--;
+          grid[currY][currX] = WATER;
+        } else {
+          if (streams.length) {
+            stream = streams.pop();
+            resetState();
+          } else {
+            done = true;
+          }
+        }
+
         return;
       }
 
