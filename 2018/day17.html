@@ -105,11 +105,19 @@
       }
 
       let streams = [{ x: 500, top: minY }];
+      let stream = steps.pop();
+      let currY = stream.top;
+      let falling = true;
+      function step() {
+        if (falling) {
+          if (grid[currY][stream.x] === EMPTY && currY <= maxY) {
+            grid[currY][stream.x] = WATER;
+            currY++;
+          }
+        }
+      }
+
       while (streams.length) {
-        let stream = streams.pop();
-        debugger;
-        console.log(stream.x, stream.top);
-        let currY = stream.top;
         while (grid[currY][stream.x] === EMPTY && currY <= maxY) {
           grid[currY][stream.x] = WATER;
           currY++;
@@ -135,7 +143,7 @@
             } else {
               grid[currY][currX] = WATER;
             }
-            if (!hasLeftWall && downLeft !== SOLID) {
+            if (!hasLeftWall && downLeft === EMPTY) {
               // console.log(`no left wall, new stream at ${currX}:${currY + 1}`);
               streams.push({ x: currX, top: currY + 1 });
               break;
@@ -153,7 +161,7 @@
             } else {
               grid[currY][currX] = WATER;
             }
-            if (!hsaRightWall && downRight !== SOLID) {
+            if (!hasRightWall && downRight === EMPTY) {
               // console.log(`no right wall, new stream at ${currX}:${currY + 1}`);
               streams.push({ x: currX, top: currY + 1 });
               break;
@@ -183,6 +191,8 @@
           }
         }
       }
+
+      setPixel(1419,995,255,0,0);
 
       ctx.putImageData(imageData, 0, 0);
 
