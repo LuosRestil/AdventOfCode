@@ -107,8 +107,10 @@
       let streams = [{ x: 500, top: minY }];
       while (streams.length) {
         let stream = streams.pop();
+        debugger;
+        console.log(stream.x, stream.top);
         let currY = stream.top;
-        while (grid[currY][stream.x] !== SOLID && currY <= maxY) {
+        while (grid[currY][stream.x] === EMPTY && currY <= maxY) {
           grid[currY][stream.x] = WATER;
           currY++;
         }
@@ -118,11 +120,57 @@
         }
         currY--;
         // seek left and right for walls or drops
-        // find left wall
-        // find right wall
-        // if both, currY-- and do it again until at least one wall is missing
+        while (true) {
+          let hasLeftWall = false;
+          let hasRightWall = false;
+          // find left wall
+          let currX = stream.x;
+          while (true) {
+            currX--;
+            let left = grid[currY][currX];
+            let downLeft = grid[currY + 1][currX];
+            if (left === SOLID) {
+              hasLeftWall = true;
+              break;
+            } else {
+              grid[currY][currX] = WATER;
+            }
+            if (!hasLeftWall && downLeft !== SOLID) {
+              // console.log(`no left wall, new stream at ${currX}:${currY + 1}`);
+              streams.push({ x: currX, top: currY + 1 });
+              break;
+            }
+          }
+          // find right wall
+          currX = stream.x;
+          while (true) {
+            currX++;
+            let right = grid[currY][currX];
+            let downRight = grid[currY + 1][currX];
+            if (right === SOLID) {
+              hasRightWall = true;
+              break;
+            } else {
+              grid[currY][currX] = WATER;
+            }
+            if (!hsaRightWall && downRight !== SOLID) {
+              // console.log(`no right wall, new stream at ${currX}:${currY + 1}`);
+              streams.push({ x: currX, top: currY + 1 });
+              break;
+            }
+          }
+          console.log(hasLeftWall, hasRightWall);
+          // if both, currY-- and do it again until at least one wall is missing
+          if (hasLeftWall && hasRightWall) {
+            // console.log('both walls, moving up');
+            currY--;
+          } else {
+            break;
+          }
+        }
       }
 
+      // draw grid
       for (let y = 0; y < grid.length; y++) {
         for (let x = 0; x < grid[0].length; x++) {
           let type = grid[y][x];
