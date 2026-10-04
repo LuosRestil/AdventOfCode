@@ -105,9 +105,12 @@
 
       let streams = [{ x: 500, top: minY }];
 
+      draw();
+
       document.addEventListener("keypress", (evt) => {
         evt.preventDefault();
         tick();
+        draw();
       });
 
       function tick() {
@@ -115,16 +118,104 @@
           // TODO show end stats
           return;
         }
-        stream = streams.pop();
-        // fall to nearest floor or wall
-        
-        // if wall, add two new streams
-        // if floor, find left and right walls
-        // walk to left boundary, making streams at empty dropoffs as you go
-        // walk to right boundary, making streams at empty dropoffs as you go
-        // if there were both right and left walls, go up one level and repeat until you overflow one or more boundaries
+        let stream = streams.pop();
+        let currY = stream.top;
+        // fall to nearest floor or wall (or water)
+        while (currY <= maxY && grid[currY][stream.x] === EMPTY) {
+          grid[currY][stream.x] = WATER;
+          currY++;
+          if (!grid[currY]) {
+            console.log(`no grid row at ${currY}`);
+          }
+        }
+        if (currY > maxY) {
+          return;
+        }
 
-        draw();
+        // if wall, add two new streams and be done with the current stream
+        let landedInWater = grid[currY][stream.x] === WATER;
+        if (landedInWater) {
+          let wall = wallsByX[stream.x].find((wall) => wall.top === currY + 1);
+          if (wall) {
+            // we've already landed on this wall before, no need to repeat
+            return;
+          }
+        } else {
+          // solid
+          let wall = wallsByX[stream.x]?.find((wall) => wall.top === currY);
+          if (wall) {
+            grid[currY - 1][stream.x - 1] = WATER;
+            grid[currY - 1][stream.x + 1] = WATER;
+            streams.push({ x: stream.x - 1, top: currY });
+            streams.push({ x: stream.x + 1, top: currY });
+            return;
+          }
+        }
+        // landed above floor, figure out which one we landed on
+        let iy = currY;
+        if (landedInWater) {
+          while (grid[iy][stream.x] !== SOLID) {
+            iy++;
+          }
+        }
+        let nearestFloor = floorsByY[iy]?.find(
+          (floor) => floor.left < stream.x && floor.right > stream.x,
+        );
+
+        currY--;
+
+        // find left and right walls
+        let validWalls = allWalls
+          .filter(
+            (wall) =>
+              wall.x >= nearestFloor.left && wall.x <= nearestFloor.right,
+          )
+          .toSorted((a, b) => a.x - b.x);
+        let boundingWalls = validWalls.filter(
+          (wall) => wall.bottom >= currY && wall.top <= currY,
+        );
+        let leftWall = boundingWalls.find((wall) => wall.x < stream.x);
+        let rightWall = boundingWalls.find((wall) => wall.x > stream.x);
+        if (landedInWater && !(!!leftWall && !!rightWall)) {
+          // landed in already explored runoff
+          return;
+        }
+
+        let hitWallLeft = true;
+        let hitWallRight = true;
+        while (hitWallLeft && hitWallRight) {
+          hitWallLeft = false;
+          hitWallRight = false;
+          // walk left
+          let currX = stream.x;
+          while (true) {
+            if (grid[currY][currX] === SOLID) {
+              hitWallLeft = true;
+              break;
+            }
+            grid[currY][currX] = WATER;
+            if (grid[currY + 1][currX] === EMPTY) {
+              streams.push({ x: currX, top: currY + 1 });
+              break;
+            }
+            currX--;
+          }
+          // walk right
+          currX = stream.x;
+          while (true) {
+            if (grid[currY][currX] === SOLID) {
+              hitWallRight = true;
+              break;
+            }
+            grid[currY][currX] = WATER;
+            if (grid[currY + 1][currX] === EMPTY) {
+              streams.push({ x: currX, top: currY + 1 });
+              break;
+            }
+            currX++;
+          }
+          currY--;
+        }
       }
 
       function draw() {
@@ -141,6 +232,10 @@
           }
         }
 
+        for (let stream of streams) {
+          setPixel(stream.x, stream.top, 255, 255, 0);
+        }
+
         ctx.putImageData(imageData, 0, 0);
       }
 
@@ -149,7 +244,7 @@
         pixels[idx] = r;
         pixels[idx + 1] = g;
         pixels[idx + 2] = b;
-        pixels[idx + 3] = x === currX && y === currY ? 255 : 155;
+        pixels[idx + 3] = 255;
       }
     </script>
   </body>
