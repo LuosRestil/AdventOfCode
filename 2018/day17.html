@@ -107,26 +107,35 @@
 
       draw();
 
+      let debug = false;
+
       document.addEventListener("keypress", (evt) => {
         evt.preventDefault();
-        tick();
-        draw();
+        if (evt.key === "k") {
+          tick();
+          draw();
+        } else if (evt.key === "l") {
+          debug = !debug;
+        }
       });
 
       function tick() {
+        // TODO handle stream landing in water over wall inside a pool
+        // if landed in water, walk left and right. if you ever hit an empty place, you can stop
+        // TODO handle overflow into existing stream path (walking through and out the other side because down is not empty, but water...)
+
         if (!streams.length) {
           // TODO show end stats
+          console.log("DONE!!!");
           return;
         }
         let stream = streams.pop();
+        if (grid[stream.top][stream.x] === WATER) return;
         let currY = stream.top;
         // fall to nearest floor or wall (or water)
         while (currY <= maxY && grid[currY][stream.x] === EMPTY) {
           grid[currY][stream.x] = WATER;
           currY++;
-          if (!grid[currY]) {
-            console.log(`no grid row at ${currY}`);
-          }
         }
         if (currY > maxY) {
           return;
@@ -135,7 +144,7 @@
         // if wall, add two new streams and be done with the current stream
         let landedInWater = grid[currY][stream.x] === WATER;
         if (landedInWater) {
-          let wall = wallsByX[stream.x].find((wall) => wall.top === currY + 1);
+          let wall = wallsByX[stream.x]?.find((wall) => wall.top === currY + 1);
           if (wall) {
             // we've already landed on this wall before, no need to repeat
             return;
@@ -154,12 +163,14 @@
         // landed above floor, figure out which one we landed on
         let iy = currY;
         if (landedInWater) {
-          while (grid[iy][stream.x] !== SOLID) {
+          while (iy <= maxY && grid[iy][stream.x] !== SOLID) {
             iy++;
           }
         }
+        if (iy > maxY) return;
+
         let nearestFloor = floorsByY[iy]?.find(
-          (floor) => floor.left < stream.x && floor.right > stream.x,
+          (floor) => floor.left <= stream.x && floor.right >= stream.x,
         );
 
         currY--;
@@ -183,6 +194,8 @@
 
         let hitWallLeft = true;
         let hitWallRight = true;
+        let lastLeftWallX = -Infinity;
+        let lastRightWallX = Infinity;
         while (hitWallLeft && hitWallRight) {
           hitWallLeft = false;
           hitWallRight = false;
@@ -191,8 +204,9 @@
           while (true) {
             if (grid[currY][currX] === SOLID) {
               hitWallLeft = true;
+              lastLeftWallX = currX;
               break;
-            }
+            } 
             grid[currY][currX] = WATER;
             if (grid[currY + 1][currX] === EMPTY) {
               streams.push({ x: currX, top: currY + 1 });
@@ -205,6 +219,7 @@
           while (true) {
             if (grid[currY][currX] === SOLID) {
               hitWallRight = true;
+              lastRightWallX = currX;
               break;
             }
             grid[currY][currX] = WATER;
