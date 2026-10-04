@@ -106,6 +106,7 @@
 
       let streams = [{ x: 500, top: minY }];
       let stream = streams.pop();
+      let foundStreams = new Set([keyifyStream(stream.x, stream.top)]);
       let currY, currX, falling, seekDir, hasLeftWall, hasRightWall;
       let done = false;
       resetState();
@@ -157,12 +158,9 @@
                 done = true;
               }
             }
-            console.log(`falling: ${currY}:${stream.x}`);
           }
           if (grid[currY][stream.x] === SOLID) {
             currY--;
-          } else {
-            console.log(`landed in water at row ${currY} col: ${stream.x}`);
           }
           falling = false;
           return;
@@ -180,12 +178,17 @@
             hasLeftWall = true;
             break;
           }
-          if (down === SOLID && downLeft === EMPTY) {
-            if (!streamsHasStream(currX - 1, currY)) {
-              console.log(`pushing stream x: ${currX - 1}, top: ${currY}`);
-              streams.push({ x: currX - 1, top: currY });
+          if (down === SOLID) {
+            let streamKey = keyifyStream(currX - 1, currY);
+            if (foundStreams.has(streamKey)) {
+              break;
             }
-            break;
+            if (downLeft === EMPTY) {
+              streams.push({x: currX - 1, top: currY});
+              foundStreams.add(streamKey);
+              console.log(`pushing stream x: ${currX - 1}, top: ${currY}`);
+              break;
+            }
           }
           currX--;
         }
@@ -199,12 +202,17 @@
             hasRightWall = true;
             break;
           }
-          if (down === SOLID && downRight === EMPTY) {
-            if (!streamsHasStream(currX + 1, currY)) {
+          if (down === SOLID) {
+            let streamKey = keyifyStream(currX + 1, currY);
+            if (foundStreams.has(streamKey)) {
+              break;
+            }
+            if (downRight === EMPTY) {
               console.log(`pushing stream x: ${currX + 1}, top: ${currY}`);
               streams.push({ x: currX + 1, top: currY });
+              foundStreams.add(streamKey);
+              break;
             }
-            break;
           }
           currX++;
         }
@@ -213,6 +221,7 @@
         } else {
           if (streams.length) {
             stream = streams.pop();
+            console.log('stream', stream);
             resetState();
           } else {
             done = true;
@@ -256,6 +265,10 @@
 
       function streamsHasStream(x, top) {
         return !!streams.find((stream) => stream.x === x && stream.top === top);
+      }
+
+      function keyifyStream(x, top) {
+        return `${x}:${top}`;
       }
     </script>
   </body>
