@@ -76,7 +76,6 @@
       const EMPTY = 0;
       const SOLID = 1;
       const WATER = 2;
-      let types = [EMPTY, SOLID, WATER];
       let WIDTH = 1000;
       let HEIGHT = maxY + 1;
       canvas.width = WIDTH;
@@ -105,118 +104,27 @@
       }
 
       let streams = [{ x: 500, top: minY }];
-      let stream = streams.pop();
-      let currY, currX, falling, seekDir, hasLeftWall, hasRightWall;
-      let done = false;
-      resetState();
 
-      let shouldLoop = true;
-      document.addEventListener("keypress", () => {
-        shouldLoop = !shouldLoop;
-        if (shouldLoop) {
-          requestAnimationFrame(loop);
-        }
+      document.addEventListener("keypress", (evt) => {
+        evt.preventDefault();
+        tick();
       });
 
-      let framerate = 1 / 120;
-      let elapsed = 0;
-      let lastTimestamp = 0;
-
-      requestAnimationFrame(loop);
-      function loop(timestamp) {
-        let dt = Math.min(0.1, (timestamp - lastTimestamp) / 1000);
-        elapsed += dt;
-        lastTimestamp = timestamp;
-        if (elapsed >= framerate) {
-          elapsed -= framerate;
-          update();
-          draw();
-        }
-
-        if (shouldLoop) {
-          requestAnimationFrame(loop);
-        }
-      }
-
-      function update() {
-        if (done) return;
-
-        if (falling) {
-          if (grid[currY][stream.x] === EMPTY && currY <= maxY) {
-            grid[currY][stream.x] = WATER;
-            currY++;
-            if (currY > maxY) {
-              if (streams.length) {
-                stream = streams.pop();
-                resetState();
-              } else {
-                done = true;
-              }
-            }
-          } else {
-            currY--;
-            falling = false;
-          }
+      function tick() {
+        if (!streams.length) {
+          // TODO show end stats
           return;
         }
+        stream = streams.pop();
+        // fall to nearest floor or wall
+        
+        // if wall, add two new streams
+        // if floor, find left and right walls
+        // walk to left boundary, making streams at empty dropoffs as you go
+        // walk to right boundary, making streams at empty dropoffs as you go
+        // if there were both right and left walls, go up one level and repeat until you overflow one or more boundaries
 
-        // seek left and right for walls and drops
-
-        let hasLeftWall = false;
-        let hasRightWall = false;
-        currX = stream.x;
-        // left
-        while (true) {
-          console.log("look left");
-          currX--;
-          let left = grid[currY][currX];
-          let downLeft = grid[currY + 1][currX];
-          if (left === SOLID) {
-            hasLeftWall = true;
-            break;
-          } else {
-            grid[currY][currX] = WATER;
-          }
-          if (!hasLeftWall && downLeft === EMPTY) {
-            if (!streamsHasStream(currX, currY + 1)) {
-              streams.push({ x: currX, top: currY + 1 });
-            }
-            break;
-          }
-        }
-        currX = stream.x;
-        // right
-        while (true) {
-          console.log("look right");
-          currX++;
-          let right = grid[currY][currX];
-          let downRight = grid[currY + 1][currX];
-          if (right === SOLID) {
-            hasRightWall = true;
-            break;
-          } else {
-            grid[currY][currX] = WATER;
-          }
-          if (!hasRightWall && downRight === EMPTY) {
-            if (!streamsHasStream(currX, currY + 1)) {
-              streams.push({ x: currX, top: currY + 1 });
-            }
-            break;
-          }
-        }
-        if (hasLeftWall && hasRightWall) {
-          currY--;
-          grid[currY][currX] = WATER;
-        } else {
-          if (streams.length) {
-            stream = streams.pop();
-            resetState();
-          } else {
-            done = true;
-          }
-        }
-
-        return;
+        draw();
       }
 
       function draw() {
@@ -233,8 +141,6 @@
           }
         }
 
-        setPixel(1419, 995, 255, 0, 0);
-
         ctx.putImageData(imageData, 0, 0);
       }
 
@@ -244,19 +150,6 @@
         pixels[idx + 1] = g;
         pixels[idx + 2] = b;
         pixels[idx + 3] = x === currX && y === currY ? 255 : 155;
-      }
-
-      function resetState() {
-        currY = stream.top;
-        currX = stream.x;
-        falling = true;
-        seekDir = "left";
-        hasLeftWall = false;
-        hasRightWall = false;
-      }
-
-      function streamsHasStream(x, top) {
-        return !!streams.find((stream) => stream.x === x && stream.top === top);
       }
     </script>
   </body>
