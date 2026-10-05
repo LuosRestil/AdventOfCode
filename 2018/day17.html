@@ -76,6 +76,7 @@
       const EMPTY = 0;
       const SOLID = 1;
       const WATER = 2;
+      const CLICKED = 3;
       let WIDTH = 1000;
       let HEIGHT = maxY + 1;
       canvas.width = WIDTH;
@@ -116,8 +117,28 @@
           draw();
         } else if (evt.key === "l") {
           debug = !debug;
+        } else if (evt.key === 'w') {
+          countWater();
         }
       });
+
+      let anchor = null;
+      document.addEventListener("click", (evt) => {
+        if (!evt.shiftKey) {
+          anchor = {x: evt.layerX, y: evt.layerY};
+          grid[anchor.y][anchor.x] = CLICKED;
+        } else {
+          if (!anchor) return;
+          for (let x = anchor.x; x <= evt.layerX; x++) {
+            for (let y = anchor.y; y <= evt.layerY; y++) {
+              grid[y][x] = CLICKED;
+            }
+          }
+          anchor = {x: evt.layerX, y: evt.layerY};
+        }
+        draw();
+      });
+
 
       function tick() {
         // TODO handle stream landing in water over wall inside a pool
@@ -127,6 +148,7 @@
         if (!streams.length) {
           // TODO show end stats
           console.log("DONE!!!");
+
           return;
         }
         let stream = streams.pop();
@@ -160,6 +182,10 @@
             return;
           }
         }
+        // bz we have NOT necessarily landed above a floor here
+        // it's possible we landed in water far above a wall
+        // in which case, when we look down, we'll hit a WALL, not a FLOOR
+        // and nearestFloor will be undefined
         // landed above floor, figure out which one we landed on
         let iy = currY;
         if (landedInWater) {
@@ -172,6 +198,10 @@
         let nearestFloor = floorsByY[iy]?.find(
           (floor) => floor.left <= stream.x && floor.right >= stream.x,
         );
+        if (!nearestFloor) {
+          // we landed in water far above a wall
+          return;
+        }
 
         currY--;
 
@@ -179,7 +209,7 @@
         let validWalls = allWalls
           .filter(
             (wall) =>
-              wall.x >= nearestFloor.left && wall.x <= nearestFloor.right,
+              wall.x >= nearestFloor.left && wall.x <= nearestFloor.right, // TODO nearestFloor undefined
           )
           .toSorted((a, b) => a.x - b.x);
         let boundingWalls = validWalls.filter(
@@ -202,11 +232,21 @@
           // walk left
           let currX = stream.x;
           while (true) {
+            if (
+              currX ===
+                Math.min(
+                  lastLeftWallX - 1,
+                  (nearestFloor?.left ?? Infinity) - 1,
+                ) &&
+              grid[currY][currX] === WATER
+            ) {
+              break;
+            }
             if (grid[currY][currX] === SOLID) {
               hitWallLeft = true;
               lastLeftWallX = currX;
               break;
-            } 
+            }
             grid[currY][currX] = WATER;
             if (grid[currY + 1][currX] === EMPTY) {
               streams.push({ x: currX, top: currY + 1 });
@@ -217,6 +257,16 @@
           // walk right
           currX = stream.x;
           while (true) {
+            if (
+              currX ===
+                Math.max(
+                  lastRightWallX + 1,
+                  (nearestFloor?.right ?? -Infinity) + 1,
+                ) &&
+              grid[currY][currX] === WATER
+            ) {
+              break;
+            }
             if (grid[currY][currX] === SOLID) {
               hitWallRight = true;
               lastRightWallX = currX;
@@ -243,12 +293,19 @@
               setPixel(x, y, 30, 144, 255);
             } else if (type === EMPTY) {
               setPixel(x, y, 180, 180, 180);
+            } else if (type === CLICKED) {
+              setPixel(x, y, 255, 0, 0);
             }
           }
         }
 
-        for (let stream of streams) {
-          setPixel(stream.x, stream.top, 255, 255, 0);
+        for (let i = 0; i < streams.length; i++) {
+          let stream = streams[i];
+          if (i === streams.length - 1) {
+            setPixel(stream.x, stream.top, 0, 255, 0);
+          } else {
+            setPixel(stream.x, stream.top, 255, 255, 0);
+          }
         }
 
         ctx.putImageData(imageData, 0, 0);
@@ -260,6 +317,23 @@
         pixels[idx + 1] = g;
         pixels[idx + 2] = b;
         pixels[idx + 3] = 255;
+      }
+
+      function getPixel(x, y) {
+        let idx = y * (WIDTH * 4) + x * 4;
+        return [pixels[idx], pixels[idx + 1], pixels[idx + 2]];
+      }
+
+      function countWater(x, y) {
+        let total = 0;
+        for (let row of grid) {
+          for (let col of row) {
+            if (col === WATER) {
+              total++;
+            }
+          }
+        }
+        console.log(`total water: ${total}`);
       }
     </script>
   </body>
