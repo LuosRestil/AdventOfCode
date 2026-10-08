@@ -4,10 +4,7 @@ import path from "node:path";
 console.time();
 
 let input = fs
-  .readFileSync(
-    path.join(import.meta.dirname, "inputs", "day19mod.txt"),
-    "utf-8",
-  )
+  .readFileSync(path.join(import.meta.dirname, "inputs", "day19.txt"), "utf-8")
   .split("\n");
 let ipRegister = parseInt(input[0].split(" ")[1]);
 let program = input.slice(1).map((row, idx) => {
@@ -82,13 +79,12 @@ console.log(`Part 1: ${registers[0]}`);
 // when reg3 * reg2 == reg5, inc reg0 by reg3
 // when reg3 > reg5, break
 // this means we just need factors of 10551339
-let factors = new Set();
-for (let i = 1; i <= 10551339; i++) {
+let total = 0;
+for (let i = 1; i <= Math.sqrt(10551339); i++) {
   if (10551339 % i === 0) {
-    factors.add(i);
-    factors.add(10551339 / i);
+    total += i + 10551339 / i;
   }
 }
-console.log(`Part 2: ${[...factors].reduce((acc, curr) => acc + curr, 0)}`);
+console.log(`Part 2: ${total}`);
 
 console.timeEnd();
