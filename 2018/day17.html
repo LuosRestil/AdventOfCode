@@ -141,14 +141,8 @@
 
 
       function tick() {
-        // TODO handle stream landing in water over wall inside a pool
-        // if landed in water, walk left and right. if you ever hit an empty place, you can stop
-        // TODO handle overflow into existing stream path (walking through and out the other side because down is not empty, but water...)
-
         if (!streams.length) {
-          // TODO show end stats
           console.log("DONE!!!");
-
           return;
         }
         let stream = streams.pop();
@@ -209,7 +203,7 @@
         let validWalls = allWalls
           .filter(
             (wall) =>
-              wall.x >= nearestFloor.left && wall.x <= nearestFloor.right, // TODO nearestFloor undefined
+              wall.x >= nearestFloor.left && wall.x <= nearestFloor.right,
           )
           .toSorted((a, b) => a.x - b.x);
         let boundingWalls = validWalls.filter(

@@ -78,6 +78,8 @@ while (streams.length) {
 
 console.log(`Part 1: ${countWater()}`);
 
+// TODO part 2 walk from all streams at the bottom back to the top, removing water
+
 console.timeEnd();
 
 function tick() {
@@ -133,7 +135,7 @@ function tick() {
   // find left and right walls
   let validWalls = allWalls
     .filter(
-      (wall) => wall.x >= nearestFloor.left && wall.x <= nearestFloor.right, // TODO nearestFloor undefined
+      (wall) => wall.x >= nearestFloor.left && wall.x <= nearestFloor.right,
     )
     .toSorted((a, b) => a.x - b.x);
   let boundingWalls = validWalls.filter(
