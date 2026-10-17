@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>2018 Day 20</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        width: 100vw;
+        height: 100vh;
+        background-color: rgb(30, 30, 30);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      canvas {
+        display: block;
+        margin: auto;
+        image-rendering: pixelated;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas></canvas>
+    <script type="module">
+      let scale = 4;
+      let infile = "inputs/day20.txt";
+
+      let canvas = document.querySelector("canvas");
+      let ctx = canvas.getContext("2d");
+
+      const res = await fetch(infile);
+      const input = await res.text();
+
+      let grid = Array(1000)
+        .fill(null)
+        .map(() => Array(1000).fill(0));
+      let stack = [];
+      let curr = [500, 500, 0]; // y, x, distance from start
+      let maxDist = 0;
+      let over1k = 0;
+      grid[curr[0]][curr[1]] = 9;
+
+      for (let char of input) {
+        let dist = 0;
+        // console.log(char);
+        switch (char) {
+          case "N":
+            if (grid[curr[0] - 2][curr[1]] === 0) {
+              grid[curr[0] - 1][curr[1]] = 2;
+              grid[curr[0] - 2][curr[1]] = 1;
+              dist = curr[2] + 1;
+              if (dist >= 1000) over1k++;
+            }
+            curr = [curr[0] - 2, curr[1], dist];
+            break;
+          case "S":
+            if (grid[curr[0] + 2][curr[1]] === 0) {
+              grid[curr[0] + 1][curr[1]] = 2;
+              grid[curr[0] + 2][curr[1]] = 1;
+              dist = curr[2] + 1;
+              if (dist >= 1000) over1k++;
+            }
+            curr = [curr[0] + 2, curr[1], dist];
+            break;
+          case "E":
+            if (grid[curr[0]][curr[1] + 2] === 0) {
+              grid[curr[0]][curr[1] + 1] = 2;
+              grid[curr[0]][curr[1] + 2] = 1;
+              dist = curr[2] + 1;
+              if (dist >= 1000) over1k++;
+            }
+            curr = [curr[0], curr[1] + 2, dist];
+            break;
+          case "W":
+            if (grid[curr[0]][curr[1] - 2] === 0) {
+              grid[curr[0]][curr[1] - 1] = 2;
+              grid[curr[0]][curr[1] - 2] = 1;
+              dist = curr[2] + 1;
+              if (dist >= 1000) over1k++;
+            }
+            curr = [curr[0], curr[1] - 2, dist];
+            break;
+          case "(":
+            stack.push([curr[0], curr[1], curr[2]]);
+            break;
+          case ")":
+            curr = stack.pop();
+            break;
+          case "|":
+            curr = stack[stack.length - 1];
+            break;
+        }
+        // console.log(curr);
+        if (curr[2] > maxDist) {
+          maxDist = curr[2];
+          // console.log("new max dist: " + maxDist);
+        }
+      }
+
+      let [minY, maxY, minX, maxX] = [Infinity, -Infinity, Infinity, -Infinity];
+      for (let y = 0; y < grid.length; y++) {
+        for (let x = 0; x < grid[0].length; x++) {
+          let val = grid[y][x];
+          if (val === 1) {
+            if (y < minY) minY = y;
+            if (y > maxY) maxY = y;
+            if (x < minX) minX = x;
+            if (x > maxX) maxX = x;
+          }
+        }
+      }
+
+      let minGrid = [];
+      let start = null;
+      for (let y = minY - 1; y <= maxY + 1; y++) {
+        let row = [];
+        for (let x = minX - 1; x <= maxX + 1; x++) {
+          row.push(grid[y][x]);
+        }
+        minGrid.push(row);
+        if (row.includes(9)) {
+          start = [minGrid.length - 1, minGrid[minGrid.length - 1].indexOf(9)];
+        }
+      }
+
+      grid = minGrid;
+
+      // display map
+      canvas.width = grid.length;
+      canvas.height = grid[0].length;
+      canvas.style.width = `${canvas.width * scale}px`;
+      canvas.style.height = `${canvas.height * scale}px`;
+      let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      let pixels = imageData.data;
+      draw();
+
+      console.log(maxDist, over1k);
+
+      function draw() {
+        for (let y = 0; y < grid.length; y++) {
+          for (let x = 0; x < grid[0].length; x++) {
+            let num = grid[y][x];
+            switch (num) {
+              case 0:
+                // setPixel(x, y, 165, 42, 42);
+                setPixel(x, y, 139, 0, 0);
+                break;
+              case 1:
+              case 2:
+                setPixel(x, y, 200, 200, 200);
+                break;
+              case 9:
+                setPixel(x, y, 50, 200, 0);
+            }
+          }
+        }
+
+        ctx.putImageData(imageData, 0, 0);
+      }
+
+      function setPixel(x, y, r, g, b) {
+        let idx = y * (grid[0].length * 4) + x * 4;
+        pixels[idx] = r;
+        pixels[idx + 1] = g;
+        pixels[idx + 2] = b;
+        pixels[idx + 3] = 255;
+      }
+    </script>
+  </body>
+</html>
