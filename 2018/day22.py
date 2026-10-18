@@ -17,20 +17,23 @@ def main():
     geologic_indices = []
     erosion_levels = []
     types = []
-    for y in range(target['y'] + 1):
+    for y in range(target['y'] * 2):
         g_row = []
         e_row = []
         t_row = []
         geologic_indices.append(g_row)
         erosion_levels.append(e_row)
         types.append(t_row)
-        for x in range(target['x'] + 1):
+        for x in range(target['x'] * 2):
             g_row.append(get_geologic_index(x, y, target, erosion_levels))
             e_row.append(get_erosion_level(x, y, geologic_indices, depth))
             t_row.append(erosion_levels[y][x] % 3)
 
-    p1_ans = sum([sum(row) for row in types])
-    print(f'Part 1: {p1_ans}') 
+    total = 0
+    for y in range(target['y'] + 1):
+        for x in range(target['x'] + 1):
+            total += types[y][x]
+    print(f'Part 1: {total}') 
 
 
 def get_geologic_index(x, y, target, erosion_levels):

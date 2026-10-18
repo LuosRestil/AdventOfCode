@@ -197,12 +197,6 @@ function getEntities(elfAttackPower) {
   return entities;
 }
 
-function printGrid(grid) {
-  for (let i = 0; i < grid.length; i++) {
-    console.log(grid[i].join(""));
-  }
-}
-
 function getShortestDistance(src, dest) {
   let openSet = [{ row: src.row, col: src.col, from: [], depth: 0 }];
   let closedSet = {};
