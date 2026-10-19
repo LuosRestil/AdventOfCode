@@ -56,6 +56,7 @@ for (let intersection of intersections) {
 console.log(`Part 1: ${minDist}`);
 console.log(`Part 2: ${minSteps}`);
 
+console.timeEnd();
 
 function getIntersections(lines1, lines2) {
   let intersections = [];
