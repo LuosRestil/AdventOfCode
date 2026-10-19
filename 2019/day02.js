@@ -9,7 +9,7 @@ const filename = "day02.txt";
 let program = fs
   .readFileSync(path.join(import.meta.dirname, "inputs", filename), "utf-8")
   .split(",")
-  .map((char) => parseInt(char));
+  .map((num) => parseInt(num));
 
 let computer = new IntcodeComputer(program);
 computer.state[1] = 12;
