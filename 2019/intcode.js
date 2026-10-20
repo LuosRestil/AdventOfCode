@@ -1,21 +1,27 @@
 export default class IntcodeComputer {
+  static STATUS_READY = 0;
+  static STATUS_RUNNING = 1;
+  static STATUS_AWAITING_INPUT = 2;
+  static STATUS_DONE = 3;
+
   constructor(program, inputs) {
+    this.status = IntcodeComputer.STATUS_READY;
     this.originalProgram = program; // original loaded program
     this.state = Array.from(this.originalProgram); // current modified program state
     this.ip = 0; // instruction pointer
-    this.done = false;
     this.outputs = [];
     this.originalInputs = inputs ?? [];
     this.inputs = Array.from(this.originalInputs);
   }
 
   runProgram() {
-    while (!this.tick()) {}
+    this.status = IntcodeComputer.STATUS_RUNNING;
+    while (this.status === IntcodeComputer.STATUS_RUNNING) {
+      this.tick();
+    }
   }
 
   tick() {
-    if (this.done) return this.done;
-
     let opcodeAndModes = this.state[this.ip++];
     let digits = [];
     while (opcodeAndModes > 0) {
@@ -37,6 +43,11 @@ export default class IntcodeComputer {
       let destination = this.state[this.ip++];
       this.state[destination] = operand1 * operand2;
     } else if (opcode === 3) {
+      if (!this.inputs.length) {
+        this.status = IntcodeComputer.STATUS_AWAITING_INPUT;
+        this.ip--;
+        return;
+      }
       let destination = this.state[this.ip++];
       this.state[destination] = this.inputs.shift();
     } else if (opcode === 4) {
@@ -66,12 +77,10 @@ export default class IntcodeComputer {
       this.state[destination] = operand1 === operand2 ? 1 : 0;
     }
     else if (opcode === 99) {
-      this.done = true;
+      this.status = IntcodeComputer.STATUS_DONE;
     } else {
       throw new Error("invalid opcode " + opcode);
     }
-
-    return this.done;
   }
 
   getOperand(mode) {
@@ -81,7 +90,7 @@ export default class IntcodeComputer {
   }
 
   reset() {
-    this.done = false;
+    this.status = IntcodeComputer.STATUS_READY;
     this.state = Array.from(this.originalProgram);
     this.ip = 0;
     this.inputs = Array.from(this.originalInputs);

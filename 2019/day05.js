@@ -18,3 +18,5 @@ console.log(`Part 1: ${computer.outputs.at(-1)}`);
 computer = new IntcodeComputer(program, [5]);
 computer.runProgram();
 console.log(`Part 2: ${computer.outputs.at(-1)}`);
+
+console.timeEnd();

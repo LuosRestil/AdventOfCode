@@ -50,3 +50,5 @@ while (queue.length) {
   }
 }
 console.log(`Part 2: ${shortest}`);
+
+console.timeEnd();
