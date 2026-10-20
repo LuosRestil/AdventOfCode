@@ -37,7 +37,7 @@ function getThrusterSignal(phaseSettings) {
   while (computers[0].status !== IntcodeComputer.STATUS_DONE) {
     for (let computer of computers) {
       computer.inputs.push(lastOutput);
-      computer.runProgram();
+      computer.run();
       lastOutput = computer.outputs.at(-1);
     }
   }

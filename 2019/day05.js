@@ -12,11 +12,11 @@ let program = fs
   .map((num) => parseInt(num));
 
 let computer = new IntcodeComputer(program, [1]);
-computer.runProgram();
+computer.run();
 console.log(`Part 1: ${computer.outputs.at(-1)}`);
 
 computer = new IntcodeComputer(program, [5]);
-computer.runProgram();
+computer.run();
 console.log(`Part 2: ${computer.outputs.at(-1)}`);
 
 console.timeEnd();

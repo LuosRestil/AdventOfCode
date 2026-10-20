@@ -14,7 +14,7 @@ let program = fs
 let computer = new IntcodeComputer(program);
 computer.state[1] = 12;
 computer.state[2] = 2;
-computer.runProgram();
+computer.run();
 console.log(`Part 1: ${computer.state[0]}`);
 
 let { noun, verb } = findNounVerb(computer, 19690720, 0, 99);
@@ -28,7 +28,7 @@ function findNounVerb(computer, target, rangeStart, rangeEnd) {
       computer.reset();
       computer.state[1] = noun;
       computer.state[2] = verb;
-      computer.runProgram();
+      computer.run();
       if (computer.state[0] === target) {
         return { noun, verb };
       }
