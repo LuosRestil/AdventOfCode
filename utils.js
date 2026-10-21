@@ -168,3 +168,24 @@ export class Vec2 {
     return degrees * (Math.PI / 180);
   }
 }
+
+export function arrEq(arr1, arr2) {
+  if (arr1.length !== arr2.length) return false;
+  for (let i = 0; i < arr1.length; i++) {
+    if (arr1[i] !== arr2[i]) {
+      return false;
+    }
+  }
+  return true;
+}
+
+export function gcd(a, b) {
+  while (b > 0) {
+    [a, b] = [b, a%b];
+  }
+  return a;
+}
+
+export function lcm(a, b) {
+	return (a * b) / gcd(a, b)
+}
