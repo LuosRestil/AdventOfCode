@@ -44,6 +44,8 @@ for (let i = 0; i < 200; i++) {
 }
 console.log(`Part 2: ${lastBlast[0] + lastBlast[1] * 100}`);
 
+console.timeEnd();
+
 function getLinesOfSight(grid, row, col) {
   let angles = {};
   for (let i = 0; i < grid.length; i++) {
