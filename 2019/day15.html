@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: rgb(30, 30, 30);
+      }
+      canvas {
+        image-rendering: pixelated;
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas></canvas>
+    <script src="intcode.js" type="module"></script>
+    <script type="module">
+      import IntcodeComputer from "./intcode.js";
+
+      let res = await fetch("inputs/day15.txt");
+      let text = await res.text();
+      let program = text.split(",").map((num) => parseInt(num));
+
+      let grid = Array(100)
+        .fill(null)
+        .map(() => Array(100).fill(3));
+      let startPos = { x: 25, y: 25 };
+      let pos = { x: 25, y: 25 };
+      let dirs = [
+        { x: 1, y: 0 },
+        { x: 0, y: 1 },
+        { x: -1, y: 0 },
+        { x: 0, y: -1 },
+      ];
+      let inputs = [4, 2, 3, 1];
+      let dirIdx = 0;
+      let colors = [
+        [255, 0, 0],
+        [200, 200, 200],
+        [30, 144, 255],
+        [0, 0, 0],
+      ];
+
+      let canvas = document.querySelector("canvas");
+      let ctx = canvas.getContext("2d");
+      canvas.width = 50;
+      canvas.height = 50;
+      const scale = 10;
+      canvas.style.width = `${canvas.width * scale}px`;
+      canvas.style.height = `${canvas.height * scale}px`;
+      let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      let pixels = imageData.data;
+
+      drawGrid();
+
+      let computer = new IntcodeComputer(program, []);
+      computer.run();
+
+      let done = false;
+      // hug the right wall
+      while (!done) {
+        dirIdx++;
+        if (dirIdx == dirs.length) dirIdx = 0;
+        let moved = false;
+        while (!moved) {
+          computer.inputs.push(inputs[dirIdx]);
+          computer.run();
+          let output = computer.outputs.pop();
+          grid[pos.y + dirs[dirIdx].y][pos.x + dirs[dirIdx].x] = output;
+          if (output !== 0) {
+            pos.x += dirs[dirIdx].x;
+            pos.y += dirs[dirIdx].y;
+            moved = true;
+            if (pos.x === startPos.x && pos.y === startPos.y) {
+              done = true;
+            }
+          } else {
+            dirIdx--;
+            if (dirIdx === -1) dirIdx = dirs.length - 1;
+          }
+        }
+      }
+      drawGrid();
+
+      function setPixel(x, y, r, g, b) {
+        let idx = y * (canvas.width * 4) + x * 4;
+        pixels[idx] = r;
+        pixels[idx + 1] = g;
+        pixels[idx + 2] = b;
+        pixels[idx + 3] = 255;
+      }
+
+      function drawGrid() {
+        for (let y = 0; y < grid.length; y++) {
+          for (let x = 0; x < grid[0].length; x++) {
+            if (pos.y === y && pos.x === x) {
+              setPixel(x, y, 0, 180, 0);
+            } else {
+              let value = grid[y][x];
+              let color = colors[value];
+              setPixel(x, y, color[0], color[1], color[2]);
+            }
+          }
+        }
+        ctx.putImageData(imageData, 0, 0);
+      }
+    </script>
+  </body>
+</html>
