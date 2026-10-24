@@ -94,33 +94,3 @@ function bfs(source, target) {
   }
   return shortestDist;
 }
-
-// // bfs
-// let shortestDist = 0;
-// let queue = [[startPos, 0]];
-// let seen = { [startPos.y]: { [startPos.x]: true } };
-// while (queue.length) {
-//   let curr = queue.shift();
-//   let currPos = curr[0];
-
-//   if (grid[currPos.y][currPos.x] === 2) {
-//     shortestDist = curr[1];
-//     break;
-//   }
-//   let neighbors = [
-//     { x: currPos.x + 1, y: currPos.y },
-//     { x: currPos.x - 1, y: currPos.y },
-//     { x: currPos.x, y: currPos.y + 1 },
-//     { x: currPos.x, y: currPos.y - 1 },
-//   ];
-//   for (let neighbor of neighbors) {
-//     if (seen[neighbor.y]?.[neighbor.x]) continue;
-//     if (!seen[neighbor.y]) seen[neighbor.y] = {};
-//     seen[neighbor.y][neighbor.x] = true;
-//     if (grid[neighbor.y][neighbor.x]) {
-//       queue.push([neighbor, curr[1] + 1]);
-//     }
-//   }
-// }
-
-// console.log(shortestDist);

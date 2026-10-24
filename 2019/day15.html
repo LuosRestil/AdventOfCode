@@ -71,7 +71,22 @@
 
       let done = false;
       // hug the right wall
-      while (!done) {
+      let lastTimestamp = 0;
+      let elapsed = 0;
+      let framerate = 1 / 10;
+      requestAnimationFrame(loop);
+      function loop(timestamp) {
+        let dt = Math.min((timestamp - lastTimestamp) / 1000, 0.1);
+        elapsed += dt;
+        if (elapsed >= framerate) {
+          elapsed -= framerate;
+          tick();
+        }
+        lastTimestamp = timestamp;
+        if (!done) requestAnimationFrame(loop);
+      }
+
+      function tick() {
         dirIdx++;
         if (dirIdx == dirs.length) dirIdx = 0;
         let moved = false;
@@ -92,8 +107,8 @@
             if (dirIdx === -1) dirIdx = dirs.length - 1;
           }
         }
+        drawGrid();
       }
-      drawGrid();
 
       function setPixel(x, y, r, g, b) {
         let idx = y * (canvas.width * 4) + x * 4;
