@@ -16,6 +16,18 @@ for (let i = 0; i < 100; i++) {
 }
 console.log(`Part 1: ${list.join("").slice(0, 8)}`);
 
+let messageOffset = parseInt(input.slice(0, 7).join(''));
+list = [];
+for (let i = messageOffset; i < input.length * 10_000; i++) {
+  list.push(input[i % input.length]);
+}
+for (let i = 0; i < 100; i++) {
+  for (let i = list.length - 1; i >= 0; i--) {
+    list[i] = Math.floor((list[i] + (list[i + 1] ?? 0)) % 10);
+  }
+}
+console.log(`Part 2: ${list.slice(0, 8).join('')}`);
+
 console.timeEnd();
 
 function phase(list) {
