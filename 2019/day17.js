@@ -11,29 +11,57 @@ let program = fs
   .split(",")
   .map((num) => parseInt(num));
 
-let ascii = {
-  46: '.',
-  35: '#',
-  94: '^'
-}
+let dirs = [
+  { char: "^", vec: { x: 0, y: -1 } },
+  { char: ">", vec: { x: 1, y: 0 } },
+  { char: "v", vec: { x: 0, y: 1 } },
+  { char: "<", vec: { x: -1, y: 0 } },
+];
 
 let computer = new IntcodeComputer(program, []);
 computer.run();
 let outputs = computer.outputs;
 let grid = [];
 let botPos = null;
+let botDir = null;
 let row = [];
-for (let output of outputs) {
+console.log(outputs.slice(outputs.length - 10));
+for (let output of outputs.slice(0, outputs.length - 1)) {
   if (output === 10) {
     grid.push(row);
     row = [];
   } else {
-    if (output === 46) row.push('.');
-    else if (output === 35) row.push('#');
+    if (output === 46) row.push(".");
+    else if (output === 35) row.push("#");
     else {
-      row.push('#');
-      botPos = {x: grid.length, y: row.length};
+      row.push("#");
+      botPos = { y: grid.length, x: row.length };
+      if (output === 94) botDir = 0;
+      else if (output === 118) botDir = 2;
+      else if (output === 62) botDir = 1;
+      else if (output === 60) botDir = 3;
+      else {
+        throw new Error("unknown character");
+      }
     }
   }
 }
-grid.forEach(row => console.log(row.join('')));
+
+for (let y = 0; y < grid.length; y++) {
+  for (let x = 0; x < grid[0].length; x++) {
+
+    
+  }
+}
+
+function printGrid(grid) {
+  for (let y = 0; y < grid.length; y++) {
+    for (let x = 0; x < grid[0].length; x++) {
+      let char = grid[y][x];
+      if (y === botPos.y && x === botPos.x)
+        process.stdout.write(dirs[botDir].char);
+      else process.stdout.write(char);
+    }
+    process.stdout.write("\n");
+  }
+}
