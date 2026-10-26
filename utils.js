@@ -181,11 +181,81 @@ export function arrEq(arr1, arr2) {
 
 export function gcd(a, b) {
   while (b > 0) {
-    [a, b] = [b, a%b];
+    [a, b] = [b, a % b];
   }
   return a;
 }
 
 export function lcm(a, b) {
-	return (a * b) / gcd(a, b)
+  return (a * b) / gcd(a, b);
+}
+
+/**
+ * A* grid search with manhattan distance heuristic
+ * Does not currently include "from"
+ * @param {{x: number, y: number, cost: number}} start
+ * @param {{x: number, y: number}} end
+ * @param {{Set}} allowList
+ * @returns {number} lowest cost
+ */
+export function aStarGrid(start, end, grid, allowList) {
+  let openSet = [start];
+  let closedSet = {};
+
+  while (openSet.length) {
+    let winnerIdx = 0;
+    let winnerF = Infinity;
+    for (let i = 0; i < openSet.length; i++) {
+      let heuristic =
+        Math.abs(openSet[i].x - end.x) + Math.abs(openSet[i].y - end.y);
+      let f = openSet[i].cost + heuristic;
+      if (f < winnerF) {
+        winnerF = f;
+        winnerIdx = i;
+      }
+    }
+    let curr = openSet.splice(winnerIdx, 1)[0];
+
+    if (curr.x === end.x && curr.y === end.y) {
+      return curr.cost;
+    }
+
+    if (!closedSet[curr.y]) closedSet[curr.y] = {};
+    if (!closedSet[curr.y][curr.x]) closedSet[curr.y][curr.x] = {};
+    closedSet[curr.y][curr.x] = true;
+
+    let neighbors = [
+      // move
+      { y: curr.y - 1, x: curr.x, cost: curr.cost + 1 },
+      { y: curr.y + 1, x: curr.x, cost: curr.cost + 1 },
+      { y: curr.y, x: curr.x - 1, cost: curr.cost + 1 },
+      { y: curr.y, x: curr.x + 1, cost: curr.cost + 1 },
+    ];
+    neighbors = neighbors.filter((neighbor) => {
+      if (closedSet[neighbor.y]?.[neighbor.x]) return false;
+      if (neighbor.y < 0 || neighbor.x < 0) return false;
+      return allowList.has(grid[neighbor.y]?.[neighbor.x]);
+    });
+
+    for (let neighbor of neighbors) {
+      let existing = openSet.find(
+        (elem) => elem.y === neighbor.y && elem.x === neighbor.x,
+      );
+      if (existing) {
+        if (neighbor.cost < existing.cost) {
+          existing.cost = neighbor.cost;
+        }
+      } else {
+        openSet.push(neighbor);
+      }
+    }
+  }
+}
+
+export function gridIter(grid, callback) {
+  for (let y = 0; y < grid.length; y++) {
+    for (let x = 0; x < grid.length; x++) {
+      callback(x, y);
+    }
+  }
 }
