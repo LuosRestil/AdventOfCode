@@ -50,7 +50,8 @@ export default class IntcodeComputer {
         return;
       }
       let destination = this.getDestination(paramModes[0]);
-      this.state[destination] = this.inputs.shift();
+      let input = this.inputs.shift();
+      this.state[destination] = input;
     } else if (opcode === 4) {
       let operand1 = this.getOperand(paramModes[0]);
       this.outputs.push(operand1);
@@ -78,6 +79,8 @@ export default class IntcodeComputer {
     } else if (opcode === 99) {
       this.status = IntcodeComputer.STATUS_DONE;
     } else {
+      // console.log(opcodeAndModes);
+      // console.log(this.ip);
       throw new Error("invalid opcode " + opcode);
     }
   }
@@ -105,7 +108,7 @@ export default class IntcodeComputer {
 
   reset() {
     this.status = IntcodeComputer.STATUS_READY;
-    this.state = Array.from(this.originalProgram);
+    this.state = this.setState(this.originalProgram);;
     this.ip = 0;
     this.inputs = Array.from(this.originalInputs);
     this.outputs = [];
