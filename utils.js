@@ -254,7 +254,7 @@ export function aStarGrid(start, end, grid, allowList) {
 
 export function gridIter(grid, callback) {
   for (let y = 0; y < grid.length; y++) {
-    for (let x = 0; x < grid.length; x++) {
+    for (let x = 0; x < grid[0].length; x++) {
       callback(x, y);
     }
   }
