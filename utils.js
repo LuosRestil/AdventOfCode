@@ -252,6 +252,10 @@ export function aStarGrid(start, end, grid, allowList) {
   }
 }
 
+/**
+ * @param {any[][]} grid
+ * @param {Function} callback - f(x, y)
+ */
 export function gridIter(grid, callback) {
   for (let y = 0; y < grid.length; y++) {
     for (let x = 0; x < grid[0].length; x++) {
