@@ -23,6 +23,7 @@ export default class IntcodeComputer {
   }
 
   tick() {
+    this.status = IntcodeComputer.STATUS_RUNNING
     let opcodeAndModes = this.state[this.ip++];
     let digits = [];
     while (opcodeAndModes > 0) {
