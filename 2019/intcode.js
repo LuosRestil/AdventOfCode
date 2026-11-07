@@ -13,6 +13,7 @@ export default class IntcodeComputer {
     this.originalInputs = inputs ?? [];
     this.inputs = Array.from(this.originalInputs);
     this.relativeBase = 0;
+    this.emptyReceives = 0;
   }
 
   run() {
@@ -23,7 +24,7 @@ export default class IntcodeComputer {
   }
 
   tick() {
-    this.status = IntcodeComputer.STATUS_RUNNING
+    this.status = IntcodeComputer.STATUS_RUNNING;
     let opcodeAndModes = this.state[this.ip++];
     let digits = [];
     while (opcodeAndModes > 0) {
@@ -47,6 +48,7 @@ export default class IntcodeComputer {
     } else if (opcode === 3) {
       if (!this.inputs.length) {
         this.status = IntcodeComputer.STATUS_AWAITING_INPUT;
+        this.emptyReceives++;
         this.ip--;
         return;
       }
@@ -56,6 +58,7 @@ export default class IntcodeComputer {
     } else if (opcode === 4) {
       let operand1 = this.getOperand(paramModes[0]);
       this.outputs.push(operand1);
+      this.emptyReceives = 0;
     } else if (opcode === 5) {
       let operand1 = this.getOperand(paramModes[0]);
       let operand2 = this.getOperand(paramModes[1]);
