@@ -39,14 +39,26 @@ for (let key in modules) {
   }
 }
 
-let pulses = [0, 0];
+// pt 2 looks for rx low pulse. rx has one parent, gq
+let gqParents = { xj: null, qs: null, kz: null, km: null };
 
-for (let i = 0; i < 1000; i++) {
+let pulses = [0, 0];
+let i = 0;
+while (i < 1000) {
   tick();
+  i++;
 }
 console.log(`Part 1: ${pulses[0] * pulses[1]}`);
 
-// for part 2, find out how many iters it takes for each of rx inputs to be 1, then math it out to find out when all will be 1
+while (Object.values(gqParents).some(val => val === null)) {
+  tick();
+  i++;
+}
+
+// gqParents loop sizes are all prime
+console.log(`Part 2: ${Object.values(gqParents).reduce((acc, curr) => acc * curr, 1)}`);
+
+console.timeEnd();
 
 function tick() {
   let q = [["broadcaster", 0, null]];
@@ -74,6 +86,9 @@ function tick() {
       let pulse = 1;
       if (Object.values(module.parents).every((pval) => pval)) {
         pulse = 0;
+      }
+      if (gqParents[name] === null && pulse === 1) {
+        gqParents[name] = i + 1;
       }
       for (let child of module.children) {
         q.push([child, pulse, name]);
