@@ -263,3 +263,9 @@ export function gridIter(grid, callback) {
     }
   }
 }
+
+export function mod(num, m) {
+  let res = num % m;
+  if (res < 0n) res += m;
+  return res;
+}
