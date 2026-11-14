@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: rgb(30, 30, 30);
+      }
+      canvas {
+        image-rendering: pixelated;
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas></canvas>
+    <script type="module">
+      const colors = {
+        "#": [0, 240, 10],
+        ".": [220, 220, 220],
+        tile: [0, 50, 220],
+      };
+
+      let dirs = [
+        [-1, 0],
+        [1, 0],
+        [0, -1],
+        [0, 1],
+      ];
+
+      let mul = 3;
+      let scale = 3;
+
+      let res = await fetch("inputs/day21.txt");
+      let text = await res.text();
+      let inputGrid = text.split("\n").map((row) => row.split(""));
+      for (let row = 0; row < inputGrid.length; row++) {
+        for (let col = 0; col < inputGrid[0].length; col++) {
+          if (inputGrid[row][col] === "S") {
+            inputGrid[row][col] = ".";
+          }
+        }
+      }
+
+      let grid = Array(131 * mul)
+        .fill(null)
+        .map(() => Array(131 * 3).fill("f"));
+      for (let y = 0; y < grid.length; y++) {
+        for (let x = 0; x < grid.length; x++) {
+          grid[y][x] = inputGrid[y % 131][x % 131];
+        }
+      }
+
+      let startTile = [
+        Math.floor(grid.length / 2),
+        Math.floor(grid.length / 2),
+      ];
+      let tiles = new Set([keyify(startTile)]);
+
+      let canvas = document.querySelector("canvas");
+      let ctx = canvas.getContext("2d");
+      canvas.width = 131 * mul;
+      canvas.height = 131 * mul;
+      canvas.style.width = `${canvas.width * scale}px`;
+      canvas.style.height = `${canvas.height * scale}px`;
+      let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      let pixels = imageData.data;
+
+      let i = 0;
+      document.addEventListener("keydown", (evt) => {
+        if (evt.key === "k") {
+          tick();
+          drawGrid();
+          console.log(++i);
+        } else if (evt.key === "p") {
+          countTiles();
+        }
+      });
+
+      drawGrid();
+
+      function tick() {
+        let nextTiles = new Set();
+        for (let tileStr of tiles) {
+          let tile = tileify(tileStr);
+          for (let dir of dirs) {
+            let neighbor = [tile[0] + dir[0], tile[1] + dir[1]];
+            if (grid[neighbor[0]][neighbor[1]] === ".") {
+              nextTiles.add(keyify(neighbor));
+            }
+          }
+        }
+        tiles = nextTiles;
+      }
+
+      function setPixel(x, y, r, g, b) {
+        let idx = y * (canvas.width * 4) + x * 4;
+        pixels[idx] = r;
+        pixels[idx + 1] = g;
+        pixels[idx + 2] = b;
+        pixels[idx + 3] = 255;
+      }
+
+      function drawGrid() {
+        for (let y = 0; y < grid.length; y++) {
+          for (let x = 0; x < grid[0].length; x++) {
+            let value = grid[y][x];
+            let color = colors[value];
+            setPixel(x, y, color[0], color[1], color[2]);
+          }
+        }
+
+        let color = colors["tile"];
+        for (let tileStr of tiles) {
+          let tile = tileify(tileStr);
+          setPixel(tile[1], tile[0], color[0], color[1], color[2]);
+        }
+
+        ctx.putImageData(imageData, 0, 0);
+      }
+
+      function countTiles() {
+        let total = 0;
+        let color = colors["tile"];
+        for (let i = 0; i < pixels.length; i += 4) {
+          if (
+            pixels[i] === color[0] &&
+            pixels[i + 1] === color[1] &&
+            pixels[i + 2] === color[2]
+          ) {
+            total++;
+          }
+        }
+        console.log(total);
+      }
+
+      function keyify(tile) {
+        return tile[0] + ":" + tile[1];
+      }
+
+      function tileify(str) {
+        return str.split(":").map((num) => parseInt(num));
+      }
+    </script>
+  </body>
+</html>

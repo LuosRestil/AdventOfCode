@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "node:path";
+import { mod } from "../utils.js";
 
 console.time();
 
@@ -43,6 +44,29 @@ for (let i = 0; i < steps; i++) {
 
 console.log(`Part 1: ${tiles.size}`);
 
+// tiles = new Set([keyify(startTile)]);
+// steps = 1000;
+// for (let i = 0; i < steps; i++) {
+//   let nextTiles = new Set();
+//   for (let tileStr of tiles) {
+//     let tile = tileify(tileStr);
+//     for (let dir of dirs) {
+//       let neighbor = [tile[0] + dir[0], tile[1] + dir[1]];
+//       if (
+//         grid[mod(neighbor[0], grid.length)][
+//           mod(neighbor[1], grid[0].length)
+//         ] === "."
+//       ) {
+//         nextTiles.add(keyify(neighbor));
+//       }
+//     }
+//   }
+//   console.log(
+//     `${i + 1}, ${nextTiles.size}`,
+//   );
+
+//   tiles = nextTiles;
+// }
 
 function keyify(tile) {
   return tile[0] + ":" + tile[1];
