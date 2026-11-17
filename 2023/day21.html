@@ -40,8 +40,8 @@
         [0, 1],
       ];
 
-      let mul = 3;
-      let scale = 3;
+      let mul = 5;
+      let scale = 1;
 
       let res = await fetch("inputs/day21.txt");
       let text = await res.text();
@@ -56,7 +56,7 @@
 
       let grid = Array(131 * mul)
         .fill(null)
-        .map(() => Array(131 * 3).fill("f"));
+        .map(() => Array(131 * mul).fill("f"));
       for (let y = 0; y < grid.length; y++) {
         for (let x = 0; x < grid.length; x++) {
           grid[y][x] = inputGrid[y % 131][x % 131];
@@ -86,6 +86,31 @@
           console.log(++i);
         } else if (evt.key === "p") {
           countTiles();
+        } else if (evt.key === "o") {
+          let color = colors["tile"];
+          for (let i = 0; i < mul; i++) {
+            for (let j = 0; j < mul; j++) {
+              let total = 0;
+              let root = {
+                x: i * inputGrid.length,
+                y: j * inputGrid[0].length,
+              };
+              for (let row = 0; row < inputGrid.length; row++) {
+                for (let col = 0; col < inputGrid[0].length; col++) {
+                  let pixel = getPixel(col + root.x, row + root.y);
+                  // console.log(pixel);
+                  if (
+                    pixel[0] === color[0] &&
+                    pixel[1] === color[1] &&
+                    pixel[2] === color[2]
+                  ) {
+                    total++;
+                  }
+                }
+              }
+              console.log(i, j, total);
+            }
+          }
         }
       });
 
@@ -97,7 +122,7 @@
           let tile = tileify(tileStr);
           for (let dir of dirs) {
             let neighbor = [tile[0] + dir[0], tile[1] + dir[1]];
-            if (grid[neighbor[0]][neighbor[1]] === ".") {
+            if (grid[neighbor[0]]?.[neighbor[1]] === ".") {
               nextTiles.add(keyify(neighbor));
             }
           }
@@ -111,6 +136,11 @@
         pixels[idx + 1] = g;
         pixels[idx + 2] = b;
         pixels[idx + 3] = 255;
+      }
+
+      function getPixel(x, y) {
+        let idx = y * (canvas.width * 4) + x * 4;
+        return [pixels[idx], pixels[idx + 1], pixels[idx + 2]];
       }
 
       function drawGrid() {
