@@ -5,11 +5,10 @@ console.time();
 
 const filename = "day22sample.txt";
 
-let idx = 0;
 let blocks = fs
   .readFileSync(path.join(import.meta.dirname, "inputs", filename), "utf-8")
   .split("\n")
-  .map((row) => {
+  .map((row, idx) => {
     const [l, r] = row
       .split("~")
       .map((side) => side.split(",").map((num) => parseInt(num)));
@@ -19,7 +18,7 @@ let blocks = fs
     let back = r[1] + 1;
     let bottom = l[2];
     let top = r[2] + 1;
-    return { left, right, front, back, bottom, top, name: idx++ };
+    return { left, right, front, back, bottom, top};
   })
   .toSorted((a, b) => a.bottom - b.bottom);
 
@@ -32,8 +31,9 @@ for (let block of blocks) {
 // find non-supporting blocks
 let total = 0;
 for (let block of blocks) {
-  if (!isSupport(block, blocks)) {
-    total++;
+  let supported = getSupported(block, blocks);
+  for (let other of supported) {
+    // if other rests on two, count goes up
   }
 }
 console.log(blocks);
@@ -50,6 +50,10 @@ function canDrop(block, blocks) {
     }
   }
   return true;
+}
+
+function getSupported(block, blocks) {
+  return blocks.filter(other => other.bottom === block.top && xyOverlap(block, other));
 }
 
 function isSupport(block, blocks) {
