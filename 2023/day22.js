@@ -61,10 +61,10 @@ function getAbove(block, blocks) {
 
 function xyOverlap(a, b) {
   return !(
-    a.left > b.right ||
-    a.right < b.left ||
-    a.front > b.back ||
-    a.back < b.front
+    a.left >= b.right ||
+    a.right <= b.left ||
+    a.front >= b.back ||
+    a.back <= b.front
   );
 }
 
