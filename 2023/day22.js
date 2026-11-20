@@ -3,7 +3,7 @@ import path from "node:path";
 
 console.time();
 
-const filename = "day22sample.txt";
+const filename = "day22.txt";
 
 let blocks = fs
   .readFileSync(path.join(import.meta.dirname, "inputs", filename), "utf-8")
@@ -18,7 +18,7 @@ let blocks = fs
     let back = r[1] + 1;
     let bottom = l[2];
     let top = r[2] + 1;
-    return { left, right, front, back, bottom, top};
+    return { left, right, front, back, bottom, top };
   })
   .toSorted((a, b) => a.bottom - b.bottom);
 
@@ -31,39 +31,32 @@ for (let block of blocks) {
 // find non-supporting blocks
 let total = 0;
 for (let block of blocks) {
-  let supported = getSupported(block, blocks);
-  for (let other of supported) {
-    // if other rests on two, count goes up
+  let above = getAbove(block, blocks);
+  if (above.every(other => getBelow(other, blocks).length > 1)) {
+    total++;
   }
 }
-console.log(blocks);
+
 console.log(total);
+// 554 too high
 
 console.timeEnd();
 
 function canDrop(block, blocks) {
   if (block.bottom === 1) return false;
-  let below = blocks.filter((other) => other.top === block.bottom);
-  for (let other of below) {
-    if (xyOverlap(block, other)) {
-      return false;
-    }
-  }
-  return true;
+  return getBelow(block, blocks).length === 0;
 }
 
-function getSupported(block, blocks) {
-  return blocks.filter(other => other.bottom === block.top && xyOverlap(block, other));
+function getBelow(block, blocks) {
+  return blocks.filter(
+    (other) => other.top === block.bottom && xyOverlap(block, other),
+  );
 }
 
-function isSupport(block, blocks) {
-  let above = blocks.filter(other => other.bottom === block.top);
-  for (let other of above) {
-    if (xyOverlap(block, other)) {
-      return true;
-    }
-  }
-  return false;
+function getAbove(block, blocks) {
+  return blocks.filter(
+    (other) => other.bottom === block.top && xyOverlap(block, other),
+  );
 }
 
 function xyOverlap(a, b) {
