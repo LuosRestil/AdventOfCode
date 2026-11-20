@@ -8,7 +8,7 @@ const filename = "day22.txt";
 let blocks = fs
   .readFileSync(path.join(import.meta.dirname, "inputs", filename), "utf-8")
   .split("\n")
-  .map((row, idx) => {
+  .map((row) => {
     const [l, r] = row
       .split("~")
       .map((side) => side.split(",").map((num) => parseInt(num)));
@@ -20,25 +20,41 @@ let blocks = fs
     let top = r[2] + 1;
     return { left, right, front, back, bottom, top };
   })
-  .toSorted((a, b) => a.bottom - b.bottom);
+  .toSorted((a, b) => a.bottom - b.bottom)
+  .map((block, idx) => {return {...block, id: idx}});
 
-// drop all blocks
 for (let block of blocks) {
   while (canDrop(block, blocks)) {
     drop(block);
   }
 }
-// find non-supporting blocks
+
 let total = 0;
 for (let block of blocks) {
   let above = getAbove(block, blocks);
-  if (above.every(other => getBelow(other, blocks).length > 1)) {
+  if (above.every((other) => getBelow(other, blocks).length > 1)) {
     total++;
   }
 }
 
-console.log(total);
-// 554 too high
+console.log(`Part 1: ${total}`);
+
+let settledStr = JSON.stringify(blocks);
+total = 0;
+for (let block of blocks) {
+  let settled = JSON.parse(settledStr);
+  settled.splice(block.id, 1);
+  for (let s of settled) {
+    let dropped = false;
+    while(canDrop(s, settled)) {
+      drop(s);
+      dropped = true;
+    }
+    if (dropped) total++;
+  }
+}
+
+console.log(`Part 2: ${total}`);
 
 console.timeEnd();
 
